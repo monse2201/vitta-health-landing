@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Revisar Prospecto - {{ prospect.nombre }}{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f5f8fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #33475b;
+    }
+    .main-content {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #fff;
+        border: 1px solid #cbd6e2;
+        border-radius: 5px;
+    }
+    .detail-header {
+        border-bottom: 1px solid #cbd6e2;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .detail-header h1 {
+        font-size: 1.75rem;
+        margin: 0;
+    }
+    .detail-list {
+        list-style: none;
+        padding: 0;
+    }
+    .detail-list li {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eaf0f6;
+    }
+    .detail-list li:last-child {
+        border-bottom: none;
+    }
+    .detail-list .label {
+        font-weight: 600;
+        color: #506e91;
+        width: 200px;
+        flex-shrink: 0;
+    }
+    .detail-list .value {
+        color: #33475b;
+    }
+    .actions {
+        margin-top: 2rem;
+        text-align: right;
+    }
+    .btn, .btn-primary, .btn-secondary {
+        text-decoration: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+    }
+    .btn-secondary {
+        color: #33475b;
+        background-color: #fff;
+        border-color: #cbd6e2;
+        margin-right: 1rem;
+    }
+    .btn-secondary:hover {
+        background-color: #f5f8fa;
+    }
+    .btn-primary {
+        color: #fff;
+        background-color: #28a745; /* Verde para la acción principal */
+        border-color: #28a745;
+    }
+    .btn-primary:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+</style>
+
+<main class="main-content">
+    <div class="detail-header">
+        <h1>Detalles del Prospecto</h1>
+    </div>
+
+    <ul class="detail-list">
+        <li>
+            <span class="label">Nombre</span>
+            <span class="value">{{ prospect.nombre }}</span>
+        </li>
+        <li>
+            <span class="label">Apellidos</span>
+            <span class="value">{{ prospect.apellidos }}</span>
+        </li>
+        <li>
+            <span class="label">Correo Electrónico</span>
+            <span class="value">{{ prospect.email }}</span>
+        </li>
+        <li>
+            <span class="label">Teléfono</span>
+            <span class="value">{{ prospect.telefono }}</span>
+        </li>
+        <li>
+            <span class="label">Especialidad</span>
+            <span class="value">{{ prospect.especialidad or 'No especificada' }}</span>
+        </li>
+        <li>
+            <span class="label">Carné Médico</span>
+            <span class="value">{{ prospect.carne_medico or 'No proporcionado' }}</span>
+        </li>
+         <li>
+            <span class="label">Identificación</span>
+            <span class="value">{{ prospect.identificacion or 'No proporcionada' }}</span>
+        </li>
+        <li>
+            <span class="label">Lugar de Trabajo</span>
+            <span class="value">{{ prospect.lugar_trabajo or 'No proporcionado' }}</span>
+        </li>
+        <li>
+            <span class="label">Fecha de Registro</span>
+            <span class="value">{{ prospect.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+        </li>
+    </ul>
+
+    <div class="actions">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Volver al Dashboard</a>
+    
+        <form action="{{ url_for('admin_convert_prospect', prospect_id=prospect.id) }}" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-primary" onclick="return confirm('¿Estás seguro de que deseas convertir este prospecto en un doctor? Esta acción no se puede deshacer.')">
+                Convertir en Doctor
+            </button>
+        </form>
+    
+        <form action="{{ url_for('admin_delete_prospect', prospect_id=prospect.id) }}" method="POST" style="display: inline; margin-left: 10px;" onsubmit="return confirm('ADVERTENCIA: Esta acción es permanente y no se puede deshacer. ¿Estás seguro de que deseas eliminar a este prospecto?');">
+            <button type="submit" class="btn" style="background-color: #dc3545; color: white; border-color: #c82333;">
+                Eliminar
+            </button>
+        </form>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,55 @@
+# app.yaml para DigitalOcean App Platform
+
+# El nombre de tu aplicación en DigitalOcean.
+name: vitta-platform
+
+# Define los componentes de tu aplicación. Aquí, un único servicio web.
+services:
+  - name: web # Un nombre para este componente de servicio.
+
+    instance_count: 1
+    # ¡CORRECCIÓN CLAVE para el error "Out of Memory"!
+    # Aumentado de 'basic-xxs' a 'basic-m' para proporcionar más RAM
+    # durante la fase de construcción (instalación de dependencias como Torch/TensorFlow).
+    # Si 'basic-m' sigue siendo insuficiente, considera 'basic-l'.
+    # Si es excesivo para la ejecución, puedes intentar 'basic-s' después de un build exitoso,
+    # pero cada nuevo build necesitará esta instancia más grande.
+    instance_size_slug: basic-m # Tamaño de instancia recomendado para ML.
+
+    github:
+      repo: tu_usuario_github/tu_nombre_repositorio # ¡IMPORTANTE! Reemplaza con tu usuario y nombre de repositorio.
+      branch: main
+      deploy_on_push: true
+
+    build_command: ""
+    run_command: ""
+
+    # Variables de entorno para tu aplicación.
+    # Estas variables estarán disponibles dentro del contenedor de tu aplicación.
+    envs:
+      - key: FLASK_ENV
+        value: production
+
+      # --- Credenciales de la Base de Datos ---
+      # Es crucial que estas variables coincidan con cómo tu aplicación Flask las espera.
+      - key: DB_USERNAME
+        value: doadmin
+      - key: DB_PASSWORD
+        value: AVNS_zRk7-87CB8FurBYkWFN
+      - key: DB_HOST
+        value: vitta-db-cluster-do-user-22731081-0.k.db.ondigitalocean.com
+      - key: DB_PORT
+        value: "25060" # El puerto debe ser una cadena si se usa en un string de conexión.
+      - key: DB_DATABASE
+        value: vitta_db
+      - key: DB_SSLMODE
+        value: require
+      # --- Fin de Credenciales de la Base de Datos ---
+
+      # Añade aquí cualquier otra variable de entorno que tu aplicación necesite.
+      # Por ejemplo, si usas la API de OpenAI, su clave:
+      # - key: OPENAI_API_KEY
+      #   value: "tu_clave_api_aqui" # Considera usar Secret Manager de DigitalOcean para secretos reales.
+
+    routes:
+      - path: /

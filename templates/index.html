@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitta Health Chat</title>
+    
+    <!-- Enlaces a estilos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+    <div class="chat-container">
+        <!-- Sidebar (Lista de chats) -->
+        <div class="sidebar">
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar..." />
+            </div>
+            <ul class="chat-list">
+                <li>
+                    <img src="{{ url_for('static', filename='images/avatar1.png') }}" alt="Avatar">
+                    <span>Abue ❤️</span>
+                </li>
+                <li>
+                    <img src="{{ url_for('static', filename='images/avatar2.png') }}" alt="Avatar">
+                    <span>Anrea 😍❤️</span>
+                </li>
+                <li>
+                    <img src="{{ url_for('static', filename='images/avatar3.png') }}" alt="Avatar">
+                    <span>Lukas</span>
+                </li>
+                <li>
+                    <img src="{{ url_for('static', filename='images/avatar4.png') }}" alt="Avatar">
+                    <span>Will</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Ventana del chat -->
+        <div class="chat-window">
+            <div class="chat-header">
+                <h2>Abue ❤️</h2>
+            </div>
+
+            <div class="chat-messages">
+                <div class="message received">
+                    Ok
+                    <br>
+                    <small>6:24 PM | 01 Feb 2025</small>
+                </div>
+
+                <div class="message sent">
+                    Gracias, abue ❤️
+                    <br>
+                    <small>6:25 PM | 01 Feb 2025</small>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" placeholder="Escribe un mensaje...">
+                <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- Panel de atributos -->
+        <div class="chat-sidebar">
+            <h3>Atributos</h3>
+            <p><strong>Nombre:</strong> Abue ❤️</p>
+            <p><strong>Teléfono:</strong> 50683097495</p>
+
+            <h4>Notas</h4>
+            <textarea placeholder="Escribe una nota..."></textarea>
+            <button class="save-btn">Guardar</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- Design Variables (Consistent with other templates) --- */
+    :root {
+        --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --body-background: #f8f9fa; /* A very light gray */
+        --card-background: #ffffff;
+        --text-primary: #212529; /* Soft black */
+        --text-secondary: #495057; /* Dark gray */
+        --text-muted: #6c757d; /* Medium gray */
+        --accent-color: #007bff; /* Primary blue */
+        --accent-color-dark: #0056b3;
+        --accent-color-light: #e7f3ff;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --danger-color: #dc3545;
+        --border-color: #dee2e6; /* Light gray for borders */
+        --border-radius-md: 8px;
+        --border-radius-sm: 6px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+        --shadow-md: 0 3px 8px rgba(0,0,0,0.07);
+    }
+
+    /* --- Global Styles --- */
+    body { /* Applied to body if this template does not inherit from a base.html with these styles */
+        font-family: var(--font-family-primary);
+        background-color: var(--body-background);
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .form-container-scribe {
+        max-width: 900px; /* Maximum width for the form */
+        margin: 30px auto;
+        background-color: var(--card-background);
+        padding: 30px 35px;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .header-form {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .header-form h1 {
+        font-size: 24px; /* Slightly larger */
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+    .header-form h1 i {
+        margin-right: 12px;
+        font-size: 1.2em;
+    }
+    .header-form p {
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+    }
+    .header-form p strong {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* --- Form Styles --- */
+    .form-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-top: 25px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee; /* Subtle separator */
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem; /* More vertical space */
+    }
+    .form-group label {
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-size: 13px; /* Slightly smaller for labels */
+        margin-bottom: 6px;
+        display: block;
+    }
+    .form-control { /* Base style for inputs, textareas, selects */
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-family: var(--font-family-primary);
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--text-primary);
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid var(--border-color);
+        appearance: none; /* For custom selects */
+        border-radius: var(--border-radius-sm);
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    .form-control:focus {
+        color: var(--text-primary);
+        background-color: #fff;
+        border-color: var(--accent-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .form-control::placeholder {
+        color: var(--text-muted);
+        opacity: 1;
+    }
+    textarea.form-control {
+        min-height: 80px; /* Minimum height for textareas */
+        resize: vertical;
+    }
+
+    .form-row { /* Used by Bootstrap, ensure no conflicts */
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -7.5px;
+        margin-left: -7.5px;
+    }
+    .form-row > .col,
+    .form-row > [class*="col-"] {
+        padding-right: 7.5px;
+        padding-left: 7.5px;
+    }
+
+    /* Styles for checkbox */
+    .form-check {
+        position: relative;
+        display: block;
+        padding-left: 1.5em;
+        margin-bottom: 0.5rem;
+    }
+    .form-check-input {
+        position: absolute;
+        margin-top: 0.25em;
+        margin-left: -1.5em;
+    }
+    .form-check-label {
+        margin-bottom: 0;
+        font-size: 14px; /* Adjust as needed to match other text */
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+
+
+    /* --- Styles for the Medications section --- */
+    #medications-container {
+        margin-bottom: 1rem; /* Space before the "Add" button */
+    }
+    .medication-item {
+        background-color: #fdfdfd; /* Slightly different background to stand out */
+        border: 1px solid #e9ecef; /* Subtle border */
+        border-radius: var(--border-radius-md);
+        padding: 20px;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .medication-item .d-flex h6 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 0;
+    }
+    .medication-item hr.mt-2 {
+        margin-top: 0.75rem !important;
+        margin-bottom: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    /* --- Buttons --- */
+    .btn {
+        display: inline-flex; /* To align icon and text */
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        line-height: 1.5;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        user-select: none;
+        background-color: transparent;
+        border: 1px solid transparent;
+        padding: 10px 18px; /* More generous padding */
+        font-size: 14px;
+        border-radius: var(--border-radius-sm);
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    .btn i {
+        margin-right: 8px;
+    }
+    .btn-primary {
+        color: #fff;
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+    .btn-primary:hover {
+        background-color: var(--accent-color-dark);
+        border-color: var(--accent-color-dark);
+    }
+    .btn-secondary {
+        color: #fff;
+        background-color: #6c757d; /* Standard Bootstrap gray */
+        border-color: #6c757d;
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+    .btn-info { /* For "Add Medication" */
+        color: #fff;
+        background-color: var(--info-color);
+        border-color: var(--info-color);
+    }
+    .btn-info:hover {
+        background-color: #117a8b;
+        border-color: #10707f;
+    }
+    .btn-danger {
+        color: #fff;
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+    .btn-sm {
+        padding: 6px 12px; /* Smaller padding for btn-sm */
+        font-size: 12px;
+        border-radius: var(--border-radius-sm);
+    }
+    .btn-sm i {
+        margin-right: 5px; /* Less space for icons in small buttons */
+    }
+
+    .form-actions-footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end; /* Main buttons to the right */
+        gap: 10px;
+    }
+</style>
+
+<div class="form-container-scribe">
+    <div class="header-form">
+        <h1><i class="fas fa-file-prescription"></i> New Medical Prescription</h1>
+        <p><strong>Patient:</strong> {{ paciente.nombre }}</p>
+        <p><strong>Visit from:</strong> {{ visita.fecha.strftime('%d/%m/%Y %H:%M') if visita.fecha else 'N/A' }}</p>
+    </div>
+    {# Removed the <hr> here because .header-form already has a border-bottom #}
+
+    <form method="POST" id="prescription-form">
+        <h4 class="form-section-title">Medications</h4>
+        <div id="medications-container">
+            {# Medication items will be inserted here by JS #}
+        </div>
+        <button type="button" class="btn btn-info btn-sm mb-3" onclick="addMedicationItem()">
+            <i class="fas fa-plus"></i> Add Medication
+        </button>
+        <input type="hidden" name="medications_json_str" id="medications_json_str" required>
+
+        <h4 class="form-section-title">Additional Details</h4>
+        <div class="form-group">
+            <label for="related_diagnosis">Related Diagnosis (Optional)</label>
+            <input type="text" class="form-control" id="related_diagnosis" name="related_diagnosis"
+                   value="{{ form_data.diagnostico_relacionado if form_data else '' }}" placeholder="E.g., HTA, Acute Pharyngitis">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="validity_days">Prescription Validity (days)</label>
+                <input type="number" class="form-control" id="validity_days" name="validity_days"
+                       value="{{ form_data.validez_dias if form_data else '30' }}" min="1">
+            </div>
+            {# You can add more fields in the form-row if needed #}
+        </div>
+
+        <div class="form-group">
+            <label for="additional_prescription_notes">Additional Notes for the Prescription (Optional)</label>
+            <textarea class="form-control" id="additional_prescription_notes" name="additional_prescription_notes" rows="3">{{ form_data.notas_adicionales_receta if form_data else '' }}</textarea>
+        </div>
+
+        <div class="form-actions-footer">
+            <a href="{{ url_for('perfil_paciente', paciente_id=paciente.id) }}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Prescription</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let medicationIdx = 0;
+
+function addMedicationItem(medication = null) {
+    const container = document.getElementById('medications-container');
+    const idx = medicationIdx++;
+
+    // Use values from the 'medication' object if provided, otherwise empty
+    const nameVal = medication && medication.nombre ? medication.nombre : '';
+    const quantityVal = medication && medication.cantidad ? medication.cantidad : '';
+    const doseVal = medication && medication.dosis ? medication.dosis : '';
+    const frequencyVal = medication && medication.frecuencia ? medication.frecuencia : '';
+    const durationVal = medication && medication.duracion ? medication.duracion : '';
+    const directionsVal = medication && medication.indicaciones ? medication.indicaciones : '';
+    const isAntibioticChecked = medication && medication.es_antibiotico ? 'checked' : ''; // <-- NEW
+
+    const itemHtml = `
+        <div class="medication-item" data-idx="${idx}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6>Medication #${idx + 1} <small class="text-muted">${medication && medication.fuente === 'ia_sugerido' ? '(AI Suggested)' : ''}</small></h6>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeMedicationItem(this)" title="Remove this medication">
+                    <i class="fas fa-trash-alt"></i> Remove
+                </button>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-8">
+                    <label for="med_name_${idx}">Name & Presentation *</label>
+                    <input type="text" class="form-control med-name" id="med_name_${idx}" value="${nameVal}" placeholder="E.g., Amoxicillin 500mg Tablets" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="med_quantity_${idx}">Quantity to Dispense *</label>
+                    <input type="text" class="form-control med-quantity" id="med_quantity_${idx}" value="${quantityVal}" placeholder="E.g., 1 box, 2 bottles" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="med_dose_${idx}">Dose *</label>
+                    <input type="text" class="form-control med-dose" id="med_dose_${idx}" value="${doseVal}" placeholder="E.g., 1 tablet, 5 ml" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="med_frequency_${idx}">Frequency *</label>
+                    <input type="text" class="form-control med-frequency" id="med_frequency_${idx}" value="${frecuenciaVal}" placeholder="E.g., Every 8 hours" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="med_duration_${idx}">Treatment Duration *</label>
+                    <input type="text" class="form-control med-duration" id="med_duration_${idx}" value="${durationVal}" placeholder="E.g., For 7 days" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="med_directions_${idx}">Specific Directions (Optional)</label>
+                <textarea class="form-control med-directions" id="med_directions_${idx}" rows="2" placeholder="E.g., Take with food, Do not consume dairy...">${directionsVal}</textarea>
+            </div>
+            {# NEW: Checkbox to mark as antibiotic #}
+            <div class="form-group form-check mt-2">
+                <input type="checkbox" class="form-check-input med-is-antibiotic" id="med_antibiotic_${idx}" ${isAntibioticChecked}>
+                <label class="form-check-label" for="med_antibiotic_${idx}">Is it an Antibiotic?</label>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', itemHtml);
+}
+
+function removeMedicationItem(button) {
+    button.closest('.medication-item').remove();
+    const items = document.querySelectorAll('#medications-container .medication-item');
+    items.forEach((item, index) => {
+        item.querySelector('h6').innerHTML = `Medication #${index + 1} ${item.querySelector('h6 small') ? item.querySelector('h6 small').outerHTML : ''}`;
+    });
+    if (items.length === 0) medicationIdx = 0;
+}
+
+document.getElementById('prescription-form').addEventListener('submit', function(event) {
+    const medicationsArray = [];
+    let allRequiredFieldsFilled = true;
+    let antibioticsCount = 0; // <-- NEW: Antibiotic counter
+
+    document.querySelectorAll('#medications-container .medication-item').forEach(item => {
+        const nameInput = item.querySelector('.med-name');
+        const quantityInput = item.querySelector('.med-quantity');
+        const doseInput = item.querySelector('.med-dose');
+        const frequencyInput = item.querySelector('.med-frequency');
+        const durationInput = item.querySelector('.med-duration');
+        const isAntibioticCheckbox = item.querySelector('.med-is-antibiotic'); // <-- NEW
+
+        if (!nameInput.value.trim() || !quantityInput.value.trim() || !doseInput.value.trim() || !frequencyInput.value.trim() || !durationInput.value.trim()) {
+            allRequiredFieldsFilled = false;
+        }
+
+        if (isAntibioticCheckbox && isAntibioticCheckbox.checked) { // <-- NEW: Count if it's an antibiotic
+            antibioticsCount++;
+        }
+
+        if (nameInput && nameInput.value.trim() !== "") {
+             medicationsArray.push({
+                nombre: nameInput.value.trim(),
+                cantidad: quantityInput.value.trim(),
+                dosis: doseInput.value.trim(),
+                frecuencia: frequencyInput.value.trim(),
+                duracion: durationInput.value.trim(),
+                indicaciones: item.querySelector('.med-directions').value.trim(),
+                es_antibiotico: isAntibioticCheckbox ? isAntibioticCheckbox.checked : false, // <-- ADDED
+            });
+        }
+    });
+
+    if (medicationsArray.length === 0) {
+        alert("You must add at least one medication.");
+        event.preventDefault();
+        return false;
+    }
+    if (!allRequiredFieldsFilled) {
+        alert("Please fill in all required fields (*) for each medication listed.");
+        event.preventDefault();
+        return false;
+    }
+
+    // --- NEW VALIDATION: Antibiotic limit ---
+    // According to Costa Rican regulations (as of May 2025), prescriptions are limited to a maximum of three systemic antimicrobial drugs.
+    // This validation ensures compliance with this regulation.
+    if (antibioticsCount > 3) {
+        alert("¡Attention! Costa Rican regulations (as of May 2025) limit prescriptions to a maximum of three systemic antimicrobial drugs. Please adjust the prescription.");
+        event.preventDefault(); // Prevents form submission if the limit is exceeded
+        return false;
+    }
+
+    document.getElementById('medications_json_str').value = JSON.stringify(medicationsArray);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // The form_data is passed directly from the Flask server
+    const formDataSource = {{ form_data | tojson | safe if form_data else '{}' }};
+    let medicationsToPopulate = [];
+
+    // Priority 1: Data that the user had already entered and is being resent (e.g., due to validation error on POST)
+    if (formDataSource && formDataSource.medications_json_str) {
+        try {
+            medicationsToPopulate = JSON.parse(formDataSource.medications_json_str);
+            if (!Array.isArray(medicationsToPopulate)) medicationsToPopulate = [];
+        } catch (e) {
+            console.error("Error parsing medications_json_str:", e);
+            medicationsToPopulate = [];
+        }
+    }
+    // Priority 2: AI suggestions (if no previous user data)
+    else if (formDataSource && formDataSource.suggested_medications_json) {
+        try {
+            let suggestions = JSON.parse(formDataSource.suggested_medications_json);
+            if (Array.isArray(suggestions)) {
+                medicationsToPopulate = suggestions.map(s => ({...s, fuente: 'ia_sugerido'})); // Mark source
+            }
+        } catch (e) {
+            console.error("Error parsing suggested_medications_json:", e);
+        }
+    }
+
+    if (medicationsToPopulate.length > 0) {
+        medicationsToPopulate.forEach(med => addMedicationItem(med));
+    } else {
+        addMedicationItem(); // Add an empty one by default if there's nothing to populate
+    }
+
+    // Repopulate other form fields
+    if (formDataSource) {
+        const diagnosisInput = document.getElementById('related_diagnosis');
+        if (diagnosisInput && formDataSource.diagnostico_relacionado) {
+            diagnosisInput.value = formDataSource.diagnostico_relacionado;
+        }
+        const validityInput = document.getElementById('validity_days');
+        if (validityInput && formDataSource.validez_dias) {
+            validityInput.value = formDataSource.validez_dias;
+        }
+        const notesInput = document.getElementById('additional_prescription_notes');
+        if (notesInput && formDataSource.notas_adicionales_receta) {
+            notesInput.value = formDataSource.notas_adicionales_receta;
+        }
+    }
+});
+</script>
+{% endblock %}

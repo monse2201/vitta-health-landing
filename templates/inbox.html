@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Lista de contactos -->
+    <div class="contact-list">
+        <h3>Conversaciones</h3>
+        <ul id="chat-list">
+            <li onclick="loadChat('taylor')">
+                <img src="https://via.placeholder.com/40" class="profile-pic">
+                <div>
+                    <strong>Taylor Swift</strong>
+                    <p>Kanye siendo Kanye...</p>
+                </div>
+                <span class="badge">2</span>
+            </li>
+            <li onclick="loadChat('abue')">
+                <img src="https://via.placeholder.com/40" class="profile-pic">
+                <div>
+                    <strong>Abue ❤️</strong>
+                    <p>Ok</p>
+                </div>
+                <span class="badge">1</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Chat principal -->
+    <div class="chat-box">
+        <div class="chat-header">
+            <h3 id="chat-title">Selecciona una conversación</h3>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <p class="received">Hola, ¿cómo estás?</p>
+            <p class="sent">¡Hola! Todo bien, ¿y tú?</p>
+        </div>
+
+        <!-- Entrada de mensajes -->
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Escribe un mensaje...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <!-- Panel de información del contacto -->
+    <div class="contact-info">
+        <h3>Información del Contacto</h3>
+        <p><strong>Nombre:</strong> <span id="contact-name">Selecciona un chat</span></p>
+        <p><strong>Medio:</strong> WhatsApp</p>
+        <p><strong>Correo:</strong> <span id="contact-email">No disponible</span></p>
+        <p><strong>Teléfono:</strong> <span id="contact-phone">+506 8309 7495</span></p>
+    </div>
+</div>
+
+<script>
+async function loadChat(contact) {
+    document.getElementById("chat-title").innerText = contact;
+    document.getElementById('chat-messages').innerHTML = `
+        <p class="received">Hola, ¿cómo estás?</p>
+        <p class="sent">¡Hola! Todo bien, ¿y tú?</p>
+    `;
+}
+
+async function sendMessage() {
+    const message = document.getElementById("message-input").value;
+    if (!message) {
+        alert("Escribe un mensaje antes de enviar.");
+        return;
+    }
+    document.getElementById('chat-messages').innerHTML += `
+        <p class="sent">${message}</p>
+    `;
+}
+</script>
+{% endblock %}
+

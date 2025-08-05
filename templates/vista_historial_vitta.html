@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Todas las Visitas - Vitta Health</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8fafc;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: #1e40af;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .logo { font-size: 24px; font-weight: 700; margin-bottom: 30px; }
+    .logo span { font-weight: 300; color: #c7d2fe; }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .nav-link.active, .nav-link:hover {
+      background-color: #2563eb;
+    }
+
+    .settings { font-size: 13px; color: #cbd5e0; margin: 20px 0 10px; }
+
+    .promo-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      background-color: transparent;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .user-info { text-align: center; }
+
+    .user-avatar {
+      background-color: #34d399;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      line-height: 48px;
+      margin: 0 auto 8px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .user-name { font-size: 14px; }
+
+    .logout-btn {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border: none;
+      background: #111827;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+    }
+
+    .left-panel {
+      width: 340px;
+      padding: 20px;
+      background-color: #fff;
+      border-right: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filters {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .filter-controls select {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .date-single-group {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .date-single-label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 4px;
+      padding-left: 8px;
+    }
+
+    .date-single-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .arrow-btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .date-single-display {
+      position: relative;
+      flex-grow: 1;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 10px 16px;
+      background-color: white;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111827;
+      cursor: pointer;
+    }
+
+    .date-single-display input[type="date"] {
+      position: absolute;
+      opacity: 0;
+      inset: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .date-single-display span {
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .filters input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .filters button {
+      background-color: #2563eb;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .visit-item {
+      background-color: #dbeafe;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .initial {
+      background-color: #3b82f6;
+      color: white;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .visit-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .right-panel {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .tabs button {
+      background: none;
+      border: none;
+      font-weight: 600;
+      color: #6b7280;
+      padding: 10px 0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tabs .active {
+      color: #1e40af;
+      border-color: #1e40af;
+    }
+
+    .export-box {
+      background-color: #e0f2fe;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #0369a1;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .action-buttons button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .note-box {
+      flex: 1;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      background-color: #f9fafa;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .footer {
+      font-size: 12px;
+      margin-top: 10px;
+      color: #6b7280;
+    }
+
+    .footer a {
+      color: #9333ea;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div>
+      <div class="logo">VittaHealth<span>rec.</span></div>
+      <a class="nav-link"><i class="fas fa-pen"></i> Scribe</a>
+      <a class="nav-link"><i class="fas fa-bolt"></i> Resumen de Registros</a>
+      <a class="nav-link"><i class="fas fa-rocket"></i> Visitas Activas</a>
+      <a class="nav-link active"><i class="fas fa-clock"></i> Todas las Visitas</a>
+      <a class="nav-link"><i class="fas fa-file-alt"></i> Plantillas</a>
+      <div class="settings">Configuraciones</div>
+      <button class="promo-btn"><i class="fas fa-mobile-alt"></i> Descargar App Móvil</button>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar">M</div>
+      <div class="user-name">Monserrat Álvarez<br>Sequeira</div>
+      <button class="logout-btn">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="left-panel">
+      <div class="filters">
+        <div class="date-single-group">
+          <label class="date-single-label">Date</label>
+          <div class="date-single-wrapper">
+            <button class="arrow-btn" onclick="changeDate(-1)"><i class="fas fa-arrow-left"></i></button>
+            <div class="date-single-display" onclick="openDatePicker()">
+              <input type="date" id="fecha" value="2025-04-15" onchange="updateDateDisplay()">
+              <span id="fecha-text">04/15/2025</span>
+            </div>
+            <button class="arrow-btn" onclick="changeDate(1)"><i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="filter-controls">
+          <select>
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+          </select>
+          <select>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+
+        <input type="text" placeholder="Buscar paciente">
+        <button>Buscar</button>
+      </div>
+
+      <div class="visit-item">
+        <div class="visit-info">
+          <div class="initial">M</div>
+          <div>
+            <strong>Monse</strong><br>
+            <small>15/04/2025, 2:43 PM</small>
+          </div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+      <div class="visit-item">
+        <div class="visit-info">
+          <div class="initial">M</div>
+          <div>
+            <strong>Sietze</strong><br>
+            <small>15/04/2025, 12:07 PM</small>
+          </div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="tabs">
+        <button><i class="fas fa-book"></i> Vista General</button>
+        <button><i class="fas fa-bolt"></i> Resumen</button>
+        <button class="active"><i class="fas fa-file-alt"></i> Notas</button>
+        <button><i class="fas fa-user"></i> Cliente</button>
+        <button><i class="fas fa-language"></i> Transcripción</button>
+      </div>
+
+      <div class="export-box">
+        <i class="fas fa-link"></i> Exporta tus notas a tu PIMS. <a href="#">Aprende más</a>
+      </div>
+
+      <div class="action-buttons">
+        <button>Marcar como completado</button>
+        <button>Agregar a la visita</button>
+        <button>Acciones</button>
+      </div>
+
+      <div class="note-box">
+        {% if transcripcion %}
+          <p><strong>Transcripción:</strong></p>
+          <p>{{ transcripcion }}</p>
+        {% else %}
+          <p>No se detectó habla en la grabación.</p>
+        {% endif %}
+      </div>      
+      <div class="footer">
+        <p><strong>Paciente:</strong> {{ paciente_nombre }}</p>
+        <p><strong>Plantilla:</strong> {{ plantilla }}</p>
+        <p><strong>ID de Visita:</strong> <code>{{ visita_id }}</code></p>
+        <p><strong>Fecha:</strong> {{ fecha_visita.strftime('%d/%m/%Y %H:%M') }}</p>
+      </div>      
+  </div>
+
+  <script>
+    function changeDate(delta) {
+      const input = document.getElementById("fecha");
+      const date = new Date(input.value);
+      date.setDate(date.getDate() + delta);
+      input.valueAsDate = date;
+      updateDateDisplay();
+    }
+
+    function updateDateDisplay() {
+      const input = document.getElementById("fecha");
+      const date = new Date(input.value);
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      document.getElementById("fecha-text").textContent = `${mm}/${dd}/${yyyy}`;
+    }
+
+    function openDatePicker() {
+      const input = document.getElementById("fecha");
+      input.showPicker?.() || input.click();
+    }
+
+    updateDateDisplay();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+

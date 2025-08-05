@@ -1,0 +1,756 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- COLOR PALETTE --- */
+    :root {
+        --vitta-blue: #007bff;
+        --vitta-blue-dark: #0056b3;
+        --vitta-blue-light: #e7f3ff;
+        --danger-red: #dc3545;
+        --danger-red-dark: #c82333;
+        --text-dark: #212529;
+        --text-light: #495057;
+        --border-color: #e5e7eb;
+        --background-light: #f8f9fa;
+        --white: #ffffff;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--background-light);
+        color: var(--text-dark);
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container-plan {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 30px 35px;
+        background-color: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .container-plan h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .container-plan h1 .fa-utensils {
+        color: var(--vitta-blue);
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--white);
+    }
+
+    .form-section h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f1f1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+    .form-section h2 .fas {
+        color: var(--vitta-blue);
+    }
+
+    /* Styling for microphone button and info text */
+    .microphone-container {
+        display: flex;
+        align-items: center;
+        margin-left: auto; /* Push to the right */
+        gap: 8px;
+    }
+
+    .btn-microphone {
+        background-color: transparent; /* No background color */
+        color: #28a745; /* Green color for microphone icon by default */
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px; /* Slightly larger icon */
+        cursor: pointer;
+        transition: color 0.2s; /* Transition for color change */
+        flex-shrink: 0;
+    }
+
+    .btn-microphone:hover {
+        color: #218838; /* Darker green on hover */
+    }
+
+    .microphone-info-text {
+        font-size: 12px;
+        color: var(--text-light);
+        font-weight: 400;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="date"],
+    .form-group input[type="time"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        background-color: #fdfdfd;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: var(--vitta-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 90px;
+    }
+
+    .food-item {
+        /* Adjusted grid: Desc, Notes, Button (removed Quantity/Porciones) */
+        display: grid;
+        grid-template-columns: 2fr 1.2fr auto; /* Adjusted grid columns */
+        gap: 15px;
+        padding: 20px 0;
+        border-bottom: 1px dashed var(--border-color);
+        align-items: flex-end;
+    }
+    .food-item:last-child {
+        border-bottom: none;
+        padding-bottom: 10px;
+    }
+    .food-item .form-group {
+        margin-bottom: 0;
+    }
+
+    .btn-add-food {
+        background-color: var(--white);
+        color: var(--vitta-blue);
+        border: 1px solid var(--vitta-blue);
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-add-food:hover {
+        background-color: var(--vitta-blue-light);
+        border-color: var(--vitta-blue-dark);
+        color: var(--vitta-blue-dark);
+    }
+    .btn-remove-food {
+        background-color: var(--danger-red);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-remove-food:hover {
+        background-color: var(--danger-red-dark);
+    }
+
+    .form-actions {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-plan {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .btn-plan:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-plan.primary {
+        background-color: var(--vitta-blue);
+        color: white;
+    }
+    .btn-plan.primary:hover {
+        background-color: var(--vitta-blue-dark);
+    }
+
+    .btn-plan.secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    .btn-plan.secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .patient-info {
+        background-color: var(--vitta-blue-light);
+        border: 1px solid #b8daff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-size: 14px;
+    }
+    .patient-info p {
+        margin: 0 0 5px 0;
+        color: #004085;
+    }
+    .patient-info p:last-child {
+        margin-bottom: 0;
+    }
+    .patient-info strong {
+        color: #003063;
+    }
+
+    .meal-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .meal-header-row .form-group {
+        margin-bottom: 0;
+        flex-grow: 1;
+        /* Since there's only one select, it will take full width of its container */
+    }
+
+    /* Style for microphone button next to input field */
+    .input-with-microphone {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .input-with-microphone .form-group {
+        flex-grow: 1;
+        margin-bottom: 0; /* Remove bottom margin here */
+    }
+
+    @media (max-width: 768px) {
+        .container-plan {
+            margin: 15px;
+            padding: 20px;
+        }
+        .food-item {
+             grid-template-columns: 1fr;
+             gap: 10px;
+             align-items: stretch;
+             padding: 15px 0;
+        }
+        .btn-remove-food {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .form-section h2 {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .microphone-container {
+            width: 100%; /* Full width for container on small screens */
+            justify-content: flex-start;
+            margin-left: 0;
+            margin-top: 10px;
+        }
+        .input-with-microphone {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .input-with-microphone .form-group {
+            width: 100%;
+        }
+        .meal-header-row .form-group {
+            flex-basis: 100%; /* Full width for dropdown on small screens */
+        }
+    }
+
+</style>
+
+<div class="container-plan">
+    <h1><i class="fas fa-utensils"></i> Create New Nutritional Plan</h1>
+
+    {% if paciente and visita %}
+    <div class="patient-info">
+        <p><strong>Patient:</strong> {{ paciente.nombre }}</p>
+        <p><strong>Visit ID:</strong> {{ visita.id }}</p>
+        <p><strong>Visit Date:</strong> {{ visita.fecha.strftime('%d/%m/%Y %H:%M') if visita.fecha else 'N/A' }}</p>
+    </div>
+    {% endif %}
+
+    <form id="formCreateNutritionalPlan" method="POST" action="{{ url_for('nuevo_plan_nutricional_para_visita_page', visita_id=visita.id) }}">
+        
+        <input type="hidden" name="visita_id" value="{{ visita.id }}">
+        <input type="hidden" name="paciente_id" value="{{ paciente.id }}">
+        <input type="hidden" name="final_json_content_str" id="final_json_content_str">
+
+        <div class="form-section">
+            <h2><i class="fas fa-bullseye"></i> Plan Details</h2>
+            <div class="input-with-microphone">
+                <div class="form-group">
+                    <label for="plan_name">Plan Name/Main Objective</label>
+                    <input type="text" id="plan_name" name="plan_name" placeholder="E.g., Muscle Gain Plan, Hypocaloric Diet Week 1" required 
+                           value="{{ form_data.nombre_plan if form_data and form_data.nombre_plan else '' }}">
+                </div>
+                <button type="button" class="btn-microphone" onclick="startRecognitionPlanName()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+        </div>
+
+        {% set meals_display_info = [
+            { 'id': 'breakfast', 'display_name': 'Breakfast', 'icon': 'fa-mug-saucer', 'ai_name': 'Desayuno', 'default_time_24hr': '07:00' },
+            { 'id': 'lunch', 'display_name': 'Lunch', 'icon': 'fa-drumstick-bite', 'ai_name': 'Almuerzo', 'default_time_24hr': '12:00' },
+            { 'id': 'dinner', 'display_name': 'Dinner', 'icon': 'fa-bowl-rice', 'ai_name': 'Cena', 'default_time_24hr': '19:00' },
+            { 'id': 'snacks', 'display_name': 'Snacks', 'icon': 'fa-apple-alt', 'primary_ai_name': 'Media Mañana', 'secondary_ai_name': 'Merienda', 'default_time_24hr': '14:00' }
+        ] %}
+
+        {% for meal_info in meals_display_info %}
+        <div class="form-section" id="section-{{ meal_info.id }}">
+            <h2>
+                <i class="fas {{ meal_info.icon }}"></i> {{ meal_info.display_name }}
+                <div class="microphone-container">
+                    <button type="button" class="btn-microphone" onclick="startRecognition('{{ meal_info.id }}')">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <span class="microphone-info-text">(Click to dictate a **new** food item)</span>
+                </div>
+            </h2>
+
+            <div class="meal-header-row">
+                <div class="form-group">
+                    <label for="suggested_time_{{ meal_info.id }}">Suggested Time</label>
+                    <select id="suggested_time_{{ meal_info.id }}" name="{{ meal_info.id }}_suggested_time">
+                        <option value="">Select time</option>
+                        {% for hour in range(0, 24) %}
+                            {% for minute in [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] %}
+                                {% set formatted_hour_24 = '%02d' % hour %}
+                                {% set formatted_minute = '%02d' % minute %}
+                                {% set time_24hr = formatted_hour_24 + ':' + formatted_minute %}
+                                {% set ampm = 'AM' if hour < 12 else 'PM' %}
+                                {% set display_hour = hour if hour > 0 and hour < 13 else 12 if hour == 0 or hour == 12 else hour - 12 %}
+                                {% set display_time = '%02d' % display_hour + ':' + formatted_minute + ' ' + ampm %}
+                                <option value="{{ time_24hr }}"
+                                        {% if form_data and form_data.horarios_comidas and form_data.horarios_comidas[meal_info.ai_name] == time_24hr %}selected{% elif not form_data or not form_data.horarios_comidas or not form_data.horarios_comidas[meal_info.ai_name] and meal_info.default_time_24hr == time_24hr %}selected{% endif %}>
+                                    {{ display_time }}
+                                </option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div id="food-items-{{ meal_info.id }}">
+                <div class="food-item">
+                    <div class="form-group">
+                        <label>Menu/Description</label>
+                        <input type="text" name="{{ meal_info.id }}_foods[0][description]" placeholder="E.g., Oatmeal with fruits">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes/Calories</label>
+                        <input type="text" name="{{ meal_info.id }}_foods[0][notes]" placeholder="Notes">
+                    </div>
+                    <div></div> {# Empty div to maintain grid structure #}
+                </div>
+            </div>
+            <button type="button" class="btn-add-food" onclick="addFoodItem('{{ meal_info.id }}')">
+                <i class="fas fa-plus"></i> Add Food Item
+            </button>
+        </div>
+        {% endfor %}
+
+        <div class="form-section">
+            <h2><i class="fas fa-clipboard-list"></i> Notes and Recommendations</h2>
+            <div class="input-with-microphone">
+                <div class="form-group">
+                    <label for="general_notes">General indications, shopping list, etc.</label>
+                    <textarea id="general_notes" name="general_notes" rows="5" placeholder="E.g., Drink 2 liters of water daily, avoid refined sugars...">{{ form_data.notas_generales if form_data and form_data.notas_generales else '' }}</textarea>
+                </div>
+                 <button type="button" class="btn-microphone" onclick="startRecognition('general_notes')">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-plan secondary" onclick="window.history.back();">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="submit" class="btn-plan primary">
+                <i class="fas fa-save"></i> Save Nutritional Plan
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let itemCounters = {};
+    let recognition; // Variable to store the SpeechRecognition instance
+
+    // Helper function to format 24hr time (HH:MM) to 12hr time (h:mm AM/PM) for display in select options
+    function formatTime24hrTo12hrDisplay(time24hr) {
+        if (!time24hr) return '';
+        const [hours, minutes] = time24hr.split(':').map(Number);
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12; // Convert 0 (midnight) or 12 (noon) to 12 for AM/PM
+        return `${String(formattedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+    }
+
+    // Initialize item counters for existing elements on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for meal_info in meals_display_info %}
+            itemCounters['{{ meal_info.id }}'] = document.getElementById(`food-items-{{ meal_info.id }}`).getElementsByClassName('food-item').length;
+        {% endfor %}
+
+        let aiSuggestionsJson = {{ form_data.contenido_json_sugerido | default('{}') | tojson | safe }};
+        let suggestions;
+
+        try {
+            suggestions = JSON.parse(aiSuggestionsJson);
+        } catch (e) {
+            console.error("Error parsing AI suggestions JSON:", e);
+            suggestions = {};
+        }
+
+        if (Object.keys(suggestions).length > 0 && !suggestions.error) {
+            console.log("Applying suggestions to the form:", suggestions);
+
+            if (suggestions.objetivo_principal) {
+                document.getElementById('plan_name').value = suggestions.objetivo_principal;
+            }
+
+            // Apply suggested general notes
+            let generalNotesText = "";
+            if (suggestions.recomendaciones_generales && Array.isArray(suggestions.recomendaciones_generales)) {
+                generalNotesText += suggestions.recomendaciones_generales.join("\n") + "\n\n";
+            }
+            if (suggestions.notas_adicionales_plan) {
+                generalNotesText += suggestions.notas_adicionales_plan;
+            }
+            document.getElementById('general_notes').value = generalNotesText.trim();
+
+            // Apply suggested meal times (Suggested Time) to the single select dropdown
+            if (suggestions.horarios_comidas) {
+                for (const aiMealName in suggestions.horarios_comidas) {
+                    let htmlIdPart = aiMealName.toLowerCase();
+                    if (htmlIdPart === 'media mañana' || htmlIdPart === 'merienda') {
+                        htmlIdPart = 'snacks';
+                    }
+                    const selectElement = document.getElementById(`suggested_time_${htmlIdPart}`);
+                    if (selectElement && suggestions.horarios_comidas[aiMealName]) {
+                        // The value attribute of the option is already in 24hr format, so just set it
+                        selectElement.value = suggestions.horarios_comidas[aiMealName];
+                    }
+                }
+            }
+
+            const dailyPlanTypeAI = suggestions.plan_diario_tipo;
+            if (dailyPlanTypeAI) {
+                const mealsInfo = [
+                    { id: 'breakfast', aiNames: ['Desayuno'] },
+                    { id: 'lunch', aiNames: ['Almuerzo'] },
+                    { id: 'dinner', aiNames: ['Cena'] },
+                    { id: 'snacks', aiNames: ['Media Mañana', 'Merienda', 'Snacks', 'snacks'] }
+                ];
+
+                mealsInfo.forEach(mealHtmlInfo => {
+                    const container = document.getElementById(`food-items-${mealHtmlInfo.id}`);
+                    if (!container) return;
+
+                    let optionsForThisSectionHTML = [];
+                    mealHtmlInfo.aiNames.forEach(aiName => {
+                        if (dailyPlanTypeAI[aiName] && Array.isArray(dailyPlanTypeAI[aiName])) {
+                            optionsForThisSectionHTML = optionsForThisSectionHTML.concat(dailyPlanTypeAI[aiName]);
+                        }
+                    });
+                    
+                    if (optionsForThisSectionHTML.length > 0) {
+                        container.innerHTML = ''; // Clear default items
+                        itemCounters[mealHtmlInfo.id] = 0; // Reset counter
+
+                        optionsForThisSectionHTML.forEach(optionStr => {
+                            const newItemElement = addFoodItem(mealHtmlInfo.id, 'ai'); // Pass 'ai' as source
+                            if (newItemElement) {
+                                const descInput = newItemElement.querySelector('input[name$="[description]"]');
+                                const notesInput = newItemElement.querySelector('input[name$="[notes]"]');
+                                
+                                const match = optionStr.match(/^(Option\s\d+:\s*)(.*?)(?:\s*-\s*(.+))?$/);
+                                if (match) {
+                                    let description = match[1] + (match[2] ? match[2].trim() : ''); 
+                                    let notes = match[3] ? match[3].trim() : '';
+
+                                    if (descInput) descInput.value = description;
+                                    if (notesInput) notesInput.value = notes;
+                                } else {
+                                    if (descInput) descInput.value = optionStr;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+
+    function addFoodItem(mealType, source = 'manual', recognizedText = '') {
+        if (!itemCounters[mealType] && itemCounters[mealType] !== 0) {
+            itemCounters[mealType] = document.getElementById(`food-items-${mealType}`).getElementsByClassName('food-item').length;
+        }
+        const container = document.getElementById(`food-items-${mealType}`);
+        const newItemIndex = itemCounters[mealType]++;
+
+        const newItem = document.createElement('div');
+        newItem.classList.add('food-item');
+        
+        const initialDescription = (source === 'speech') ? recognizedText : '';
+
+        newItem.innerHTML = `
+            <div class="form-group">
+                <label>Menu/Description</label>
+                <input type="text" name="${mealType}_foods[${newItemIndex}][description]" placeholder="Description" value="${initialDescription}">
+            </div>
+            <div class="form-group">
+                <label>Notes/Calories</label>
+                <input type="text" name="${mealType}_foods[${newItemIndex}][notes]" placeholder="Notes">
+            </div>
+            <div>
+                <button type="button" class="btn-remove-food" onclick="removeFoodItem(this)" title="Remove food item">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newItem);
+        return newItem;
+    }
+
+    function removeFoodItem(button) {
+        const itemToRemove = button.closest('.food-item');
+        if (itemToRemove) {
+            itemToRemove.remove();
+        }
+    }
+
+    function startRecognitionPlanName() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Your browser does not support the speech recognition API. Please use Chrome or Edge for this feature.');
+            return;
+        }
+
+        if (recognition) {
+            recognition.stop();
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US'; 
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = function(event) {
+            const speechResult = event.results[0][0].transcript;
+            console.log('Speech result (Plan Name):', speechResult);
+            document.getElementById('plan_name').value = speechResult;
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error (Plan Name):', event.error);
+            alert('Speech recognition error: ' + event.error + '. Make sure your microphone is connected and you have granted permissions to your browser (Chrome/Edge).');
+        };
+
+        recognition.onend = function() {
+            console.log('Speech recognition (Plan Name) finished.');
+        };
+
+        recognition.start();
+        console.log('Listening for the plan name...');
+        alert('Speak now to dictate the Plan Name/Main Objective. Make sure your microphone is connected and you have granted permissions to your browser (Chrome/Edge).');
+    }
+
+
+    function startRecognition(targetSectionId) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Your browser does not support the speech recognition API. Please use Chrome or Edge for this feature.');
+            return;
+        }
+
+        if (recognition) {
+            recognition.stop(); 
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US'; 
+        recognition.interimResults = false; 
+        recognition.maxAlternatives = 1; 
+
+        recognition.onresult = function(event) {
+            const speechResult = event.results[0][0].transcript;
+            console.log('Speech result:', speechResult);
+
+            if (targetSectionId === 'general_notes') {
+                const generalNotesTextarea = document.getElementById('general_notes');
+                if (generalNotesTextarea) {
+                    generalNotesTextarea.value += (generalNotesTextarea.value.trim() ? '\n' : '') + speechResult;
+                }
+            } else {
+                addFoodItem(targetSectionId, 'speech', speechResult);
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            alert('Speech recognition error: ' + event.error + '. Make sure your microphone is connected and you have granted permissions to your browser (Chrome/Edge).');
+        };
+
+        recognition.onend = function() {
+            console.log('Speech recognition finished.');
+        };
+
+        recognition.start();
+        console.log('Listening...');
+        let sectionDisplayName;
+        if (targetSectionId === 'general_notes') {
+            sectionDisplayName = 'Notes and Recommendations';
+        } else {
+            sectionDisplayName = document.querySelector(`#section-${targetSectionId} h2`).childNodes[1].nodeValue.trim();
+        }
+        alert('Speak now to dictate the food item for the ' + sectionDisplayName + ' section. Make sure your microphone is connected and you have granted permissions to your browser (Chrome/Edge).');
+    }
+
+    document.getElementById('formCreateNutritionalPlan').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        const planData = {
+            main_objective: document.getElementById('plan_name').value || "",
+            general_recommendations: [], 
+            daily_plan_type: {},
+            additional_plan_notes: "",
+            meal_times: {} 
+        };
+        
+        const mealSections = ['breakfast', 'lunch', 'dinner', 'snacks'];
+        mealSections.forEach(mealId => {
+            const selectElement = document.getElementById(`suggested_time_${mealId}`);
+            if (selectElement && selectElement.value) {
+                let aiName;
+                if (mealId === 'breakfast') aiName = 'Desayuno';
+                else if (mealId === 'lunch') aiName = 'Almuerzo';
+                else if (mealId === 'dinner') aiName = 'Cena';
+                else if (mealId === 'snacks') aiName = 'Snacks'; 
+
+                if (aiName) {
+                    // The value of the select option is already in 24hr format (HH:MM)
+                    planData.meal_times[aiName] = selectElement.value;
+                }
+            }
+        });
+
+
+        const generalNotesValue = document.getElementById('general_notes').value;
+        const separateNotes = generalNotesValue.split('\n').filter(line => line.trim().length > 0);
+        
+        planData.general_recommendations = separateNotes.filter(line => /^\s*[-*]/.test(line));
+        planData.additional_plan_notes = separateNotes.filter(line => !/^\s*[-*]/.test(line)).join('\n');
+
+        const mealsInfo = [
+            { id: 'breakfast', ai_name: 'Desayuno' },
+            { id: 'lunch', ai_name: 'Almuerzo' },
+            { id: 'dinner', ai_name: 'Cena' },
+            { id: 'snacks', ai_name: 'Snacks' }
+        ];
+
+        mealsInfo.forEach(mealHtmlInfo => {
+            const aiMealName = mealHtmlInfo.ai_name;
+            planData.daily_plan_type[aiMealName] = [];
+            const container = document.getElementById(`food-items-${mealHtmlInfo.id}`);
+            if (container) {
+                const items = container.getElementsByClassName('food-item');
+                for (let i = 0; i < items.length; i++) {
+                    const descInput = items[i].querySelector('input[name$="[description]"]');
+                    const notesInput = items[i].querySelector('input[name$="[notes]"]');
+
+                    if (descInput && descInput.value.trim()) {
+                        let optionString = descInput.value.trim();
+                        if (notesInput && notesInput.value.trim()) {
+                            optionString += ` - ${notesInput.value.trim()}`;
+                        }
+                        planData.daily_plan_type[aiMealName].push(optionString);
+                    }
+                }
+            }
+        });
+        
+        document.getElementById('final_json_content_str').value = JSON.stringify(planData, null, 2);
+        this.submit();
+    });
+</script>
+
+{% endblock %}

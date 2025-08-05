@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta Profesional - Vitta Health Scribe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .auth-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .vittahealth-logo { /* Estilo para el logo de texto o contenedor del logo */
+            font-size: 30px; /* Tamaño del texto del logo */
+            font-weight: bold; /* Negrita para el texto del logo */
+            color: #1c64f2; /* Color primario, ajústalo al color de tu logo */
+            margin-bottom: 15px; /* Espacio debajo del logo */
+            /* Si usas una imagen, puedes ajustar estos estilos o quitarlos */
+        }
+        .vittahealth-logo img { /* Si decides usar una imagen */
+            max-width: 200px; /* Ajusta el tamaño máximo de tu logo */
+            height: auto; /* Mantiene la proporción */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 15px;
+        }
+        .auth-container h1, .auth-container h2 { /* h2 ya no se usa para el título principal */
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 24px;
+        }
+        .auth-container p.subtitle {
+            color: #555;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #344054;
+            font-size: 14px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="tel"],
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            color: #101828;
+            background-color: #fff;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #1c64f2;
+            box-shadow: 0 0 0 3px rgba(28, 100, 242, 0.2);
+            outline: none;
+        }
+        .phone-input-group {
+            display: flex;
+            align-items: center;
+        }
+        .phone-input-group select {
+            width: auto;
+            margin-right: -1px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            flex-shrink: 0;
+            padding-right: 8px;
+            padding-left: 8px;
+            height: 46px;
+        }
+        .phone-input-group input[type="tel"] {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            flex-grow: 1;
+        }
+        .hidden-field {
+            display: none;
+            margin-top: 10px;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #1c64f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+        .auth-button:hover {
+            background-color: #1a56db;
+        }
+        .auth-container .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+        }
+        .auth-container .alert-danger { background-color: #fef3f2; color: #d92d20; border: 1px solid #fecdca;}
+        .auth-container .alert-success { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;}
+        .auth-container .alert-info { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;}
+        .auth-container .alert-warning { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a;}
+        .login-link {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #555;
+        }
+        .login-link a {
+            color: #1c64f2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .required-indicator {
+            color: #d92d20;
+            margin-left: 2px;
+        }
+        .form-group small {
+            font-size: 12px;
+            color: #667085;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    {% set especialidades_medicas_registro = [
+        "Anestesiología", "Cardiología", "Cirugía General", "Cirugía Pediátrica", "Cirugía Plástica",
+        "Dermatología", "Endocrinología", "Gastroenterología", "Geriatría", "Ginecología y Obstetricia",
+        "Hematología", "Infectología", "Medicina de Emergencia", "Medicina Familiar",
+        "Medicina Física y Rehabilitación", "Medicina General", "Medicina Interna", "Nefrología",
+        "Neumología", "Neurocirugía", "Neurología", "Nutrición", "Oftalmología", "Oncología Médica",
+        "Oncología Radioterápica", "Ortopedia y Traumatología", "Otorrinolaringología",
+        "Patología Clínica", "Pediatría", "Psiquiatría", "Radiología", "Reumatología", "Urología"
+    ] %}
+
+    {% set codigos_pais_registro = [
+        {"codigo": "+506", "nombre": "Costa Rica", "bandera": "🇨🇷"},
+        {"codigo": "+1", "nombre": "EE. UU.", "bandera": "🇺🇸"},
+        {"codigo": "+52", "nombre": "México", "bandera": "🇲🇽"},
+        {"codigo": "+34", "nombre": "España", "bandera": "🇪🇸"},
+        {"codigo": "+57", "nombre": "Colombia", "bandera": "🇨🇴"},
+        {"codigo": "+54", "nombre": "Argentina", "bandera": "🇦🇷"},
+    ] %}
+
+    <div class="auth-container">
+        <div class="vittahealth-logo">VittaHealth</div>
+
+        <p class="subtitle">Complete los detalles para comenzar.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register_route') }}">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo<span class="required-indicator">*</span></label>
+                <input type="text" id="nombre" name="nombre" value="{{ nombre or '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electrónico<span class="required-indicator">*</span></label>
+                <input type="email" id="email" name="email" value="{{ email or '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="licencia_profesional">Nº Colegiado / Licencia Profesional<span class="required-indicator">*</span></label>
+                <input type="text" id="licencia_profesional" name="licencia_profesional" value="{{ licencia_profesional or '' }}" required placeholder="Ej: MED-12345">
+            </div>
+
+            <div class="form-group">
+                <label for="especialidad_select">Especialidad Médica<span class="required-indicator">*</span></label>
+                <select id="especialidad_select" name="especialidad_select" required>
+                    <option value="" disabled {{ 'selected' if not especialidad_select or especialidad_select == "" else '' }}>Seleccione una especialidad</option>
+                    {% for esp in especialidades_medicas_registro %}
+                        <option value="{{ esp }}" {{ 'selected' if esp == especialidad_select }}>{{ esp }}</option>
+                    {% endfor %}
+                    <option value="otro" {{ 'selected' if especialidad_select == "otro" }}>Otro...</option>
+                </select>
+                <input type="text" id="especialidad_otro" name="especialidad_otro"
+                       class="hidden-field form-control"
+                       value="{{ especialidad_otro or '' }}"
+                       placeholder="Escriba su especialidad"
+                       style="{{ 'display: block;' if especialidad_select == 'otro' else 'display: none;' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono_numero">Teléfono<span class="required-indicator">*</span></label>
+                <div class="phone-input-group">
+                    <select id="telefono_prefijo" name="telefono_prefijo" required>
+                        <option value="" disabled {{ 'selected' if not telefono_prefijo else '' }}>Prefijo<span class="required-indicator">*</span></option>
+                        {% for pais in codigos_pais_registro %}
+                        <option value="{{ pais.codigo }}" {{ 'selected' if pais.codigo == telefono_prefijo }}>{{ pais.bandera }} {{ pais.codigo }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="tel" id="telefono_numero" name="telefono_numero" value="{{ telefono_numero or '' }}" placeholder="Número" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña<span class="required-indicator">*</span></label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="auth-button">Registrarse</button>
+        </form>
+        <p class="login-link">¿Ya tienes una cuenta? <a href="{{ url_for('login_route') }}">Inicia Sesión Aquí</a></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const especialidadSelect = document.getElementById('especialidad_select');
+            const especialidadOtroInput = document.getElementById('especialidad_otro');
+
+            if (especialidadSelect && especialidadOtroInput) {
+                function toggleEspecialidadOtro() {
+                    if (especialidadSelect.value === 'otro') {
+                        especialidadOtroInput.style.display = 'block';
+                        especialidadOtroInput.setAttribute('required', 'required');
+                    } else {
+                        especialidadOtroInput.style.display = 'none';
+                        especialidadOtroInput.removeAttribute('required');
+                    }
+                }
+                especialidadSelect.addEventListener('change', toggleEspecialidadOtro);
+                toggleEspecialidadOtro();
+            }
+        });
+    </script>
+</body>
+</html>

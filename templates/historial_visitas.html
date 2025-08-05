@@ -1,0 +1,2766 @@
+{% extends "base.html" %}
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- Basic Reset & Global Styles --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-x: hidden; /* Prevents unwanted horizontal scroll */
+    }
+
+    .main-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        flex-direction: row; /* Default for desktop */
+    }
+
+    /* --- Sidebar Panel --- */
+    .sidebar-panel {
+        width: 320px;
+        background-color: #ffffff;
+        border-right: 1px solid #e0e0e0;
+        overflow-y: auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0; /* Ensures it doesn't shrink more than necessary */
+    }
+
+    .sidebar-panel .header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sidebar-panel .header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .schedule-button {
+        width: calc(100% - 40px);
+        margin: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .schedule-button:hover {
+        background-color: #0056b3;
+    }
+
+    .date-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 15px;
+    }
+
+    .arrow-btn {
+        background-color: #e9ecef;
+        color: #495057;
+        border: 1px solid #ced4da;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .arrow-btn:hover {
+        background-color: #d1d5db;
+        border-color: #adb5bd;
+    }
+
+    .date-display {
+        position: relative;
+        flex-grow: 1;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 9px 12px;
+        background-color: white;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 500;
+        color: #212529;
+        cursor: pointer;
+        height: 36px;
+    }
+
+    .date-display input[type="date"] {
+        position: absolute;
+        opacity: 0;
+        inset: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .date-display span {
+        position: relative;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .date-display:hover {
+        border-color: #adb5bd;
+    }
+
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        padding: 0 20px 15px;
+        font-size: 13px;
+        gap: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 15px;
+        flex-wrap: wrap; /* Allows elements to wrap on small screens */
+    }
+
+    .filter-controls select {
+        padding: 9px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 13px;
+        background-color: white;
+        flex-grow: 1;
+        height: 36px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3Csvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.7rem center;
+        background-size: 1.2em 1.2em;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        min-width: 100px; /* Minimum width for selects */
+    }
+
+    .filter-controls select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .search-input {
+        width: calc(100% - 40px);
+        margin: 0 20px 20px 20px;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 14px;
+        height: 38px;
+    }
+
+    .search-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    #visitList {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 0 10px 0 20px;
+    }
+
+    .visit-card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-left: 4px solid transparent;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .visit-card:hover {
+        background-color: #f0f4fa;
+        border-left-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .visit-card.selected {
+        border-left: 4px solid #007bff;
+        background-color: #e7f3ff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .visit-card .avatar {
+        width: 40px;
+        height: 40px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .visit-card-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; /* Allows info to grow */
+    }
+
+    .visit-card .patient-name {
+        font-weight: 600;
+        color: #343a40;
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+
+    .visit-card .visit-date {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .detail-panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px 30px;
+        background-color: #f8f9fa;
+        position: relative;
+        min-width: 0; /* Allows it to shrink */
+    }
+
+    .notification {
+        padding: 12px 18px;
+        background-color: #e7f3ff;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .notification i {
+        font-size: 18px;
+        color: #007bff;
+        margin-right: 12px;
+    }
+
+    .notification p {
+        margin: 0;
+        color: #004085;
+    }
+
+    .tabs-container {
+        display: flex;
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 25px;
+        background-color: transparent;
+        overflow-x: auto; /* Allows horizontal scrolling if there are many tabs */
+        -webkit-overflow-scrolling: touch; /* Improves scrolling on iOS */
+        white-space: nowrap; /* Prevents tabs from wrapping */
+    }
+
+    .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 3px solid transparent;
+        color: #495057;
+        font-weight: 500;
+        white-space: nowrap;
+        font-size: 14px;
+        transition: all 0.2s;
+        margin-right: 5px;
+    }
+
+    .tab:hover {
+        color: #0056b3;
+        background-color: #e9ecef;
+        border-bottom-color: #adb5bd;
+    }
+
+    .tab.active {
+        color: #007bff;
+        border-bottom-color: #007bff;
+        font-weight: 600;
+        background-color: transparent;
+    }
+
+    .tab i {
+        margin-right: 6px;
+        font-size: 1em;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap; /* Allows buttons to wrap */
+        justify-content: flex-start; /* Aligns buttons to the start */
+    }
+
+    .action-btn {
+        padding: 9px 14px;
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 500;
+        font-size: 13px;
+        transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+        flex-shrink: 0; /* Prevents buttons from shrinking */
+    }
+
+    .action-btn:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .action-btn.secondary {
+        background-color: #ffffff;
+        color: #007bff;
+        border: 1px solid #007bff;
+    }
+
+    .action-btn.secondary:hover {
+        background-color: #e7f3ff;
+        border-color: #0056b3;
+        color: #0056b3;
+    }
+
+    .action-btn.danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    .action-btn.danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .action-btn.menu {
+        padding: 9px 10px;
+    }
+
+    .action-btn:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-color: #ced4da;
+        cursor: not-allowed;
+    }
+
+    .tab-panel {
+        display: none;
+        animation: fadeIn 0.5s;
+    }
+
+    .tab-panel.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #dee2e6;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        flex-shrink: 0;
+    }
+
+    .translation-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap; /* Allows controls to wrap */
+        gap: 10px;
+        justify-content: flex-end; /* Aligns to the right on large screens */
+    }
+
+    .translation-controls > span {
+        font-size: 0.9em;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .generic-translate-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3Csvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.7rem center;
+        background-size: 1.2em 1.2em;
+        padding: 8px 2.8rem 8px 12px;
+        font-size: 13px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background-color: white;
+        color: #007bff;
+        height: 36px;
+        min-width: 100px; /* Minimum width for language select */
+    }
+
+    .generic-translate-select:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-color: #ced4da;
+    }
+
+    .generic-translate-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .transcription-area {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 18px 22px;
+        min-height: 150px;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        font-size: 13px;
+        color: #343a40;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        margin-bottom: 15px;
+        overflow-x: auto; /* Ensures text doesn't overflow the area */
+    }
+
+    /* Ensure textarea takes up full width and appropriate height */
+    #notes-ai-summary-unified-textarea {
+        width: 100%; /* Important: Make it take full width of its container */
+        min-height: 250px; /* Match the display div's min-height */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        font-family: 'Inter', sans-serif; /* Use Inter for better editing readability */
+        font-size: 14px; /* Slightly larger font for comfortable editing */
+        line-height: 1.6;
+        resize: vertical; /* Allow vertical resizing by user */
+        padding: 18px 22px; /* Match display div's padding */
+    }
+
+    /* --- START: Added styles for diet plan table --- */
+    #diet-plan-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 13px;
+    }
+
+    #diet-plan-content th,
+    #diet-plan-content td {
+        border: 1px solid #dee2e6;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    #diet-plan-content th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    #diet-plan-content td ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    /* --- END: Added styles for diet plan table --- */
+
+    #full-transcription {
+        min-height: 280px;
+    }
+
+    .speaker {
+        font-weight: 600;
+        color: #007bff;
+        margin-right: 8px;
+    }
+
+    .no-speech {
+        padding: 40px;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        font-size: 14px;
+        background-color: #f8f9fa;
+        border: 1px dashed #ced4da;
+        border-radius: 6px;
+    }
+
+    .overview-grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .overview-detail-item {
+        padding: 18px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .overview-label {
+        display: block;
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 8px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .overview-value {
+        font-size: 14px;
+        color: #212529;
+    }
+
+    #overview-summary-text.overview-value {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #374151;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        min-height: 80px;
+        overflow-x: auto; /* Ensures scroll if content is too wide */
+    }
+
+    .overview-summary-item,
+    .overview-activity-item {
+        grid-column: 1 / -1; /* Takes up full width at any size */
+    }
+
+    @media (min-width: 768px) {
+        .overview-summary-item,
+        .overview-activity-item {
+            grid-column: span 2;
+        }
+    }
+
+    .activity-log-timeline {
+        list-style: none;
+        padding-left: 0;
+        position: relative;
+        margin-top: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px; /* Space for scrollbar */
+    }
+
+    .activity-log-timeline li {
+        padding: 8px 0 15px 30px;
+        position: relative;
+        font-size: 13px;
+        color: #495057;
+        line-height: 1.6;
+        border-left: 2px solid #dee2e6;
+    }
+
+    .activity-log-timeline li:first-child {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+
+    .activity-log-timeline li:last-child {
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-left: 2px solid #dee2e6;
+    }
+
+    .activity-log-timeline li .activity-icon {
+        position: absolute;
+        left: -12px;
+        top: 7px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        border: 2px solid #dee2e6;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-log-timeline li strong {
+        color: #212529;
+        font-weight: 600;
+    }
+
+    .activity-log-timeline li span[title] {
+        color: #868e96;
+        font-size: 0.85em;
+        margin-left: 5px;
+        cursor: help;
+    }
+
+    .ai-notes-section {
+        margin-bottom: 25px;
+        padding: 20px;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .ai-notes-section h4,
+    #notes > h4 {
+        font-size: 16px;
+        color: #343a40;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+        font-weight: 600;
+    }
+
+    #notes > h4 i,
+    .ai-notes-section h4 i {
+        margin-right: 8px;
+        color: #007bff;
+    }
+
+    #manual-notes-content {
+        width: 100%;
+        min-height: 150px;
+        padding: 12px 15px;
+        margin-top: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+        font-family: 'Inter', sans-serif;
+    }
+
+    #manual-notes-content:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    #btn-save-manual-notes,
+    #btn-generate-ai-summary,
+    #btn-generate-ai-notes {
+        margin-top: 15px;
+    }
+
+    #patient h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 20px;
+    }
+
+    #patient > div {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    #patient .patient-info-item {
+        display: flex;
+        margin-bottom: 12px;
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+
+    #patient .patient-info-label {
+        width: 130px;
+        font-weight: 500;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+
+    #patient .patient-info-value {
+        color: #212529;
+        flex-grow: 1;
+    }
+
+    #patient-history-link {
+        font-size: 14px;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    #patient-history-link:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+
+    .detail-panel-footer {
+        padding-top: 20px;
+        margin-top: auto;
+        text-align: right;
+    }
+
+    .visit-id-display {
+        color: #868e96;
+        font-size: 12px;
+        margin-top: 15px;
+        font-style: italic;
+        display: block;
+        text-align: right;
+    }
+
+    .template-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .template-link:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+
+    .template-link i {
+        font-size: 1.1em;
+    }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .popup-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .popup-content {
+        background-color: #ffffff;
+        padding: 25px 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        width: 90%; /* Adjustment for mobile */
+        max-width: 500px;
+        position: relative;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        max-height: 90vh; /* To prevent the popup from being taller than the screen */
+        overflow-y: auto; /* Allows scrolling within the popup */
+    }
+
+    .popup-overlay.visible .popup-content {
+        transform: scale(1);
+    }
+
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #888;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .popup-close:hover {
+        color: #333;
+    }
+
+    .popup-content h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .popup-content p {
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .popup-content p strong {
+        color: #007bff;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #454545;
+        font-weight: 500;
+    }
+
+    .form-group input[type="email"],
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+
+    .form-group select.generic-translate-select {
+        padding-right: 2.8rem;
+    }
+
+    .popup-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        flex-wrap: wrap; /* Ensures buttons wrap */
+    }
+
+    .feedback-message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+    }
+
+    .feedback-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+
+    .feedback-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+    }
+
+    .feedback-message.in-progress {
+        background-color: #e7f3ff;
+        color: #004085;
+        border: 1px solid #b8daff;
+        display: block;
+    }
+
+    /* --- Media Queries for Responsiveness --- */
+
+    /* Tablets and up (768px and more) */
+    @media (min-width: 768px) {
+        .main-container {
+            flex-direction: row; /* Returns to two-column layout on tablets and desktops */
+        }
+
+        .sidebar-panel {
+            width: 320px; /* Fixed width for the sidebar panel on larger screens */
+            height: 100vh; /* Full height for the sidebar panel */
+        }
+
+        .detail-panel {
+            flex: 1; /* Takes up remaining space */
+            padding: 25px 30px; /* Original padding for the detail panel */
+        }
+
+        .filter-controls select {
+            flex-grow: 1; /* Allows them to grow to fill space */
+            min-width: auto;
+        }
+
+        .translation-controls {
+            display: flex; /* Ensure flexbox for alignment */
+            flex-wrap: nowrap; /* Prevents controls from wrapping */
+            justify-content: flex-end;
+            align-items: center; /* Vertically align items */
+            gap: 10px; /* Spacing between elements */
+        }
+
+        .translation-controls .action-btn.secondary {
+            margin-left: 10px; /* Add some spacing for the edit button */
+        }
+
+        .popup-actions {
+            flex-wrap: nowrap;
+        }
+    }
+
+    /* Mobile (up to 767px) */
+    @media (max-width: 767px) {
+        body {
+            font-size: 13px; /* Slightly smaller font size for mobile */
+        }
+
+        .main-container {
+            flex-direction: column; /* Stacks panels vertically on mobile */
+            height: auto; /* Allows height to adjust to content */
+            min-height: 100vh; /* Ensures it at least takes up the full viewport height */
+        }
+
+        .sidebar-panel {
+            width: 100%; /* Sidebar panel takes up full width */
+            height: auto; /* Auto height, not 100vh */
+            border-right: none;
+            border-bottom: 1px solid #e0e0e0; /* Bottom border to separate from detail panel */
+        }
+
+        .detail-panel {
+            width: 100%; /* Detail panel takes up full width */
+            padding: 15px 20px; /* Reduce padding on mobile */
+            flex-grow: 1; /* Ensures the detail panel takes up remaining space */
+        }
+
+        .schedule-button {
+            width: calc(100% - 30px); /* Adjusts width for better padding on mobile */
+            margin: 15px; /* Reduce margin */
+            padding: 10px 15px; /* Reduce padding */
+            font-size: 13px; /* Reduce font size */
+        }
+
+        .date-controls,
+        .filter-controls {
+            padding: 10px 15px; /* Reduce padding */
+            gap: 8px; /* Reduce space between elements */
+        }
+
+        .arrow-btn,
+        .date-display {
+            height: 32px; /* Reduce height of date controls */
+            font-size: 13px; /* Reduce font size */
+        }
+
+        .search-input {
+            width: calc(100% - 30px);
+            margin: 0 15px 15px 15px; /* Reduce margin */
+            padding: 8px 12px; /* Reduce font size */
+            height: 34px;
+        }
+
+        #visitList {
+            padding: 0 10px 0 15px; /* Adjust side padding */
+        }
+
+        .visit-card {
+            padding: 12px; /* Reduce card padding */
+            margin-bottom: 10px; /* Reduce bottom margin */
+            gap: 10px; /* Reduce space between avatar and info */
+        }
+
+        .visit-card .avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+        }
+
+        .visit-card .patient-name {
+            font-size: 14px;
+        }
+
+        .visit-card .visit-date {
+            font-size: 12px;
+        }
+
+        .notification {
+            padding: 10px 15px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .notification i {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .tabs-container {
+            margin-bottom: 20px;
+            padding-bottom: 5px; /* More space for tab scrolling */
+        }
+
+        .tab {
+            padding: 10px 15px;
+            font-size: 13px;
+            gap: 6px;
+        }
+
+        .tab i {
+            font-size: 0.9em;
+        }
+
+        .action-buttons {
+            margin-bottom: 20px;
+            gap: 8px;
+            justify-content: center; /* Center buttons on small screens */
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .section-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            flex-direction: column; /* Stack title and translation controls */
+            align-items: flex-start; /* Left-align stacked elements */
+            gap: 10px;
+        }
+
+        .section-header h3 {
+            font-size: 16px;
+        }
+
+        .translation-controls {
+            flex-direction: column; /* Stack translation controls */
+            align-items: flex-start; /* Left-align */
+            gap: 8px;
+            width: 100%; /* Take up full available width */
+        }
+
+        .translation-controls > span {
+            width: 100%; /* So that the text takes up its own line */
+        }
+
+        .generic-translate-select {
+            width: 100%; /* Takes up full available width */
+            height: 34px;
+            font-size: 12px;
+        }
+
+        .generic-show-original-btn {
+            width: 100%; /* Takes up full available width */
+            height: 34px;
+            font-size: 12px;
+        }
+
+        /* NEW: Adjust for edit button in mobile translation controls */
+        .translation-controls .action-btn.secondary {
+            margin-left: 0; /* Remove left margin in mobile view */
+            width: 100%; /* Make it full width */
+        }
+
+        .transcription-area,
+        .ai-notes-section {
+            padding: 15px 18px; /* Reduce padding */
+            font-size: 12px; /* Reduce font size */
+        }
+
+        #full-transcription {
+            min-height: 200px;
+        }
+
+        /* --- START: Added styles for diet plan table (mobile) --- */
+        #diet-plan-content table {
+            font-size: 12px;
+        }
+
+        #diet-plan-content th,
+        #diet-plan-content td {
+            padding: 8px 10px;
+        }
+
+        /* --- END: Added styles for diet plan table (mobile) --- */
+
+        .overview-grid {
+            grid-template-columns: 1fr; /* A single column for all grid elements */
+            gap: 15px; /* Reduce space between elements */
+        }
+
+        .overview-detail-item {
+            padding: 15px; /* Reduce padding */
+        }
+
+        .overview-label {
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .overview-value {
+            font-size: 13px;
+        }
+
+        #overview-summary-text.overview-value {
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .activity-log-timeline {
+            max-height: 250px; /* Adjust max height */
+        }
+
+        .activity-log-timeline li {
+            font-size: 12px;
+            padding: 6px 0 12px 25px; /* Adjust padding */
+        }
+
+        .activity-log-timeline li .activity-icon {
+            left: -10px;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+        }
+
+        #manual-notes-content {
+            padding: 10px 12px;
+            font-size: 13px;
+            min-height: 120px;
+        }
+
+        #patient .patient-info-item {
+            font-size: 13px;
+            flex-direction: column; /* Stack label and value */
+            margin-bottom: 10px;
+        }
+
+        #patient .patient-info-label {
+            width: auto; /* Deactivate fixed width */
+            margin-bottom: 5px; /* Space between label and value */
+        }
+
+        #patient-history-link {
+            font-size: 13px;
+        }
+
+        .visit-id-display {
+            font-size: 11px;
+        }
+
+        .popup-content {
+            padding: 20px 25px; /* Reduce popup padding */
+        }
+
+        .popup-content h3 {
+            font-size: 18px;
+        }
+
+        .popup-content p {
+            font-size: 13px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .popup-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap; /* Ensures buttons wrap */
+        }
+
+        .popup-actions .action-btn {
+            width: 100%; /* Popup buttons take up full width */
+            justify-content: center; /* Center the button text */
+        }
+    }
+</style>
+
+<div class="main-container">
+    <div class="sidebar-panel">
+        <div class="header">
+            <h1>Visits</h1>
+        </div>
+        <button class="schedule-button" onclick="window.location.href='{{ url_for('grabar_cita') }}'"><i class="fas fa-plus"></i> New Visit</button>
+        <div class="date-controls">
+            <button class="arrow-btn" onclick="changeDate(-1)" title="Previous Day"><i class="fas fa-chevron-left"></i></button>
+            <div class="date-display" onclick="openDatePicker()">
+                <input type="date" id="date-input" value="{{ current_date }}" onchange="updateDateDisplay()">
+                <span id="date-text">{{ current_date_display }}</span>
+            </div>
+            <button class="arrow-btn" onclick="changeDate(1)" title="Next Day"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="filter-controls">
+            <select id="statusFilter" onchange="filterVisits()" title="Filter by status">
+                <option value="all">All</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+            </select>
+            <select id="orderFilter" onchange="filterVisits()" title="Order by date">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+            </select>
+        </div>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search patient..." onkeyup="filterVisits()">
+        <div id="visitList">
+            {% for visit in visits %}
+            <div class="visit-card {% if recent_visit and visit.id == recent_visit.id %}selected{% endif %}" onclick="showVisitDetails('{{ visit.id }}')">
+                <div class="avatar">{{ (visit.paciente_nombre[0] if visit.paciente_nombre and visit.paciente_nombre != 'Default Patient' else '?')|upper }}</div>
+                <div class="visit-card-info">
+                    <div class="patient-name">{{ visit.paciente_nombre }}</div>
+                    <div class="visit-date">{{ visit.fecha_formateada }}</div>
+                </div>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 14px; padding: 20px;">No visits registered.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="detail-panel">
+        {% if recent_visit %}
+        <div class="notification">
+            <i class="fas fa-check-circle"></i>
+            <p>Visit for <strong id="patientNameNotification">{{ recent_visit.paciente_nombre }}</strong> processed. Details below.</p>
+        </div>
+        {% endif %}
+
+        <div class="tabs-container">
+            <div class="tab active" onclick="changeTab(event, 'overview')"><i class="fas fa-eye"></i> Overview</div>
+            <div class="tab" onclick="changeTab(event, 'transcription')"><i class="fas fa-file-alt"></i> Transcription</div>
+            <div class="tab" onclick="changeTab(event, 'notes')"><i class="fas fa-sticky-note"></i> Notes & AI Summary</div>
+            <div class="tab" onclick="changeTab(event, 'patient')"><i class="fas fa-user"></i> Patient</div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" id="btn-create-prescription-visit" disabled title="Create prescription for this visit">
+                <i class="fas fa-file-prescription"></i> Prescription
+            </button>
+            <button class="action-btn" id="btn-create-referral-visit" disabled title="Create referral for this visit">
+                <i class="fas fa-directions"></i> Referral
+            </button>
+
+            {% if action_for_specialty %}
+            <button class="action-btn" id="btn-specialty-action"
+                data-route-name="{{ action_for_specialty.route_name }}"
+                data-doc-type="{{ action_for_specialty.doc_type }}"
+                disabled title="{{ action_for_specialty.text }}">
+                {{ action_for_specialty.text | safe if action_for_specialty.text else 'Specialty Action' }}
+            </button>
+            {% endif %}
+            <button class="action-btn secondary" id="btn-share-visit" disabled><i class="fas fa-share-alt"></i> Share</button>
+            <button class="action-btn menu secondary"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+
+        <div id="overview" class="tab-panel active">
+            <div class="overview-grid">
+                <div class="overview-detail-item">
+                    <label class="overview-label">Assigned Staff</label>
+                    <span id="overview-staff-name" class="overview-value">Select visit...</span>
+                </div>
+                <div class="overview-detail-item">
+                    <label class="overview-label">Patient</label>
+                    <span id="overview-patient-name" class="overview-value">Select visit...</span>
+                </div>
+                <div class="overview-detail-item overview-summary-item">
+                    <label class="overview-label">Quick Summary (AI)</label>
+                    <div id="overview-summary-text" class="overview-value">
+                        <div class="no-speech">Select visit...</div>
+                    </div>
+                </div>
+                <div class="overview-detail-item">
+                    <label class="overview-label">Applied Template</label>
+                    <a href="#" class="template-link" id="template-link">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <span id="template-name" class="overview-value">N/A</span>
+                    </a>
+                </div>
+                <div class="overview-detail-item overview-activity-item">
+                    <label class="overview-label">Recent Activity Log</label>
+                    <ul id="overview-activity-log-list" class="activity-log-timeline">
+                        <li>
+                            <div class="no-speech" style="border:none; padding: 10px 0;">Select a visit to see activity...</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <span class="visit-id-display" id="visit-id-overview">Visit ID: N/A</span>
+        </div>
+
+        <div id="transcription" class="tab-panel">
+            <div class="section-header">
+                <h3>Transcription</h3>
+                <div class="translation-controls">
+                    <span id="transcription-original-lang-display">Original Language: <strong id="transcription-original-lang-text">N/A</strong></span>
+                    <span>Translate to:</span>
+                    <select id="transcription-translate-select" class="generic-translate-select" disabled>
+                        <option value="" disabled selected>Select...</option>
+                        <option value="es">Spanish</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                    </select>
+                    <button class="action-btn secondary generic-show-original-btn" id="btn-show-transcription-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
+                </div>
+            </div>
+            <div class="transcription-area" id="full-transcription">
+                <div class="no-speech">Select a visit.</div>
+            </div>
+            <span class="visit-id-display" id="transcription-visit-id">Visit ID: N/A</span>
+        </div>
+
+        <div id="notes" class="tab-panel">
+            <div class="section-header">
+                <h3>Visit Notes & Summary</h3>
+                <p style="margin:0; font-size: 0.9em;">Patient: <strong id="notes-patient-name">N/A</strong></p>
+            </div>
+
+            {# Combined AI content section #}
+            <div class="ai-notes-section">
+                <h4><i class="fas fa-robot"></i> AI Content (Notes & Summary)</h4>
+                <div class="translation-controls" style="margin-bottom:15px;">
+                    <span id="notes-ai-original-lang-display">Original Language: <strong id="notes-ai-original-lang-text">N/A</strong></span>
+                    <span>Translate to:</span>
+                    <select id="notes-ai-translate-select" class="generic-translate-select" disabled>
+                        <option value="" disabled selected>Select...</option>
+                        <option value="es">Spanish</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                    </select>
+                    <button class="action-btn secondary generic-show-original-btn" id="btn-show-notes-ai-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
+
+                    {# MOVED EDIT BUTTON HERE #}
+                    <button class="action-btn secondary" id="btn-edit-ai-notes-summary" title="Edit AI Notes and Summary content">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    {# END MOVED EDIT BUTTON #}
+
+                    <button class="action-btn secondary" id="btn-download-ai-notes-pdf" style="margin-left: 10px; display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
+                </div>
+
+                {# This is the wrapper for the display div and the textarea #}
+                <div id="notes-ai-summary-content-wrapper">
+                    <div id="notes-ai-summary-unified-content" class="transcription-area" style="min-height: 250px;">
+                        <div class="no-speech">AI notes or summary have not been generated yet.</div>
+                    </div>
+                    {# The textarea for editing. Hidden by default. #}
+                    {# Applied transcription-area styling directly here for robustness #}
+                    <textarea id="notes-ai-summary-unified-textarea" class="transcription-area" style="display:none;"></textarea>
+                </div>
+
+                <div class="edit-actions"> {# This div now only contains Save/Cancel #}
+                    <button class="action-btn" id="btn-save-ai-notes-summary" style="display: none;" title="Save changes to AI Notes and Summary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button class="action-btn secondary" id="btn-cancel-ai-notes-summary-edit" style="display: none;" title="Cancel editing">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+
+                <button class="action-btn secondary" id="btn-generate-ai-notes-summary" style="margin-top: 15px;" disabled>
+                    <i class="fas fa-lightbulb"></i> Generate/Update AI Notes & Summary
+                </button>
+            </div>
+
+            <span class="visit-id-display" id="notes-visit-id">Visit ID: N/A</span>
+        </div>
+
+        <div id="patient" class="tab-panel">
+            <h3>Patient Information</h3>
+            <div>
+                <div class="patient-info-item">
+                    <div class="patient-info-label">Name:</div>
+                    <div id="patient-info-name" class="patient-info-value">-</div>
+                </div>
+                <div class="patient-info-item">
+                    <div class="patient-info-label">Patient ID:</div>
+                    <div id="patient-info-id" class="patient-info-value">-</div>
+                </div>
+                <a href="#" id="patient-history-link">View full patient history</a>
+            </div>
+            <span class="visit-id-display" id="patient-visit-id">Visit ID: N/A</span>
+        </div>
+    </div>
+
+    <div id="popup-share-email" class="popup-overlay">
+        <div class="popup-content">
+            <button class="popup-close" onclick="closeSharePopup()">&times;</button>
+            <h3>Share Visit Details</h3>
+            <p>The information for the current visit for patient: <strong id="popup-patient-name">N/A</strong> will be shared.</p>
+            <form id="form-share-email" onsubmit="sendShareEmail(event)">
+                <div id="share-feedback" class="feedback-message"></div>
+                <div class="form-group">
+                    <label for="recipient-email">Recipient's Email Address:</label>
+                    <input type="email" id="recipient-email" name="recipient_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="optional-subject">Subject (Optional):</label>
+                    <input type="text" id="optional-subject" name="optional_subject" placeholder="Medical Visit Details">
+                </div>
+                <div class="form-group">
+                    <label for="additional-message">Additional Message (Optional):</label>
+                    <textarea id="additional-message" name="additional_message" rows="3" placeholder="Hello, I am sharing the visit details with you..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="email-language">Email Content Language:</label>
+                    <select id="email-language" name="email_language" class="generic-translate-select" style="width:100%;">
+                        <option value="" selected>Visit's Original Language</option>
+                        <option value="es">Spanish</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                    </select>
+                </div>
+                <div class="popup-actions">
+                    <button type="button" class="action-btn secondary" onclick="closeSharePopup()">Cancel</button>
+                    <button type="submit" class="action-btn" id="btn-send-email-popup">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+<script>
+    const md = window.markdownit(); // Initialize markdown-it parser
+
+    const visitDetails = {};
+
+    let originalAiSummaryText = '';
+    let originalAiNotesText = '';
+    let unifiedAiContentMarkdown = ''; // Stores the combined markdown for current display/editing
+    let originalUnifiedAiContentMarkdown = ''; // To store the state before editing for cancel
+
+
+    {% for visit in visits %}
+    visitDetails['{{ visit.id }}'] = {
+        patient_name: {{ visit.paciente.nombre|tojson }},
+        template: {{ visit.plantilla | default('null') | tojson }},
+        date: {{ visit.fecha_formateada | default('null') | tojson }},
+        id: {{ visit.id | default('null') | tojson }},
+        detected_language: {{ visit.idioma_detectado | default('null') | tojson }},
+        ai_summary: {{ visit.resumen_ai | default('null') | tojson }},
+        ai_notes: {{ visit.notas_ai | default('null') | tojson }}, // This will be markdown from DB
+        transcription: {{ visit.transcripcion | default('null') | tojson }},
+        patient_id: {{ visit.paciente.id|tojson }},
+        ai_notes_pdf_path: {{ visit.ruta_notas_ai_pdf | default('null') | tojson }} // Capture PDF path
+    };
+    {% endfor %}
+
+    let currentlySelectedVisit = null;
+    let originalTranscriptionHtml = '';
+
+    const languageNames = {
+        'es': 'Spanish',
+        'en': 'English',
+        'fr': 'French',
+        'de': 'German',
+        'it': 'Italian',
+        'N/A': 'Unknown',
+        'api': 'API (Auto)'
+    };
+
+    const sharePopup = document.getElementById('popup-share-email');
+    const btnShareVisit = document.getElementById('btn-share-visit');
+    const shareEmailForm = document.getElementById('form-share-email');
+    const shareFeedbackDiv = document.getElementById('share-feedback');
+    const patientNamePopup = document.getElementById('popup-patient-name');
+    const btnSendEmailPopup = document.getElementById('btn-send-email-popup');
+    const emailLanguageSelect = document.getElementById('email-language');
+
+    const deleteVisitForm = document.getElementById('form-eliminar-visita');
+    const btnDeleteFullVisit = document.getElementById('btn-eliminar-visita-completa');
+    const btnCreatePrescriptionVisit = document.getElementById('btn-create-prescription-visit');
+    const btnCreateReferralVisit = document.getElementById('btn-create-referral-visit');
+    const btnSpecialtyAction = document.getElementById('btn-specialty-action');
+    const tabDietPlan = document.getElementById('tab-plan-alimenticio');
+    const btnDownloadAiNotesPdf = document.getElementById('btn-download-ai-notes-pdf');
+
+    // References for edit functionality
+    const notesAiSummaryUnifiedContentDisplay = document.getElementById('notes-ai-summary-unified-content');
+    const notesAiSummaryUnifiedTextarea = document.getElementById('notes-ai-summary-unified-textarea');
+    const btnEditAiNotesSummary = document.getElementById('btn-edit-ai-notes-summary');
+    const btnSaveAiNotesSummary = document.getElementById('btn-save-ai-notes-summary');
+    const btnCancelAiNotesSummaryEdit = document.getElementById('btn-cancel-ai-notes-summary-edit');
+    // Reference for the combined generate button
+    const btnGenerateAiNotesSummary = document.getElementById('btn-generate-ai-notes-summary');
+
+
+    function changeTab(event, tabId) {
+        // Hide all panels and deactivate all tabs first
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+        // Get the clicked tab element or find it by ID if event is null
+        let tabToActivate;
+        if (event) {
+            tabToActivate = event.currentTarget;
+        } else {
+            tabToActivate = document.querySelector(`.tab[onclick*="changeTab(event, '${tabId}')"]`);
+        }
+
+        // Activate the selected tab and its corresponding panel
+        if (tabToActivate) {
+            tabToActivate.classList.add('active');
+        }
+        const activePanel = document.getElementById(tabId);
+        if (activePanel) {
+            activePanel.classList.add('active');
+        } else {
+            console.error("Panel not found:", tabId);
+        }
+    }
+
+    async function showVisitDetails(visitId) {
+        console.log(`Loading details for visit ID: ${visitId}`);
+        currentlySelectedVisit = visitId;
+
+        const currentVisitDetails = visitDetails[visitId] || {};
+
+        // Reset edit mode when a new visit is selected
+        // This line is crucial and must be here. It ensures we are not in edit mode when switching visits.
+        disableEditMode();
+
+        // Ensure the "Overview" tab is active by default when loading a new visit
+        changeTab(null, 'overview');
+
+        if (btnShareVisit) btnShareVisit.disabled = !currentlySelectedVisit;
+
+        if (btnCreatePrescriptionVisit) {
+            btnCreatePrescriptionVisit.disabled = !currentlySelectedVisit;
+            if (currentlySelectedVisit) {
+                btnCreatePrescriptionVisit.onclick = () => {
+                    window.location.href = `/visit/${currentlySelectedVisit}/prescription/new`;
+                };
+            } else {
+                btnCreatePrescriptionVisit.onclick = null;
+            }
+        }
+        if (btnCreateReferralVisit) {
+            btnCreateReferralVisit.disabled = !currentlySelectedVisit;
+            if (currentlySelectedVisit) {
+                btnCreateReferralVisit.onclick = () => {
+                    window.location.href = `/visit/${currentlySelectedVisit}/referral/new`;
+                };
+            } else {
+                btnCreateReferralVisit.onclick = null;
+            }
+        }
+
+        if (btnSpecialtyAction) {
+            btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetails.transcription;
+            if (currentlySelectedVisit && currentVisitDetails.transcription) {
+                const routeNameFromData = btnSpecialtyAction.dataset.routeName;
+                const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
+
+                if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
+                    btnSpecialtyAction.onclick = () => {
+                        // This now always points to the new page for creation
+                        window.location.href = `/visit/${currentlySelectedVisit}/${routeNameFromData}`;
+                    };
+                } else {
+                    btnSpecialtyAction.onclick = null;
+                    console.warn("Route information for specialty button not found.");
+                }
+            } else {
+                btnSpecialtyAction.onclick = null;
+            }
+        }
+        document.querySelectorAll('.visit-card').forEach(card => card.classList.remove('selected'));
+        const cardElement = document.querySelector(`.visit-card[onclick*="'${visitId}'"]`);
+        if (cardElement) cardElement.classList.add('selected');
+
+        const visitIdNum = currentVisitDetails.id || 'N/A';
+        const originalDetectedLanguage = currentVisitDetails.detected_language || 'N/A';
+        const originalLanguageName = languageNames[originalDetectedLanguage] || originalDetectedLanguage.toUpperCase();
+
+        document.getElementById('visit-id-overview').textContent = `Visit ID: ${visitIdNum}`;
+        document.getElementById('transcription-visit-id').textContent = `Visit ID: ${visitIdNum}`;
+        document.getElementById('notes-visit-id').textContent = `Visit ID: ${visitIdNum}`;
+        document.getElementById('patient-visit-id').textContent = `Visit ID: ${visitIdNum}`;
+        if (document.getElementById('diet-plan-visit-id')) {
+            document.getElementById('diet-plan-visit-id').textContent = `Visit ID: ${visitIdNum}`;
+        }
+
+
+        const originalTranscriptionText = currentVisitDetails.transcription || null;
+        originalTranscriptionHtml = formatTranscription(originalTranscriptionText);
+        document.getElementById('full-transcription').innerHTML = originalTranscriptionHtml;
+        document.getElementById('transcription-original-lang-text').textContent = originalLanguageName;
+        updateTranslationControls('transcription', originalDetectedLanguage, !!originalTranscriptionText);
+
+        if (deleteVisitForm && btnDeleteFullVisit) {
+            if (visitIdNum !== 'N/A' && currentlySelectedVisit) {
+                deleteVisitForm.action = `/api/delete_visit/${visitIdNum}`;
+                btnDeleteFullVisit.onclick = function() {
+                    return confirm('Are you SURE you want to delete this ENTIRE visit?\\n\\nThis action is IRREVERSIBLE and will erase all associated information (transcription, summary, notes, activity logs, etc.).');
+                };
+                btnDeleteFullVisit.disabled = false;
+            } else {
+                deleteVisitForm.action = '#';
+                btnDeleteFullVisit.onclick = null;
+                btnDeleteFullVisit.disabled = true;
+            }
+        }
+
+        // --- Unified logic for AI Notes and Summary Display ---
+        originalAiSummaryText = currentVisitDetails.ai_summary || '';
+        originalAiNotesText = currentVisitDetails.ai_notes || '';
+        updateUnifiedAiContentDisplay(); // Call function to update display
+        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Store for cancel
+
+
+        document.getElementById('notes-patient-name').textContent = currentVisitDetails.patient_name || 'N/A';
+        document.getElementById('notes-ai-original-lang-text').textContent = originalLanguageName;
+
+        // New combined button to generate Notes and Summary
+        if (btnGenerateAiNotesSummary) {
+            btnGenerateAiNotesSummary.disabled = !originalTranscriptionText;
+            btnGenerateAiNotesSummary.onclick = () => callGenerateAiNotesAndSummaryApi(visitId);
+        }
+
+        // Update translation controls for the unified 'notes-ai' content
+        updateTranslationControls(
+            'notes-ai',
+            originalDetectedLanguage,
+            (originalAiSummaryText || originalAiNotesText) // True if either has content
+        );
+
+        // Set the PDF download button link for notes (summary is usually not PDF'd separately)
+        if (btnDownloadAiNotesPdf) {
+            if (currentVisitDetails.ai_notes_pdf_path) {
+                btnDownloadAiNotesPdf.style.display = 'inline-block';
+                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+            } else {
+                btnDownloadAiNotesPdf.style.display = 'none';
+            }
+        }
+
+        document.getElementById('patient-info-name').textContent = currentVisitDetails.patient_name || '-';
+        document.getElementById('patient-info-id').textContent = currentVisitDetails.patient_id || '-';
+        const patientHistoryLink = document.getElementById('patient-history-link');
+        if (patientHistoryLink && currentVisitDetails.patient_id) {
+            patientHistoryLink.href = `/patient_profile/${currentVisitDetails.patient_id}`;
+            patientHistoryLink.style.display = 'inline';
+        } else if (patientHistoryLink) {
+            patientHistoryLink.style.display = 'none';
+        }
+
+        document.getElementById('overview-staff-name').textContent = 'Loading...';
+        document.getElementById('overview-patient-name').textContent = currentVisitDetails.patient_name || 'Loading...';
+        const overviewSummaryTextElem = document.getElementById('overview-summary-text');
+        // Update overview summary from local data first
+        if (originalAiSummaryText) {
+            overviewSummaryTextElem.textContent = originalAiSummaryText;
+        } else if (currentVisitDetails.transcription) {
+            overviewSummaryTextElem.textContent = "Transcription available. Summary not generated.";
+        } else {
+            overviewSummaryTextElem.innerHTML = '<div class="no-speech">Loading summary...</div>';
+        }
+
+        document.getElementById('overview-activity-log-list').innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">Select a visit to see activity...</div></li>';
+        const templateSpan = document.getElementById('template-name');
+        if (templateSpan) templateSpan.textContent = currentVisitDetails.template || 'N/A';
+
+        try {
+            const response = await fetch(`/api/visit_overview/${visitIdNum}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Error ${response.status}`);
+            }
+            const overviewData = await response.json();
+            console.log("Overview data received:", overviewData);
+
+            document.getElementById('overview-staff-name').textContent = overviewData.staff || 'Not available';
+            document.getElementById('overview-patient-name').textContent = overviewData.patient || currentVisitDetails.patient_name || 'Not available';
+
+            let summaryForOverview = overviewData.ai_summary || overviewData.summary;
+            if (summaryForOverview && !summaryForOverview.startsWith("Error") && summaryForOverview !== "Not available") {
+                overviewSummaryTextElem.textContent = summaryForOverview;
+                if (originalAiSummaryText !== summaryForOverview && visitDetails[visitId] && overviewData.ai_summary) {
+                    visitDetails[visitId].ai_summary = overviewData.ai_summary;
+                    originalAiSummaryText = overviewData.ai_summary;
+                    updateUnifiedAiContentDisplay(); // Re-render combined content after updating summary
+                }
+            } else if (!currentVisitDetails.transcription) {
+                overviewSummaryTextElem.innerHTML = `<div class="no-speech">No summary or transcription.</div>`;
+            } else {
+                overviewSummaryTextElem.textContent = "Transcription available. Summary not generated.";
+            }
+
+            // Update Notes AI from Overview
+            if (overviewData.ai_notes) {
+                if (originalAiNotesText !== overviewData.ai_notes) {
+                    visitDetails[visitId].ai_notes = overviewData.ai_notes;
+                    visitDetails[visitId].ai_notes_pdf_path = overviewData.ai_notes_pdf_path; // Make sure this is updated
+                    originalAiNotesText = overviewData.ai_notes;
+                    updateUnifiedAiContentDisplay(); // Re-render combined content after updating notes
+                }
+            }
+
+            // Update PDF download button based on new path from overview
+            if (btnDownloadAiNotesPdf) {
+                if (visitDetails[visitId].ai_notes_pdf_path) { // Check the locally updated data
+                    btnDownloadAiNotesPdf.style.display = 'inline-block';
+                    btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+                } else {
+                    btnDownloadAiNotesPdf.style.display = 'none';
+                }
+            }
+
+            if (overviewData.detected_language && visitDetails[visitId] && overviewData.detected_language !== visitDetails[visitId].detected_language) {
+                console.log(`Detected language updated for visit ${visitId} from ${visitDetails[visitId].detected_language} to ${overviewData.detected_language}`);
+                visitDetails[visitId].detected_language = overviewData.detected_language;
+                const newOriginalLanguageName = languageNames[overviewData.detected_language] || overviewData.detected_language.toUpperCase();
+
+                document.getElementById('transcription-original-lang-text').textContent = newOriginalLanguageName;
+                updateTranslationControls('transcription', overviewData.detected_language, !!originalTranscriptionText);
+
+                document.getElementById('notes-ai-original-lang-text').textContent = newOriginalLanguageName;
+                updateTranslationControls('notes-ai', overviewData.detected_language, !!(originalAiSummaryText || originalAiNotesText));
+            }
+
+            const logList = document.getElementById('overview-activity-log-list');
+            logList.innerHTML = '';
+            if (overviewData.activity_logs && overviewData.activity_logs.length > 0) {
+                overviewData.activity_logs.forEach(log => {
+                    const li = document.createElement('li');
+                    const iconHtml = log.icon || 'fas fa-cog';
+                    const safeDescription = log.description ? log.description.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+                    const safeUser = log.user ? log.user.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '?';
+                    const safeTimestampTitle = log.timestamp ? log.timestamp.replace(/"/g, "&quot;") : '';
+                    const safeTimeAgo = log.time_ago ? log.time_ago.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+                    li.innerHTML = `<span class="activity-icon"><i class="${iconHtml}"></i></span> ${safeDescription} by <strong>${safeUser}</strong> <span title="${safeTimestampTitle}">(${safeTimeAgo})</span>`;
+                    logList.appendChild(li);
+                });
+            } else {
+                logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity logged.</div></li>';
+            }
+        } catch (error) {
+            console.error("Error fetching or processing overview:", error);
+            if (!originalAiSummaryText && !(currentVisitDetails && currentVisitDetails.transcription)) {
+                overviewSummaryTextElem.innerHTML = `<div class="no-speech" style="color:red;">Error loading summary.</div>`;
+            }
+            const logList = document.getElementById('overview-activity-log-list');
+            if (!logList.hasChildNodes() || (logList.firstChild && logList.firstChild.textContent.includes("Loading"))) {
+                logList.innerHTML = '<li><div class="no-speech" style="color:red; border:none; padding: 10px 0;">Error loading activity.</div></li>';
+            }
+        }
+    }
+
+    // NEW: Function to toggle edit mode for unified AI content
+    function enableEditMode() {
+        if (!currentlySelectedVisit) {
+            alert("Please select a visit to edit.");
+            return;
+        }
+
+        // Store current state for 'Cancel'
+        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown;
+
+        // Hide the display div and show the textarea
+        notesAiSummaryUnifiedContentDisplay.style.display = 'none';
+        notesAiSummaryUnifiedTextarea.style.display = 'block';
+
+        // Populate textarea with the `unifiedAiContentMarkdown` (raw markdown with actual newlines)
+        notesAiSummaryUnifiedTextarea.value = unifiedAiContentMarkdown;
+
+        // Show/hide buttons
+        btnEditAiNotesSummary.style.display = 'none';
+        btnGenerateAiNotesSummary.style.display = 'none'; // Hide generate button during edit
+        btnSaveAiNotesSummary.style.display = 'inline-block';
+        btnCancelAiNotesSummaryEdit.style.display = 'inline-block';
+
+        // Disable translation controls during edit
+        const translateSelectNotesAi = document.getElementById('notes-ai-translate-select');
+        if (translateSelectNotesAi) translateSelectNotesAi.disabled = true;
+        const btnShowNotesAiOriginal = document.getElementById('btn-show-notes-ai-original');
+        if (btnShowNotesAiOriginal) btnShowNotesAiOriginal.style.display = 'none';
+
+        // Disable PDF download button during edit
+        const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
+        if (btnDownloadPdf) btnDownloadPdf.style.display = 'none';
+
+
+        notesAiSummaryUnifiedTextarea.focus();
+    }
+
+    function disableEditMode() {
+        // Hide the textarea and show the display div
+        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.style.display = 'block';
+        if (notesAiSummaryUnifiedTextarea) notesAiSummaryUnifiedTextarea.style.display = 'none';
+
+        // Re-render the content (important for when 'Cancel' is pressed)
+        updateUnifiedAiContentDisplay();
+
+        // Show/hide buttons
+        const hasContent = !!unifiedAiContentMarkdown;
+        // Show btnEditAiNotesSummary only if there is content and we are not in edit mode
+        if (btnEditAiNotesSummary) btnEditAiNotesSummary.style.display = (hasContent && notesAiSummaryUnifiedTextarea.style.display === 'none') ? 'inline-block' : 'none';
+
+        // Re-enable generate button only if a visit is selected and has transcription
+        const currentDetails = visitDetails[currentlySelectedVisit];
+        if (btnGenerateAiNotesSummary && currentDetails && currentDetails.transcription) {
+            btnGenerateAiNotesSummary.style.display = 'inline-block';
+        } else if (btnGenerateAiNotesSummary) {
+            btnGenerateAiNotesSummary.style.display = 'none';
+        }
+        if (btnSaveAiNotesSummary) btnSaveAiNotesSummary.style.display = 'none';
+        if (btnCancelAiNotesSummaryEdit) btnCancelAiNotesSummaryEdit.style.display = 'none';
+
+        // Re-enable translation controls
+        const translateSelectNotesAi = document.getElementById('notes-ai-translate-select');
+        if (translateSelectNotesAi) translateSelectNotesAi.disabled = false;
+        const btnShowNotesAiOriginal = document.getElementById('btn-show-notes-ai-original');
+        if (btnShowNotesAiOriginal) {
+            btnShowNotesAiOriginal.style.display = 'none';
+        }
+        // Re-call translation controls update to restore correct state
+        const currentDetail = visitDetails[currentlySelectedVisit];
+        updateTranslationControls(
+            'notes-ai',
+            currentDetail ? currentDetail.detected_language : 'N/A',
+            !!unifiedAiContentMarkdown
+        );
+
+        // Re-show PDF button if path exists
+        const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
+        if (btnDownloadPdf && currentDetail && currentDetail.ai_notes_pdf_path) {
+            btnDownloadPdf.style.display = 'inline-block';
+        } else if (btnDownloadPdf) {
+            btnDownloadPdf.style.display = 'none';
+        }
+    }
+
+    async function saveUnifiedAiContent() {
+        if (!currentlySelectedVisit) {
+            alert("No visit selected to save.");
+            return;
+        }
+        const editedContent = notesAiSummaryUnifiedTextarea.value; // Get content from the textarea
+
+        // Update `unifiedAiContentMarkdown` with the edited content immediately
+        unifiedAiContentMarkdown = editedContent;
+
+        // Split the content back into summary and notes based on markdown headers.
+        let summaryPart = '';
+        let notesPart = '';
+
+        const summaryMatch = editedContent.match(/###\s*AI\s*Summary\n([\s\S]*?)(?=\n###\s*AI\s*Generated\s*Notes|$)/i);
+        const notesMatch = editedContent.match(/###\s*AI\s*Generated\s*Notes\n([\s\S]*)/i);
+
+        if (summaryMatch && summaryMatch[1]) {
+            summaryPart = summaryMatch[1].trim();
+        }
+        if (notesMatch && notesMatch[1]) {
+            notesPart = notesMatch[1].trim();
+        } else if (summaryMatch) {
+            summaryPart = editedContent.substring(summaryMatch.index + summaryMatch[0].length).trim();
+            notesPart = '';
+        } else if (notesMatch) {
+            summaryPart = '';
+            notesPart = editedContent.substring(notesMatch.index + notesMatch[0].length).trim();
+        } else {
+            notesPart = editedContent;
+            summaryPart = '';
+        }
+
+        if (btnSaveAiNotesSummary) {
+            btnSaveAiNotesSummary.disabled = true;
+            btnSaveAiNotesSummary.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        }
+
+
+        try {
+            const response = await fetch('/api/update_ai_notes_summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    visit_id: currentlySelectedVisit,
+                    ai_summary_content: summaryPart,
+                    ai_notes_content: notesPart
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || `Error ${response.status}`);
+            }
+
+            // Update local data and re-render display
+            visitDetails[currentlySelectedVisit].ai_summary = summaryPart;
+            visitDetails[currentlySelectedVisit].ai_notes = notesPart;
+            originalAiSummaryText = summaryPart;
+            originalAiNotesText = notesPart;
+            originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Update original for future cancels
+
+            updateUnifiedAiContentDisplay(); // Render `unifiedAiContentMarkdown` for display
+            disableEditMode(); // Exit edit mode
+            alert(data.message || "AI content saved successfully.");
+
+            // Optionally update overview summary if needed
+            const overviewSummaryElem = document.getElementById('overview-summary-text');
+            if (overviewSummaryElem) overviewSummaryElem.textContent = summaryPart;
+
+        } catch (error) {
+            console.error("Error saving unified AI content:", error);
+            alert(`Error saving: ${error.message}`);
+        } finally {
+            if (btnSaveAiNotesSummary) {
+                btnSaveAiNotesSummary.disabled = false;
+                btnSaveAiNotesSummary.innerHTML = '<i class="fas fa-save"></i> Save';
+            }
+        }
+    }
+
+    // Consolidated function to update the unified display
+    function updateUnifiedAiContentDisplay() {
+        let combinedContentMarkdown = '';
+
+        if (originalAiSummaryText && !originalAiSummaryText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Summary\n\n' + originalAiSummaryText.replace(/\\n/g, '\n') + '\n\n';
+        } else if (originalAiSummaryText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Summary (Error)\n\n' + originalAiSummaryText.replace(/\\n/g, '\n') + '\n\n';
+        }
+
+        if (originalAiNotesText && !originalAiNotesText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Generated Notes\n\n' + originalAiNotesText.replace(/\\n/g, '\n') + '\n\n';
+        } else if (originalAiNotesText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Generated Notes (Error)\n\n' + originalAiNotesText.replace(/\\n/g, '\n') + '\n\n';
+        }
+
+        // Store this raw markdown for editing and original content display.
+        unifiedAiContentMarkdown = combinedContentMarkdown.trim();
+
+        if (notesAiSummaryUnifiedContentDisplay) { // Ensure the element exists
+            if (unifiedAiContentMarkdown === '') {
+                notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
+            } else {
+                notesAiSummaryUnifiedContentDisplay.innerHTML = md.render(unifiedAiContentMarkdown);
+            }
+        }
+    }
+
+
+    async function requestTranslation(visitId, contentType, targetLanguageCode) {
+        const baseDetails = visitDetails[visitId] || {};
+        const sourceLanguageCode = baseDetails.detected_language || 'N/A';
+        let originalTextToTranslate = '';
+        let displayAreaId = '';
+        let originalButtonId = '';
+        let originalLanguageDisplaySpanId = '';
+        let translateSelectId = '';
+        let editButtonId = ''; // Added to manage edit button state during translation
+
+        // Ensure not in edit mode when translating
+        disableEditMode(); // Ensure display is normal before translating
+
+        if (contentType === 'transcription') {
+            originalTextToTranslate = baseDetails.transcription;
+            displayAreaId = 'full-transcription';
+            originalButtonId = 'btn-show-transcription-original';
+            originalLanguageDisplaySpanId = 'transcription-original-lang-display';
+            translateSelectId = 'transcription-translate-select';
+        } else if (contentType === 'notes-ai') {
+            originalTextToTranslate = unifiedAiContentMarkdown;
+
+            displayAreaId = 'notes-ai-summary-unified-content';
+            originalButtonId = 'btn-show-notes-ai-original';
+            originalLanguageDisplaySpanId = 'notes-ai-original-lang-display';
+            translateSelectId = 'notes-ai-translate-select';
+            editButtonId = 'btn-edit-ai-notes-summary'; // Assign edit button for notes-ai
+        } else {
+            return;
+        }
+
+
+        if (!sourceLanguageCode || sourceLanguageCode === 'N/A' || sourceLanguageCode === 'api') {
+            alert("Could not reliably determine original language to translate.");
+            return;
+        }
+        if (!originalTextToTranslate || originalTextToTranslate.trim() === '') {
+            alert(`No original ${contentType.replace('-', ' ')} to translate.`);
+            return;
+        }
+        if (!targetLanguageCode || targetLanguageCode === "") {
+            alert("Please select a language from the menu.");
+            return;
+        }
+
+        const displayArea = document.getElementById(displayAreaId);
+        const originalButton = document.getElementById(originalButtonId);
+        const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
+        const strongElementOriginal = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
+        const strongElementOriginalId = strongElementOriginal ? strongElementOriginal.id : `${contentType}-original-lang-text`;
+        const translateSelect = document.getElementById(translateSelectId);
+        const editButton = document.getElementById(editButtonId); // Get edit button
+
+        if (!displayArea || !translateSelect || !originalLanguageDisplaySpan) {
+            console.error("UI elements for translation not found.", {
+                displayArea,
+                translateSelect,
+                originalLanguageDisplaySpan
+            });
+            alert("Internal error: Translation elements not available.");
+            return;
+        }
+
+        const sourceLanguageName = languageNames[sourceLanguageCode] || sourceLanguageCode.toUpperCase();
+        const targetLanguageName = languageNames[targetLanguageCode] || targetLanguageCode.toUpperCase();
+
+        if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #ff7f0e;">(Translating to ${targetLanguageName}...)</span>`;
+        displayArea.innerHTML = '<div class="no-speech">Translating...</div>';
+        if (translateSelect) translateSelect.disabled = true;
+        if (originalButton) originalButton.style.display = 'none';
+        if (editButton) editButton.disabled = true; // Disable edit button during translation
+
+        try {
+            const response = await fetch('/api/translate_text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    original_text: originalTextToTranslate,
+                    source_language_code: sourceLanguageCode,
+                    target_language_code: targetLanguageCode
+                })
+            });
+            if (!response.ok) {
+                let errorMsg = `Server error ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {}
+                throw new Error(errorMsg);
+            }
+            const data = await response.json();
+
+            if (data && data.translated_text) {
+                displayArea.innerHTML = md.render(data.translated_text);
+
+                if (originalButton) originalButton.style.display = 'inline-block';
+                if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #10b980;">(Showing translation to ${targetLanguageName})</span>`;
+
+                if (translateSelect) {
+                    translateSelect.disabled = false;
+                    translateSelect.value = "";
+                    Array.from(translateSelect.options).forEach(option => {
+                        option.disabled = (option.value === targetLanguageCode) || (option.value === sourceLanguageCode && sourceLanguageCode !== 'N/A' && sourceLanguageCode !== 'api') || (option.value === "");
+                    });
+                }
+            } else {
+                throw new Error("Invalid translation API response.");
+            }
+        } catch (error) {
+            console.error(`Error in translation (${contentType}):`, error);
+
+            // Reconstruct original content on error based on type
+            if (contentType === 'transcription') {
+                displayArea.innerHTML = formatTranscription(visitDetails[visitId].transcription || '');
+            } else if (contentType === 'notes-ai') {
+                displayArea.innerHTML = md.render(unifiedAiContentMarkdown || `<div class="no-speech" style="color:red;">Error translating: ${error.message}.</div>`);
+            }
+
+            if (originalButton) originalButton.style.display = 'none';
+            if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #ef4444;">(Translation failed)</span>`;
+            updateTranslationControls(contentType, sourceLanguageCode, true); // Keep controls enabled if original text is there
+        } finally {
+            if (editButton) editButton.disabled = false; // Re-enable edit button after translation attempt
+        }
+    }
+
+    function showOriginalContent(visitId, contentType) {
+        const baseDetails = visitDetails[visitId] || {};
+        const detectedLanguage = baseDetails.detected_language || 'N/A';
+        let originalText = '';
+        let displayAreaId = '';
+        let originalLanguageDisplaySpanId = '';
+        let originalButtonId = '';
+        let editButtonId = ''; // Added to manage edit button state
+
+        // Ensure not in edit mode when displaying original
+        disableEditMode();
+
+        if (contentType === 'transcription') {
+            displayAreaId = 'full-transcription';
+            originalText = baseDetails.transcription;
+            if (document.getElementById(displayAreaId)) { // Ensure the element exists
+                document.getElementById(displayAreaId).innerHTML = formatTranscription(originalText) || '<div class="no-speech">No transcription available.</div>';
+            }
+        } else if (contentType === 'notes-ai') {
+            originalText = unifiedAiContentMarkdown; // Use the stored combined markdown
+
+            displayAreaId = 'notes-ai-summary-unified-content';
+            if (document.getElementById(displayAreaId)) { // Ensure the element exists
+                document.getElementById(displayAreaId).innerHTML = md.render(originalText) || '<div class="no-speech">No AI content available.</div>';
+            }
+            editButtonId = 'btn-edit-ai-notes-summary'; // Assign edit button for notes-ai
+        } else {
+            return;
+        }
+
+        if (!originalText && contentType !== 'transcription' && contentType !== 'notes-ai' && document.getElementById(displayAreaId)) {
+            document.getElementById(displayAreaId).innerHTML = `<div class="no-speech">No ${contentType.replace('-', ' ')} available.</div>`;
+        }
+
+        originalLanguageDisplaySpanId = `${contentType}-original-lang-display`;
+        originalButtonId = `btn-show-${contentType}-original`;
+
+        const detectedLanguageName = languageNames[detectedLanguage] || detectedLanguage.toUpperCase();
+        const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
+        const strongElement = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
+        const strongElementOriginalId = strongElement ? strongElement.id : `${contentType}-original-lang-text`;
+
+        if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${detectedLanguageName}</strong>`;
+
+        const originalButton = document.getElementById(originalButtonId);
+        if (originalButton) originalButton.style.display = 'none';
+
+        const editButton = document.getElementById(editButtonId); // Get edit button
+        if (editButton) editButton.disabled = false; // Re-enable edit button
+
+        updateTranslationControls(contentType, detectedLanguage, !!originalText);
+    }
+
+    function updateTranslationControls(contentType, originalDetectedLanguage, hasOriginalText) {
+        const selectId = `notes-ai-translate-select`;
+        const selectTranslate = document.getElementById(selectId);
+        const btnShowOriginal = document.getElementById(`btn-show-notes-ai-original`);
+        const btnEdit = document.getElementById(`btn-edit-ai-notes-summary`); // Only for notes-ai
+
+        if (!selectTranslate) {
+            console.warn("Select not found:", contentType, selectId);
+            return;
+        }
+
+        const canTranslate = (hasOriginalText && originalDetectedLanguage && originalDetectedLanguage !== 'N/A' && originalDetectedLanguage !== 'api');
+        selectTranslate.disabled = !canTranslate;
+        selectTranslate.value = "";
+
+        Array.from(selectTranslate.options).forEach(option => {
+            if (option.value === "") {
+                option.disabled = false;
+            } else if (!canTranslate || option.value === originalDetectedLanguage) {
+                option.disabled = true;
+            } else {
+                option.disabled = false;
+            }
+        });
+
+        if (btnShowOriginal) {
+            // Only show the 'Original' button if the select is not currently showing original content
+            const currentLanguageDisplay = document.getElementById(`${contentType}-original-lang-text`).nextSibling; // Get the span after the strong tag
+            if (currentLanguageDisplay && currentLanguageDisplay.textContent.includes('Showing translation')) {
+                btnShowOriginal.style.display = 'inline-block';
+            } else {
+                btnShowOriginal.style.display = 'none';
+            }
+            btnShowOriginal.onclick = () => showOriginalContent(currentlySelectedVisit, contentType);
+        }
+
+        // Ensure edit button for 'notes-ai' is enabled/disabled correctly
+        if (contentType === 'notes-ai' && btnEdit) {
+            // Enable edit button if there's any AI content (summary or notes)
+            // and it's not currently in editing mode (checked by display styles of textarea)
+            btnEdit.disabled = !hasOriginalText || notesAiSummaryUnifiedTextarea.style.display === 'block';
+            if (notesAiSummaryUnifiedTextarea.style.display === 'block') { // If in edit mode, hide it
+                btnEdit.style.display = 'none';
+            } else { // Otherwise, show it if there's content to edit
+                btnEdit.style.display = hasOriginalText ? 'inline-block' : 'none';
+            }
+        }
+    }
+
+    function formatTranscription(text) {
+        if (!text || text.trim() === "") {
+            return '<div class="no-speech">No transcription available.</div>';
+        }
+        const lines = text.split('\n');
+        let html = '';
+        const escapeHtml = (unsafe) => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            const parts = line.match(/^((?:SPEAKER_\d+|SPK_\d+|SPEAKER\s*\d*|UNK|Speaker\s*\d*|Speaker\s*\d*)[^:]*):\s*(.*)$/i);
+            if (parts && parts[1] && parts[2]) { // Ensure both parts exist
+                const speaker = escapeHtml(parts[1].trim());
+                const message = escapeHtml(parts[2].trim());
+                html += `<p><span class="speaker">${speaker}:</span> ${message}</p>`;
+            } else {
+                html += `<p>${escapeHtml(line)}</p>`;
+            }
+        });
+        return html || '<div class="no-speech">Unrecognized format or empty transcription.</div>';
+    }
+
+    // This function is now the single point for generating both notes and summary
+    async function callGenerateAiNotesAndSummaryApi(visitId) {
+        if (!visitId) {
+            alert("Invalid visit ID.");
+            return;
+        }
+        const baseDetails = visitDetails[visitId];
+        if (!baseDetails || !baseDetails.transcription) {
+            alert("No transcription available to generate AI notes and summary.");
+            return;
+        }
+
+        const btn = document.getElementById('btn-generate-ai-notes-summary');
+        const originalButtonText = btn.innerHTML;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Both...';
+        }
+        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">Generating AI Notes and Summary...</div>';
+        if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
+        if (btnEditAiNotesSummary) btnEditAiNotesSummary.disabled = true; // Disable edit button during generation
+
+        let summaryGenerated = false;
+        let notesGenerated = false;
+        let summaryError = null;
+        let notesError = null;
+
+        // First, generate summary
+        try {
+            const responseSummary = await fetch('/api/generate_ai_summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    visit_id: visitId
+                })
+            });
+            const dataSummary = await responseSummary.json();
+            if (!responseSummary.ok) {
+                throw new Error(dataSummary.error || `Error ${responseSummary.status}`);
+            }
+            if (dataSummary.ai_summary) {
+                visitDetails[visitId].ai_summary = dataSummary.ai_summary;
+                originalAiSummaryText = dataSummary.ai_summary;
+                summaryGenerated = true;
+            } else {
+                throw new Error("Empty AI summary response.");
+            }
+        } catch (error) {
+            console.error("Error generating AI summary (part of unification):", error);
+            summaryError = error.message;
+            visitDetails[visitId].ai_summary = `[Error generating summary: ${summaryError}]`;
+            originalAiSummaryText = `[Error generating summary: ${summaryError}]`;
+        }
+
+        // Then, generate notes
+        try {
+            const responseNotes = await fetch('/api/generate_ai_notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    visit_id: visitId
+                })
+            });
+            const dataNotes = await responseNotes.json();
+            if (!responseNotes.ok) {
+                throw new Error(dataNotes.error || `Error ${responseNotes.status}`);
+            }
+            if (dataNotes.ai_notes_markdown && dataNotes.ai_notes_html) {
+                visitDetails[visitId].ai_notes = dataNotes.ai_notes_markdown;
+                visitDetails[visitId].ai_notes_pdf_path = dataNotes.ai_notes_pdf_path;
+                originalAiNotesText = dataNotes.ai_notes_markdown;
+                notesGenerated = true;
+            } else if (dataNotes.ai_notes) { // Fallback if only markdown is returned
+                visitDetails[visitId].ai_notes = dataNotes.ai_notes;
+                originalAiNotesText = dataNotes.ai_notes;
+                notesGenerated = true;
+            } else {
+                throw new Error("Empty AI notes response.");
+            }
+        } catch (error) {
+            console.error("Error generating AI notes (part of unification):", error);
+            notesError = error.message;
+            visitDetails[visitId].ai_notes = `[Error generating notes: ${notesError}]`;
+            originalAiNotesText = `[Error generating notes: ${notesError}]`;
+        }
+
+        // After both calls, update the display
+        let statusMessage = "AI process completed. ";
+
+        if (summaryGenerated) {
+            statusMessage += "Summary updated. ";
+        } else if (summaryError) {
+            statusMessage += `Summary Error: ${summaryError}. `;
+        }
+
+        if (notesGenerated) {
+            statusMessage += "Notes updated. ";
+        } else if (notesError) {
+            statusMessage += `Notes Error: ${notesError}. `;
+        }
+
+        updateUnifiedAiContentDisplay(); // Re-render the combined view
+        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Update original for future cancels
+        alert(statusMessage);
+
+        // Update PDF download button if notes were generated and path exists
+        if (btnDownloadAiNotesPdf) {
+            if (visitDetails[visitId].ai_notes_pdf_path) {
+                btnDownloadAiNotesPdf.style.display = 'inline-block';
+                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+            } else {
+                btnDownloadAiNotesPdf.style.display = 'none';
+            }
+        }
+
+        // Refresh activity logs and translation controls via overview API call
+        try {
+            const overviewResponse = await fetch(`/api/visit_overview/${visitId}`);
+            const overviewData = await overviewResponse.json();
+            if (overviewResponse.ok) {
+                const logList = document.getElementById('overview-activity-log-list');
+                logList.innerHTML = ''; // Clear previous logs
+                if (overviewData.activity_logs && overviewData.activity_logs.length > 0) {
+                    overviewData.activity_logs.forEach(log => {
+                        const li = document.createElement('li');
+                        const iconHtml = log.icon || 'fas fa-cog';
+                        const safeDescription = log.description ? log.description.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+                        const safeUser = log.user ? log.user.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '?';
+                        const safeTimestampTitle = log.timestamp ? log.timestamp.replace(/"/g, "&quot;") : '';
+                        const safeTimeAgo = log.time_ago ? log.time_ago.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+                        li.innerHTML = `<span class="activity-icon"><i class="${iconHtml}"></i></span> ${safeDescription} by <strong>${safeUser}</strong> <span title="${safeTimestampTitle}">(${safeTimeAgo})</span>`;
+                        logList.appendChild(li);
+                    });
+                } else {
+                    logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity logged.</div></li>';
+                }
+                updateTranslationControls(
+                    'notes-ai',
+                    overviewData.detected_language || baseDetails.detected_language,
+                    !!(originalAiSummaryText || originalAiNotesText)
+                );
+                const overviewSummaryElem = document.getElementById('overview-summary-text');
+                if (overviewSummaryElem && overviewData.ai_summary) {
+                    overviewSummaryElem.textContent = overviewData.ai_summary;
+                }
+            } else {
+                console.error("Error updating overview after unified AI generation:", overviewData.error);
+            }
+        } catch (err) {
+            console.error("Error in overview API call after unified AI:", err);
+        }
+
+        btn.disabled = !(baseDetails && baseDetails.transcription);
+        btn.innerHTML = originalButtonText;
+        if (btnEditAiNotesSummary) btnEditAiNotesSummary.disabled = false; // Re-enable edit button
+    }
+
+
+    // START: Added function to generate diet plan
+    async function generateDietPlan(visitId) {
+        if (!visitId) {
+            alert("Invalid visit ID.");
+            return;
+        }
+        const visitDetail = visitDetails[visitId];
+        if (!visitDetail || !visitDetail.transcription) {
+            alert("No transcription available to generate the diet plan.");
+            return;
+        }
+
+        // Use the dynamic specialty button
+        const btn = document.getElementById('btn-specialty-action');
+        let originalButtonHTML = ''; // Store HTML to preserve icon
+        if (btn) { // Make sure the button exists
+            originalButtonHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Plan...';
+        }
+
+        const contentDiv = document.getElementById('diet-plan-content');
+        if (contentDiv) contentDiv.innerHTML = '<div class="no-speech">Generating diet plan... Please wait.</div>';
+
+        // Switch to the "Diet Plan" tab
+        changeTab(null, 'diet-plan');
+
+        try {
+            const response = await fetch('/api/generate_diet_plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    visit_id: visitId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Try to get error from backend response, otherwise use default
+                throw new Error(data.error || `Server error ${response.status}`);
+            }
+
+            if (data.diet_plan_html) {
+                // Assuming the backend returns HTML for the diet plan
+                if (contentDiv) contentDiv.innerHTML = data.diet_plan_html;
+                // Store the generated HTML in the local `visitDetails` object
+                visitDetails[visitId].diet_plan_html = data.diet_plan_html;
+            } else {
+                throw new Error("The API response did not include the diet plan.");
+            }
+            // Log activity (backend should ideally do this, but frontend can be informed)
+            // await fetchActivityLogsAndUpdate(); // Hypothetical function
+
+        } catch (error) {
+            console.error("Error generating diet plan:", error);
+            if (contentDiv) contentDiv.innerHTML = `<div class="no-speech" style="color:red;">Error generating the plan: ${error.message}.<br/>Make sure the API is configured correctly.</div>`;
+            alert(`Error generating the diet plan: ${error.message}`);
+        } finally {
+            if (btn) { // Make sure the button exists
+                btn.disabled = !(visitDetail && visitDetail.transcription);
+                btn.innerHTML = originalButtonHTML; // Restore original button text/icon
+            }
+        }
+    }
+    // END: Added function to generate diet plan
+
+    function changeDate(delta) {
+        const dateInput = document.getElementById('date-input');
+        const currentDate = new Date(dateInput.value + "T00:00:00");
+        currentDate.setDate(currentDate.getDate() + delta);
+        dateInput.value = currentDate.toISOString().split('T')[0];
+        updateDateDisplay();
+        window.location.href = `/visit_history?selected_date=${dateInput.value}`;
+    }
+
+    function updateDateDisplay() {
+        const dateInput = document.getElementById('date-input');
+        const dateText = document.getElementById('date-text');
+        if (dateInput.value) {
+            const dateParts = dateInput.value.split('-');
+            if (dateParts.length === 3) {
+                dateText.textContent = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+            } else {
+                dateText.textContent = dateInput.value;
+            }
+        } else {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            dateText.textContent = `${day}/${month}/${year}`;
+        }
+    }
+
+    function openDatePicker() {
+        document.getElementById('date-input').showPicker();
+    }
+
+    function filterVisits() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const orderFilter = document.getElementById('orderFilter').value;
+        const visitListDiv = document.getElementById('visitList');
+        const cards = Array.from(visitListDiv.querySelectorAll('.visit-card'));
+
+        let filteredCards = cards.filter(card => {
+            const patientNameElem = card.querySelector('.patient-name');
+            const patientName = patientNameElem ? patientNameElem.textContent.toLowerCase() : '';
+            return patientName.includes(searchTerm);
+        });
+
+        filteredCards.sort((a, b) => {
+            const dateAElem = a.querySelector('.visit-date');
+            const dateBElem = b.querySelector('.visit-date');
+            const dateAStr = dateAElem ? dateAElem.textContent : '01/01/1970 00:00';
+            const dateBStr = dateBElem ? dateBElem.textContent : '01/01/1970 00:00';
+
+            const parseDate = (str) => {
+                const [datePart, timePart = '00:00'] = str.split(' ');
+                const [day, month, year] = datePart.split('/');
+                return new Date(`${year}-${month}-${day}T${timePart}`);
+            };
+
+            const dateA = parseDate(dateAStr);
+            const dateB = parseDate(dateBStr);
+
+            return orderFilter === 'newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        visitListDiv.innerHTML = '';
+        if (filteredCards.length > 0) {
+            filteredCards.forEach(card => visitListDiv.appendChild(card));
+        } else {
+            visitListDiv.innerHTML = '<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 14px; padding: 20px;">No visits match the filters.</p>';
+        }
+    }
+
+    if (btnShareVisit) {
+        btnShareVisit.addEventListener('click', () => {
+            if (!currentlySelectedVisit) {
+                alert("Please select a visit to share.");
+                return;
+            }
+            const currentVisitDetails = visitDetails[currentlySelectedVisit];
+            patientNamePopup.textContent = currentVisitDetails ? currentVisitDetails.patient_name : "N/A";
+
+            const originalVisitLanguage = currentVisitDetails.detected_language || 'N/A';
+            const originalVisitLanguageName = languageNames[originalVisitLanguage] || 'Unknown';
+
+            const originalOption = emailLanguageSelect.querySelector('option[value=""]');
+            if (originalOption) originalOption.textContent = `Visit's Original Language (${originalVisitLanguageName})`;
+            emailLanguageSelect.value = "";
+
+            sharePopup.classList.add('visible');
+            document.getElementById('recipient-email').focus();
+        });
+    }
+
+    function closeSharePopup() {
+        sharePopup.classList.remove('visible');
+        if (shareEmailForm) shareEmailForm.reset();
+        if (shareFeedbackDiv) {
+            shareFeedbackDiv.style.display = 'none';
+            shareFeedbackDiv.className = 'feedback-message';
+        }
+        if (btnSendEmailPopup) {
+            btnSendEmailPopup.disabled = false;
+            btnSendEmailPopup.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+        }
+    }
+
+    async function sendShareEmail(event) {
+        event.preventDefault();
+        if (!currentlySelectedVisit) {
+            showShareFeedback("No visit selected.", "error");
+            return;
+        }
+        const recipientEmail = document.getElementById('recipient-email').value;
+        const optionalSubject = document.getElementById('optional-subject').value;
+        const additionalMessage = document.getElementById('additional-message').value;
+        const selectedEmailLanguage = emailLanguageSelect.value;
+
+        btnSendEmailPopup.disabled = true;
+        btnSendEmailPopup.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        showShareFeedback("Sending email...", "in-progress");
+
+        try {
+            const payload = {
+                visit_id: currentlySelectedVisit,
+                recipient_email: recipientEmail,
+                subject: optionalSubject,
+                additional_message: additionalMessage,
+                email_language: selectedEmailLanguage
+            };
+
+            const response = await fetch('/api/share_visit_email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                showShareFeedback(data.message || "Email sent.", "success");
+            } else {
+                showShareFeedback(data.error || "Error sending email.", "error");
+            }
+        } catch (error) {
+            console.error("Error sending email:", error);
+            showShareFeedback("Network or server error.", "error");
+        } finally {
+            btnSendEmailPopup.disabled = false;
+            btnSendEmailPopup.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+        }
+    }
+
+    function showShareFeedback(message, type) {
+        shareFeedbackDiv.textContent = message;
+        shareFeedbackDiv.className = 'feedback-message';
+        shareFeedbackDiv.classList.add(type);
+        shareFeedbackDiv.style.display = 'block';
+    }
+
+    function initializeVisitHistoryPage() {
+        console.log("[HISTORY] Starting page initialization.");
+
+        currentlySelectedVisit = null;
+
+        const overviewPanel = document.getElementById('overview');
+        if (overviewPanel && !overviewPanel.querySelector('.no-speech')) {
+            overviewPanel.innerHTML = '<div class="no-speech" style="padding:40px;">Select a visit to see the details or create a new one.</div>';
+        } else if (overviewPanel && overviewPanel.querySelector('.no-speech')) {
+            overviewPanel.querySelector('.no-speech').textContent = 'Select a visit to see the details or create a new one.';
+        }
+
+        const fullTranscriptionDiv = document.getElementById('full-transcription');
+        if (fullTranscriptionDiv) fullTranscriptionDiv.innerHTML = '<div class="no-speech">Select a visit.</div>';
+
+        // Ensure the display div is shown and textarea is hidden initially
+        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.style.display = 'block';
+        if (notesAiSummaryUnifiedTextarea) notesAiSummaryUnifiedTextarea.style.display = 'none';
+
+        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
+
+        const manualNotesTextarea = document.getElementById('manual-notes-content');
+        if (manualNotesTextarea) manualNotesTextarea.value = '';
+
+        const dietPlanContentPanel = document.getElementById('diet-plan-content');
+        if (dietPlanContentPanel) dietPlanContentPanel.innerHTML = '<div class="no-speech">Select a visit.</div>';
+        if (tabDietPlan) tabDietPlan.style.display = 'none';
+
+        if (btnSpecialtyAction) {
+            btnSpecialtyAction.disabled = true;
+            btnSpecialtyAction.onclick = null;
+        }
+
+        if (btnShareVisit) btnShareVisit.disabled = true;
+        if (btnCreatePrescriptionVisit) btnCreatePrescriptionVisit.disabled = true;
+        if (btnCreateReferralVisit) btnCreateReferralVisit.disabled = true;
+
+        if (document.getElementById('form-eliminar-visita') && btnDeleteFullVisit) {
+            btnDeleteFullVisit.disabled = true;
+            document.getElementById('form-eliminar-visita').action = '#';
+        } else if (btnDeleteFullVisit) {
+            btnDeleteFullVisit.disabled = true;
+        }
+        if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
+
+        // Attach event listeners for edit buttons
+        if (btnEditAiNotesSummary) {
+            btnEditAiNotesSummary.onclick = enableEditMode;
+        }
+        if (btnSaveAiNotesSummary) {
+            btnSaveAiNotesSummary.onclick = saveUnifiedAiContent;
+        }
+        if (btnCancelAiNotesSummaryEdit) {
+            btnCancelAiNotesSummaryEdit.onclick = function() {
+                unifiedAiContentMarkdown = originalUnifiedAiContentMarkdown;
+                disableEditMode();
+            };
+        }
+        // Call disableEditMode() here to set the initial state of the buttons
+        // before any visit is loaded.
+        disableEditMode();
+
+
+        ['transcription', 'notes-ai'].forEach(type => {
+            const selectEl = document.getElementById(`${type}-translate-select`);
+            if (selectEl) {
+                selectEl.addEventListener('change', function(event) {
+                    const selectedLanguageCode = event.target.value;
+                    if (selectedLanguageCode && currentlySelectedVisit) {
+                        requestTranslation(currentlySelectedVisit, type, selectedLanguageCode);
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" && sharePopup && sharePopup.classList.contains('visible')) {
+                closeSharePopup();
+            }
+        });
+        if (sharePopup) {
+            sharePopup.addEventListener('click', function(event) {
+                if (event.target === sharePopup) {
+                    closeSharePopup();
+                }
+            });
+        }
+        console.log("[HISTORY] Initialization completed.");
+
+        const recentVisitId = '{{ recent_visit.id if recent_visit else 'null' }}';
+        if (recentVisitId !== 'null' && visitDetails[recentVisitId]) {
+            console.log(`[HISTORY] Detected recent visit: ${recentVisitId}. Loading details automatically.`);
+            showVisitDetails(recentVisitId);
+        } else if (Object.keys(visitDetails).length > 0) {
+            const firstVisitId = Object.keys(visitDetails)[0];
+            console.log(`[HISTORY] No specific recent visit, but visits exist. Loading the first one: ${firstVisitId}`);
+            showVisitDetails(firstVisitId);
+        } else {
+            console.log("[HISTORY] No visits to load automatically.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeVisitHistoryPage);
+</script>
+{% endblock %}

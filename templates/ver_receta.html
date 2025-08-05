@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename=css_file) }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* ... (Your CSS is maintained as is, no changes needed) ... */
+    :root {
+        --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --body-background: #f8f9fa;
+        --card-background: #ffffff;
+        --text-primary: #212529;
+        --text-secondary: #495057;
+        --text-muted: #6c757d;
+        --accent-color: #007bff;
+        --info-color: #17a2b8; /* Color for the share button */
+        --border-color: #dee2e6;
+        --border-radius-md: 8px;
+        --border-radius-sm: 6px;
+        --shadow-md: 0 3px 8px rgba(0,0,0,0.07);
+    }
+    body {
+        font-family: var(--font-family-primary);
+        background-color: var(--body-background);
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .document-container-scribe {
+        max-width: 800px;
+        margin: 30px auto;
+        background-color: var(--card-background);
+        padding: 30px 35px;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+    .header-document {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* Align to the top */
+    }
+    .header-document h1 {
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+    .header-document .title-section h1 i {
+        margin-right: 12px;
+        font-size: 1.3em;
+    }
+    /* Updated .institution-details to be shared for both sides of the header */
+    .institution-details {
+        text-align: left; /* Default for left side */
+        width: 250px; /* Fixed width as per user's new div */
+        font-size: 14px; /* Matches new snippets font size */
+        line-height: 1.4; /* Matches new snippets line height */
+    }
+    .institution-details.right-align { /* For the right side block */
+        text-align: right;
+    }
+    .institution-details p {
+        margin: 2px 0; /* Reduced margin */
+        color: var(--text-secondary);
+        font-size: 14px; /* Consistent with new snippets */
+    }
+    .institution-details strong {
+        font-size: 16px; /* Consistent with new snippets */
+        font-weight: 600;
+        color: var(--text-primary);
+        display: block; /* Ensures it takes full line */
+        margin-bottom: 5px; /* Spacing after strong text */
+    }
+    .institution-details img {
+        max-height: 60px; /* As per new snippet */
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .patient-info {
+        margin-bottom: 20px;
+    }
+    .patient-info p, .doctor-info p, .prescription-details p { /* doctor-info removed as it's now .institution-details */
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+    .patient-info strong, .prescription-details strong { /* doctor-info removed */
+        font-weight: 500;
+        color: var(--text-primary);
+        display: inline-block;
+        min-width: 120px;
+    }
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-top: 25px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    .medications-list {
+        list-style: none;
+        padding-left: 0;
+    }
+    .medication-item-view {
+        background-color: #fdfdfd;
+        border: 1px solid #e9ecef;
+        border-radius: var(--border-radius-md);
+        padding: 15px 20px;
+        margin-bottom: 15px;
+    }
+    .medication-item-view h6 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 10px;
+    }
+    .medication-item-view p {
+        margin-bottom: 6px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    .medication-item-view p strong {
+        min-width: 100px;
+        color: var(--text-primary);
+    }
+    .footer-actions {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex; /* To align buttons */
+        justify-content: flex-end; /* Aligns buttons to the right */
+        gap: 10px; /* Space between buttons */
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 10px 18px;
+        font-size: 14px;
+        border-radius: var(--border-radius-sm);
+        transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .btn i {
+        margin-right: 8px;
+    }
+    .btn-primary {
+        color: #fff;
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .btn-secondary { /* For Print and Cancel in Modal */
+        color: var(--text-primary);
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+    .btn-secondary:hover {
+        background-color: #d3d9df;
+        border-color: #b9c2cb;
+    }
+    .btn-info { /* For the Share button */
+        color: #fff;
+        background-color: var(--info-color);
+        border-color: var(--info-color);
+    }
+    .btn-info:hover {
+        background-color: #117a8b;
+        border-color: #10707f;
+    }
+    .text-sm {
+      font-size: 0.875rem;
+    }
+    .text-xs {
+      font-size: 0.75rem;
+    }
+
+    /* --- Modal Styles --- */
+    .modal-scribe {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-scribe-content {
+        background-color: var(--card-background);
+        margin: 10% auto;
+        padding: 25px 30px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        width: 90%;
+        max-width: 550px; /* Modal width */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        position: relative;
+    }
+    .modal-scribe-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .modal-scribe-header h5 {
+        font-size: 1.25rem; /* 20px */
+        font-weight: 600;
+        margin-bottom: 0;
+        color: var(--text-primary);
+    }
+    .modal-scribe-header .close-scribe-modal {
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        opacity: .5;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+    }
+    .modal-scribe-header .close-scribe-modal:hover {
+        opacity: .75;
+    }
+    .modal-scribe .form-group {
+        margin-bottom: 1rem;
+    }
+    .modal-scribe .form-group label {
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .modal-scribe .form-control {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-primary);
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    .modal-scribe .form-control:focus {
+        border-color: var(--accent-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .modal-scribe-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 20px;
+        margin-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="document-container-scribe">
+    <div class="header-document">
+        {# Information about the doctor's institution/clinic on the left #}
+        <div class="institution-details" style="text-align: left; width: 250px;">
+            {% if logo_clinica_base64 %}
+                <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" style="max-height: 60px; margin-bottom: 10px; display: block;">
+            {% endif %}
+            {% if show_clinic_name %}
+                <p><strong>{{ medico.clinica_nombre or 'Clinic Name' }}</strong></p>
+            {% endif %}
+            {% if show_clinic_address %}
+                <p>{{ medico.clinica_direccion or 'Clinic Address' }}</p>
+            {% endif %}
+            {% if show_clinic_phone %}
+                <p>Phone: {{ medico.clinica_telefono or 'Phone' }}</p>
+            {% endif %}
+            {% if show_clinic_website %}
+                <p>Web: {{ medico.clinica_website or 'Website' }}</p>
+            {% endif %}
+        </div>
+
+        {# Main title centered #}
+        <div class="title-section" style="flex-basis: 250px; text-align: center; flex-grow: 1;">
+            <h1><i class="fas fa-file-prescription"></i> Medical Prescription</h1>
+        </div>
+
+        {# Doctor's information on the right #}
+        <div class="institution-details right-align" style="width: 250px;">
+            {% if medico %}
+                <p><strong>{{ medico.nombre }}</strong></p>
+                <p>{{ medico.especialidad or 'Specialty not indicated' }}</p>
+                {% if show_doctor_license %}
+                    <p>License: {{ medico.licencia_profesional or 'N/A' }}</p>
+                {% endif %}
+                {% if show_doctor_phone %}
+                    <p>Tel: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
+                {% endif %}
+                {% if show_doctor_bio %}
+                    <p>{{ medico.biografia or 'Bio N/A' }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="patient-info">
+        <p><strong>Patient:</strong> {{ receta.paciente_receta.nombre if receta.paciente_receta else 'N/A' }}</p>
+        <p><strong>ID:</strong> {{ receta.paciente_receta.identificacion_documento if receta.paciente_receta and receta.paciente_receta.identificacion_documento else 'N/A' }}</p>
+        {# NEW: Display patient's age on the prescription #}
+        <p><strong>Age:</strong> {{ receta.paciente_receta.edad if receta.paciente_receta and receta.paciente_receta.edad is not none else 'N/A' }} years</p>
+        <p><strong>Date of Issue:</strong> {{ receta.fecha_emision.strftime('%d/%m/%Y') }}</p>
+    </div>
+
+    <hr>
+
+    <h4 class="section-title">Prescribed Medications</h4>
+    {% if medicamentos %}
+        <ul class="medications-list">
+            {% for med in medicamentos %}
+            <li class="medication-item-view">
+                <h6>{{ loop.index }}. {{ med.nombre | title if med.nombre else 'Unspecified medication' }}</h6>
+                <p><strong>Quantity:</strong> {{ med.cantidad if med.cantidad else 'N/A' }}</p>
+                <p><strong>Dose:</strong> {{ med.dosis if med.dosis else 'N/A' }}</p>
+                <p><strong>Frequency:</strong> {{ med.frecuencia if med.frecuencia else 'N/A' }}</p>
+                <p><strong>Duration:</strong> {{ med.duracion if med.duracion else 'N/A' }}</p>
+                {% if med.indicaciones %}
+                <p><strong>Directions:</strong> {{ med.indicaciones }}</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No medications are listed in this prescription.</p>
+    {% endif %}
+
+    {% if receta.diagnostico_relacionado %}
+    <div class="prescription-details mt-4">
+        <h4 class="section-title">Diagnosis</h4>
+        <p>{{ receta.diagnostico_relacionado }}</p>
+    </div>
+    {% endif %}
+
+    {% if receta.notas_adicionales_receta %}
+    <div class="prescription-details mt-3">
+        <h4 class="section-title">Additional Notes</h4>
+        <p>{{ receta.notas_adicionales_receta | nl2br }}</p>
+    </div>
+    {% endif %}
+
+    <div class="prescription-details mt-4">
+        <p class="text-sm"><strong>Prescription validity:</strong> {{ receta.validez_dias }} days from the date of issue.</p>
+        {% if receta.medico_emisor_receta %}
+        <p class="mt-5 text-center">__________________________________<br>Doctor's Signature<br>{{ receta.medico_emisor_receta.nombre }}</p>
+        {% else %}
+        <p class="mt-5 text-center">__________________________________<br>Doctor's Signature</p>
+        {% endif %}
+    </div>
+
+    <div class="footer-actions">
+        <button type="button" class="btn btn-info" id="btnOpenShareModal">
+            <i class="fas fa-envelope"></i> Share via Email
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="window.print();">
+            <i class="fas fa-print"></i> Print
+        </button>
+        <a href="{{ url_for('perfil_paciente', paciente_id=receta.paciente_id) }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </a>
+    </div>
+</div>
+
+<div id="shareRecetaModal" class="modal-scribe">
+    <div class="modal-scribe-content">
+        <div class="modal-scribe-header">
+            <h5>Share Medical Prescription via Email</h5>
+            <button type="button" class="close-scribe-modal" data-dismiss="modal" aria-label="Close" onclick="document.getElementById('shareRecetaModal').style.display='none';">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-scribe-body">
+            <form id="formShareReceta">
+                <div class="form-group">
+                    <label for="recipient_email">Recipient's Email *</label>
+                    <input type="email" class="form-control" id="recipient_email" name="recipient_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="prescription_email_subject">Subject (Optional)</label>
+                    <input type="text" class="form-control" id="prescription_email_subject" name="prescription_email_subject" placeholder="Medical Prescription for: {{ receta.paciente_receta.nombre if receta.paciente_receta else 'the Patient' | e }}">
+                </div>
+                <div class="form-group">
+                    <label for="prescription_email_language">Email Content Language</label>
+                    <select class="form-control" id="prescription_email_language" name="prescription_email_language">
+                        <option value="es" selected>Spanish (Original)</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="pt">Portuguese</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="additional_message_prescription">Additional Message (Optional)</label>
+                    <textarea class="form-control" id="additional_message_prescription" name="additional_message_prescription" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-scribe-footer">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('shareRecetaModal').style.display='none';">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnSendPrescriptionEmail"><i class="fas fa-paper-plane"></i> Send Email</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shareModal = document.getElementById('shareRecetaModal');
+    const btnOpenShareModal = document.getElementById('btnOpenShareModal');
+    const btnCloseModal = shareModal.querySelector('.close-scribe-modal');
+    const btnSendEmail = document.getElementById('btnSendPrescriptionEmail');
+    const prescriptionId = {{ receta.id | tojson }};
+
+    if (btnOpenShareModal) {
+        btnOpenShareModal.addEventListener('click', function() {
+            shareModal.style.display = 'block';
+            const patientName = "{{ receta.paciente_receta.nombre if receta.paciente_receta else 'Patient' | e }}";
+            const prescriptionDate = "{{ receta.fecha_emision.strftime('%d/%m/%Y') }}";
+            document.getElementById('prescription_email_subject').value = `Medical Prescription: ${patientName} - ${prescriptionDate}`;
+        });
+    }
+
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener('click', function() {
+            shareModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == shareModal) {
+            shareModal.style.display = 'none';
+        }
+    });
+
+    if (btnSendEmail) {
+        btnSendEmail.addEventListener('click', function() {
+            const recipientEmail = document.getElementById('recipient_email').value;
+            const subject = document.getElementById('prescription_email_subject').value;
+            const emailLanguage = document.getElementById('prescription_email_language').value;
+            const additionalMessage = document.getElementById('additional_message_prescription').value;
+
+            if (!recipientEmail) {
+                alert("Please enter the recipient's email.");
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(recipientEmail)) {
+                alert("Please enter a valid email.");
+                return;
+            }
+
+            const data = {
+                recipient_email: recipientEmail,
+                subject: subject,
+                email_language: emailLanguage,
+                additional_message_raw: additionalMessage
+            };
+
+            btnSendEmail.disabled = true;
+            btnSendEmail.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            fetch(`/api/prescription/${prescriptionId}/share_email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    alert("Success: " + result.message);
+                    shareModal.style.display = 'none';
+                    document.getElementById('recipient_email').value = '';
+                    document.getElementById('additional_message_prescription').value = '';
+                } else if (result.error) {
+                    alert("Error: " + result.error);
+                } else {
+                    alert("An unknown error occurred.");
+                }
+            })
+            .catch(error => {
+                console.error('Error sharing prescription:', error);
+                alert("Connection error while trying to share the prescription.");
+            })
+            .finally(() => {
+                btnSendEmail.disabled = false;
+                btnSendEmail.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

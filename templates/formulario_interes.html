@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Información - Vitta Health</title>
+    <style>
+        /* --- Importación de Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        /* --- Variables Globales de Estilo --- */
+        :root {
+            --primary-color: #5D5FEF; /* Tono de morado/azul del diseño */
+            --background-color: #FFFFFF;
+            --text-color: #333;
+            --label-color: #555;
+            --input-bg-color: #F7F7F7;
+            --border-color: #E0E0E0;
+            --white: #fff;
+            --error-color: #e74c3c;
+        }
+
+        /* --- Reseteo y Estilos Base --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* --- Columna Izquierda: Información y Gráficos --- */
+        .info-column {
+            flex-basis: 45%;
+            padding: 3rem;
+            background-color: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .info-content p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            color: var(--label-color);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* --- Columna Derecha: Formulario --- */
+        .form-column {
+            flex-basis: 55%;
+            padding: 3rem;
+            background: var(--white);
+            display: flex; /* Para centrar el mensaje de éxito */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-wrapper {
+            width: 100%;
+        }
+
+        .contact-form .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            position: absolute;
+            left: -9999px; 
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--input-bg-color);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group select {
+             color: var(--label-color);
+        }
+        
+        .form-group select:focus, .form-group select:valid {
+            color: var(--text-color);
+        }
+
+        .form-group input::placeholder {
+            color: var(--label-color);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.2);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+
+        .btn-submit:hover {
+            background-color: #4a4cc7;
+        }
+
+        .btn-submit:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Estilo para el mensaje de éxito y error */
+        #success-message, #error-message {
+            text-align: center;
+            padding: 2rem;
+        }
+        #success-message h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        #success-message p {
+            font-size: 1.1rem;
+            color: var(--label-color);
+        }
+        #error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* --- ESTILO PARA EL BOTÓN SECUNDARIO --- */
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--border-color);
+            color: var(--label-color);
+            background-color: var(--white);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--input-bg-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+
+        /* --- Diseño Responsivo --- */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .info-column {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 500px) {
+             body {
+                padding: 0;
+            }
+            .main-container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .form-column {
+                padding: 2rem 1.5rem;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="info-column">
+            <div class="info-content">
+                <h1>Solicita más información</h1>
+                <p>Déjanos tus datos y un especialista de Vitta Health se pondrá en contacto contigo.</p>
+                <div class="image-container">
+                    <img src="https://images.pexels.com/photos/5452291/pexels-photo-5452291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Profesional de la salud usando la plataforma Vitta Health">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-column">
+
+            <div id="form-wrapper" class="form-wrapper">
+                <form id="contact-form" class="contact-form" action="/formulario-interes" method="POST">
+                    <div class="form-group">
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre *" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" id="apellidos" name="apellidos" placeholder="Apellidos *" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Correo electrónico *" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="tel" id="telefono" name="telefono" placeholder="Teléfono *" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <select id="especialidad" name="especialidad" required>
+                            <option value="" disabled selected>Especialidad médica *</option>
+                            <option value="alergologia">Alergología</option>
+                            <option value="anatomia_patologica">Anatomía Patológica</option>
+                            <option value="anestesiologia">Anestesiología</option>
+                            <option value="cardiologia">Cardiología</option>
+                            <option value="cirugia_general">Cirugía General y del Aparato Digestivo</option>
+                            <option value="cirugia_plastica">Cirugía Plástica, Estética y Reparadora</option>
+                            <option value="dermatologia">Dermatología</option>
+                            <option value="endocrinologia">Endocrinología y Nutrición</option>
+                            <option value="fisioterapia">Fisioterapia</option>
+                            <option value="gastroenterologia">Gastroenterología</option>
+                            <option value="geriatria">Geriatría</option>
+                            <option value="ginecologia">Ginecología y Obstetricia</option>
+                            <option value="hematologia">Hematología</option>
+                            <option value="infectologia">Infectología</option>
+                            <option value="medicina_deportiva">Medicina Deportiva</option>
+                            <option value="medicina_familiar">Medicina Familiar y Comunitaria</option>
+                            <option value="medicina_general">Medicina General</option>
+                            <option value="medicina_interna">Medicina Interna</option>
+                            <option value="nefrologia">Nefrología</option>
+                            <option value="neumologia">Neumología</option>
+                            <option value="neurocirugia">Neurocirugía</option>
+                            <option value="neurologia">Neurología</option>
+                            <option value="nutricion">Nutrición y Dietética</option>
+                            <option value="oftalmologia">Oftalmología</option>
+                            <option value="oncologia">Oncología Médica</option>
+                            <option value="otorrinolaringologia">Otorrinolaringología</option>
+                            <option value="pediatria">Pediatría</option>
+                            <option value="psicologia">Psicología</option>
+                            <option value="psiquiatria">Psiquiatría</option>
+                            <option value="reumatologia">Reumatología</option>
+                            <option value="traumatologia">Traumatología y Cirugía Ortopédica</option>
+                            <option value="urologia">Urología</option>
+                            <option value="otra">Otra</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="carne_medico" name="carne_medico" placeholder="Carné Médico">
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" id="identificacion" name="identificacion" placeholder="Cédula o Identificación">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" id="submit-button" class="btn-submit">Enviar Información</button>
+                    </div>
+                    <div id="error-message" style="display: none;"></div>
+                </form>
+            </div>
+
+            <div id="success-message" style="display: none;">
+                <h2>¡Gracias!</h2>
+                <p>Ya recibimos tu solicitud, pronto estaremos en contacto.</p>
+                <a href="/" class="btn-secondary">Conoce más sobre Vitta</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formWrapper = document.getElementById('form-wrapper');
+            const successMessage = document.getElementById('success-message');
+            const errorMessageDiv = document.getElementById('error-message');
+            const submitButton = document.getElementById('submit-button');
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+            errorMessageDiv.style.display = 'none';
+
+            // Simplemente crea el objeto FormData. No es necesario convertirlo a JSON.
+            const formData = new FormData(form);
+            
+            // Realiza la petición fetch
+            fetch(form.action, {
+                method: 'POST',
+                // No establezcas la cabecera 'Content-Type'. 
+                // El navegador lo hará automáticamente por ti con el boundary correcto
+                // cuando el cuerpo (body) es un objeto FormData.
+                body: formData
+            })
+            .then(response => {
+                // La lógica para manejar la respuesta no cambia.
+                if (response.ok) {
+                    return response.json();
+                }
+                return response.json().then(errorData => {
+                    // Si el servidor devuelve un error, lo extraemos del JSON
+                    throw new Error(errorData.error || 'Ocurrió un error en el servidor.');
+                });
+            })
+            .then(data => {
+                console.log('Success:', data);
+                formWrapper.style.display = 'none';
+                successMessage.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorMessageDiv.textContent = `${error.message}`;
+                errorMessageDiv.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Información';
+            });
+        });
+    </script>
+</body>
+</html>

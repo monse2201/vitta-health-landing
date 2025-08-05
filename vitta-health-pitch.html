@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitta Health :: Investor Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #F9FAFB;
+            --text-dark: #111827;
+            --text-light: #6B7280;
+            --accent-blue: #3B82F6;
+            --white: #FFFFFF;
+            --border-color: #E5E7EB;
+            --green: #10B981;
+            --red: #EF4444;
+            --lead-color: #9CA3AF;
+            --demo-color: #60A5FA;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+        }
+
+        .deck-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.45, 0, 0.55, 1);
+        }
+
+        .slide {
+            flex-shrink: 0;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .slide.active {
+            opacity: 1;
+        }
+        
+        .slide-content {
+            width: 100%;
+            max-width: 1200px;
+            padding: 60px 80px;
+        }
+        
+        /* Centering and Sizing Utilities */
+        .text-center { text-align: center; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .max-w-900 { max-width: 900px; }
+        .max-w-800 { max-width: 800px; }
+        .max-w-700 { max-width: 700px; }
+        .mb-36 { margin-bottom: 36px; }
+
+        .slide.active .animated {
+            animation: fadeInUp 0.7s both;
+            animation-delay: var(--delay, 0ms);
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            width: 100%;
+            align-items: center;
+        }
+        
+        .three-col-grid {
+             display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch;
+        }
+
+        /* Slide Specific Styles */
+        .slide-eyebrow {
+            position: absolute;
+            top: 60px;
+            right: 80px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+        
+        .slide-title-1 { font-size: 5.5rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.05em; line-height: 1; }
+        .slide-subtitle { font-size: 1.5rem; color: var(--text-light); max-width: 600px; margin-top: 24px; }
+        .slide-header { text-align: left; margin-bottom: 48px; }
+        .slide-header .title { font-size: 3.8rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.04em; line-height: 1.1; }
+        .slide-header .title-small { font-size: 3.2rem; }
+        .slide-header .subtitle-narrative { font-size: 1.25rem; color: var(--text-light); max-width: 90%; margin-top: 16px;}
+
+
+        .info-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-highlight { font-size: 6rem; font-weight: 800; color: var(--accent-blue); line-height: 1; }
+        .mockup-img { width: 100%; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        
+        .value-prop-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px;
+        }
+        .value-prop { text-align: center; }
+        .value-prop .value { font-size: 3rem; font-weight: 800; color: var(--accent-blue); }
+        .value-prop .label { font-weight: 700; color: var(--text-light); }
+        .value-prop-icon { font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 16px; }
+
+
+        .comp-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; font-size: 0.9rem;}
+        .comp-table th, .comp-table td { padding: 16px; text-align: center; vertical-align: middle; }
+        .comp-table th { font-weight: 700; background-color: var(--bg-color); border-bottom: 1px solid var(--border-color); }
+        .comp-table td { border-bottom: 1px solid var(--border-color); }
+        .comp-table tr:last-child td { border-bottom: none; }
+        .comp-table td:first-child { text-align: left; font-weight: 700; }
+        .comp-table .check { font-size: 1.5rem; color: var(--green); }
+        .comp-table .cross { font-size: 1.5rem; color: var(--red); }
+        .comp-table .highlight-col { background-color: #dbeafe; }
+        .comp-table .total-col { font-weight: 800; }
+        .advantage-list { list-style: none; padding: 0; margin: 0; }
+        .advantage-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;}
+        .advantage-list li strong { color: var(--text-dark); }
+        .advantage-list .fa-check-circle { font-size: 1.2rem; color: var(--accent-blue); margin-top: 4px; }
+
+        .timeline { border-left: 3px solid var(--accent-blue); padding-left: 24px; }
+        .timeline-item { position: relative; margin-bottom: 24px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before { content: ''; position: absolute; left: -34px; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 4px solid var(--accent-blue); }
+        .timeline-item .duration { font-weight: 700; color: var(--text-light); }
+        .timeline-item h4 { font-size: 1.25rem; font-weight: 800; }
+        
+        .pricing-tier {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .pricing-tier.highlight {
+            background-color: #DBEAFE;
+            border-color: var(--accent-blue);
+        }
+        .pricing-tier h4 { font-size: 1.2rem; margin: 0 0 8px 0; }
+        .pricing-tier .price { font-size: 2.5rem; font-weight: 800; color: var(--accent-blue); }
+        .pricing-tier .per-month { color: var(--text-light); }
+        .pricing-tier .features { list-style: none; padding: 0; margin: 24px 0; text-align: left; font-size: 0.9rem; line-height: 1.6; flex-grow: 1;}
+        .pricing-tier .features li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px;}
+        .pricing-tier .features .fa-check { color: var(--green); margin-top: 4px; }
+        .pricing-tier .btn { display:inline-block; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; background: var(--accent-blue); color: white; margin-top: auto;}
+
+        /* Interactive Chart Styles */
+        .interactive-chart-wrapper {
+             position: relative;
+             padding: 10px 50px 40px 60px;
+        }
+        .axis-title {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            top: 50%;
+        }
+        .axis-title.left {
+            transform: translateY(-50%) rotate(-90deg);
+            left: -85px;
+        }
+        .axis-title.right {
+            transform: translateY(-50%) rotate(90deg);
+            right: -85px;
+        }
+
+        .interactive-chart {
+            height: 300px;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            position: relative;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .y-axis-labels {
+            position: absolute;
+            left: -50px; top: -10px; bottom: 0;
+            display: flex; flex-direction: column; justify-content: space-between;
+            font-size: 0.8rem; font-weight: 700; color: var(--text-light);
+        }
+        .y-axis-labels-right {
+             position: absolute;
+             right: -50px; top: -10px; bottom: 0;
+             display: flex; flex-direction: column; justify-content: space-between;
+             font-size: 0.8rem; font-weight: 700; color: var(--green);
+        }
+
+        .chart-grid-line {
+             position: absolute; left: 0; right: 0;
+             height: 1px; background-color: var(--border-color);
+             z-index: 1;
+        }
+        .chart-grid-line:nth-child(1) { bottom: 25%;}
+        .chart-grid-line:nth-child(2) { bottom: 50%;}
+        .chart-grid-line:nth-child(3) { bottom: 75%;}
+
+        .chart-bar-group {
+            display: flex; align-items: flex-end; gap: 8px;
+            height: 100%; position: relative; z-index: 2;
+            width: 30%;
+            justify-content: center;
+        }
+         .chart-bar-group::after {
+            content: attr(data-label);
+            position: absolute; bottom: -30px; left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700; font-size: 0.9rem;
+         }
+
+        .chart-bar {
+            width: 30%; border-radius: 6px 6px 0 0;
+            position: relative; cursor: pointer;
+            transform: scaleY(0); transform-origin: bottom;
+            transition: all 0.3s ease;
+        }
+         .slide.active .chart-bar {
+            animation: growBar 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: var(--delay);
+         }
+        @keyframes growBar {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .chart-bar:hover { opacity: 0.8; transform: translateY(-5px) scaleY(1.02); }
+        .chart-bar .tooltip {
+            position: absolute; top: -30px; left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-dark); color: white;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 0.8rem; font-weight: 700;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            white-space: nowrap;
+        }
+        .chart-bar:hover .tooltip { opacity: 1; visibility: visible; }
+        
+        .chart-legend {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 16px 24px; margin-top: 16px;
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .legend-color { width: 16px; height: 16px; border-radius: 4px; }
+
+        .cta-button { display: inline-block; background-color: var(--accent-blue); color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1.1rem; margin-top: 32px; transition: transform 0.2s ease; }
+        .cta-button:hover { transform: scale(1.05); }
+
+
+        /* Deck UI */
+        .deck-ui {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+        }
+        .nav-arrow {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .nav-arrow:hover { border-color: var(--accent-blue); transform: scale(1.05); }
+        .nav-arrow:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
+        .progress-bar-container {
+            width: 200px;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
+        }
+        
+        .slide-footer {
+            position: fixed;
+            bottom: 40px;
+            left: 80px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        /* --- Live Demo Styles --- */
+        .demo-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .demo-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .demo-step {
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .demo-step:hover {
+            background-color: var(--white);
+        }
+        .demo-step.active {
+            border-left-color: var(--accent-blue);
+            background-color: var(--white);
+            transform: translateX(10px);
+        }
+        .demo-step h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .demo-step.active h3 { color: var(--accent-blue); }
+        .demo-step p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .demo-mockup {
+            background-color: #F3F4F6;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: 520px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mockup-top-bar {
+            background-color: var(--white);
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            color: var(--text-dark);
+            text-align: center;
+        }
+        .mockup-top-bar span {
+            font-weight: 700;
+        }
+
+        .demo-mockup-content {
+            padding: 25px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: calc(100% - 45px);
+            position: absolute;
+            width: 100%;
+            top: 45px;
+            left: 0;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            visibility: hidden;
+        }
+        .demo-mockup-content.visible {
+            opacity: 1;
+            transform: scale(1);
+            visibility: visible;
+        }
+
+        .mockup-form-group {
+            width: 100%;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .mockup-form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        .mockup-form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #EFF2F5;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        .record-btn {
+            width: 100px;
+            height: 100px;
+            background-color: var(--red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            margin: 40px auto;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .mockup-text-area {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            width: 100%;
+            height: 380px;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .mockup-text-area .speaker {
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+        .mockup-text-area h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 10px 0 5px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .slide-content { padding: 0 40px; }
+            .slide-eyebrow { right: 40px; top: 40px; }
+            .slide-title-1 { font-size: 4rem; }
+            .slide-header .title { font-size: 2.8rem; }
+            .grid { grid-template-columns: 1fr; }
+            .three-col-grid { grid-template-columns: 1fr; }
+            .mockup-img { max-width: 500px; margin: 30px auto 0 auto; display: block; }
+            .slide-footer { left: 40px; }
+            .demo-container { grid-template-columns: 1fr; }
+            .demo-steps { flex-direction: row; justify-content: space-around; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-container">
+        <div class="slide-wrapper">
+
+            <section class="slide">
+                <div class="slide-content">
+                    <div class="text-center">
+                        <h1 class="slide-title-1 animated">Vitta Health</h1>
+                        <p class="slide-subtitle animated mx-auto" style="--delay: 200ms;">AI automation for real-time medical documentation. <br> Save time. No more paperwork. Smarter care.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">The Problem</div>
+                <div class="slide-content">
+                    <div class="grid">
+                        <div class="slide-header">
+                            <h2 class="title animated">Physician burnout is a crisis, fueled by administrative overload.</h2>
+                        </div>
+                        <div class="info-card animated" style="--delay: 200ms;">
+                            <p class="stat-highlight">37.5%</p>
+                            <h3>Of a doctor's workday is lost to administrative tasks.</h3>
+                            <p>This translates to <strong>2-3 hours per day</strong> spent on paperwork instead of patients. This lost time directly impacts revenue potential, quality of care, and drives physician burnout in Latin America.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">The Solution</div>
+                <div class="slide-content">
+                    <div class="grid">
+                        <div>
+                            <div class="slide-header">
+                                <h2 class="title animated" style="--delay: 100ms;">An AI platform that listens, understands, and documents for the doctor.</h2>
+                            </div>
+                            <p class="animated" style="--delay: 200ms;">Vitta Health's ambient AI captures the natural conversation of a clinical visit and automatically generates structured, accurate medical notes **and other clinical documents, personalized for each specialty.**<br><br>From SOAP notes for a GP to progress reports for a therapist, our platform adapts to the unique needs of each doctor, giving them back their time.</p>
+                        </div>
+                        <div class="animated" style="--delay: 200ms;">
+                            <img src="https://res.cloudinary.com/dpuptoe0o/image/upload/Vitta_Health_Sales_Deck_chwjnj" 
+                            alt="Vitta Health Mockup" 
+                         style="width: 120%; max-width: none; transform: translateX(5%) scale(1.3); border-radius: 0; box-shadow: none;">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide" id="live-demo">
+                 <div class="slide-eyebrow animated">Live Demo</div>
+                 <div class="slide-content">
+                    <div class="slide-header">
+                       <h2 class="title animated" style="--delay: 100ms;">From Conversation to Clinic-Ready.</h2>
+                    </div>
+                    <div class="demo-container animated" style="--delay: 200ms;">
+                        <div class="demo-steps">
+                            <div id="demo-step-1" class="demo-step" data-step="1">
+                                <h3><i class="fas fa-circle-dot"></i> 1. Record Visit</h3>
+                                <p>Capture the natural patient conversation.</p>
+                            </div>
+                             <div id="demo-step-2" class="demo-step" data-step="2">
+                                <h3><i class="fas fa-file-alt"></i> 2. Transcribe Audio</h3>
+                                <p>AI converts audio into an accurate transcript.</p>
+                            </div>
+                             <div id="demo-step-3" class="demo-step" data-step="3">
+                                <h3><i class="fas fa-robot"></i> 3. Generate AI Notes</h3>
+                                <p>Key clinical data is extracted and structured, ready for review.</p>
+                            </div>
+                        </div>
+                        <div class="demo-mockup">
+                            <div class="mockup-top-bar">Clinical Encounter - <span>Ana Rojas</span></div>
+                            <div id="demo-content-1" class="demo-mockup-content">
+                                <div class="mockup-form-group">
+                                    <label>Patient</label>
+                                    <input type="text" value="Ana Rojas" disabled>
+                                </div>
+                                <div class="mockup-form-group">
+                                    <label>Template</label>
+                                    <input type="text" value="General Consultation" disabled>
+                                </div>
+                                <div class="record-btn"><i class="fas fa-microphone"></i></div>
+                            </div>
+                            <div id="demo-content-2" class="demo-mockup-content">
+                                <div style="display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 15px;">
+                                    <div id="demo-spinner-2" class="spinner" style="width:25px; height:25px; border-width: 3px;"></div>
+                                    <p id="demo-status-2" style="color: var(--text-light); margin:0;">Transcribing audio...</p>
+                                </div>
+                                <div class="mockup-text-area" style="opacity: 0; transition: opacity 0.5s ease 0.2s;" id="demo-transcript-text">
+<span class="speaker">Doctor:</span> Hi Ana, tell me, what brings you in today?
+<span class="speaker">Patient:</span> Doctor, I've had a persistent headache and a lot of fatigue for about a week. It's been hard to concentrate at work.
+                                </div>
+                            </div>
+                             <div id="demo-content-3" class="demo-mockup-content">
+                                <div style="display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 15px;">
+                                    <div id="demo-spinner-3" class="spinner" style="width:25px; height:25px; border-width: 3px;"></div>
+                                    <p id="demo-status-3" style="color: var(--text-light); margin: 0;">Generating AI summary...</p>
+                                </div>
+                                <div class="mockup-text-area" style="opacity: 0; transition: opacity 0.5s ease 0.2s;" id="demo-summary-text">
+<h3>AI Generated Notes (SOAP)</h3>
+<span class="speaker">Subjective:</span>
+- Patient, Ana Rojas, reports a persistent headache and fatigue for approximately one week.
+- Notes difficulty concentrating at work.
+- Denies other associated symptoms.
+
+<span class="speaker">Assessment:</span>
+- Probable tension headache.
+- Secondary fatigue.
+
+<span class="speaker">Plan:</span>
+- Recommend PRN analgesics (Ibuprofen 400mg).
+- Order blood tests (CBC, TSH) to evaluate fatigue.
+- Follow-up appointment in 2 weeks to discuss results.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="slide-eyebrow animated">Market Opportunity</div>
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="title animated" style="--delay: 100ms;">A focused entry into a significant, validated market.</h2>
+                    </div>
+                     <div class="grid animated" style="--delay: 200ms; grid-template-columns: 1fr 1.1fr; gap: 32px; align-items: stretch;">
+                        <div class="info-card" style="justify-content: center; background-color: #EFF6FF; border-color: #60A5FA;">
+                             <h3 style="margin-top: 0; text-align: center; color: #1E40AF;">US Market Precedent</h3>
+                             <p style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue); text-align: center; margin-bottom: 16px;">The AI scribe market in the USA is projected to exceed $4.5 Billion.</p>
+                             <p style="color: #1E3A8A;">This massive adoption proves the model's value. Vitta Health is positioned to capture the parallel opportunity in Latin America, a market hungry for the same efficiency gains.</p>
+                        </div>
+                        <div class="info-card">
+                            <p class="text-center" style="margin-bottom: 24px;">Our go-to-market strategy begins with a validated niche in Costa Rica before a targeted LATAM expansion.</p>
+                            <div class="value-prop-grid">
+                                <div class="value-prop">
+                                    <p class="value">3,570</p>
+                                    <p class="label">Initial Market (SOM)<br>Nutritionists & Therapists in CR</p>
+                                </div>
+                                <div class="value-prop">
+                                    <p class="value">7,200+</p>
+                                    <p class="label">Accessible Market (SAM)<br>13 Target Medical Specialties in CR</p>
+                                </div>
+                                 <div class="value-prop">
+                                    <p class="value">LATAM</p>
+                                    <p class="label">Total Addressable Market (TAM)</p>
+                                </div>
+                            </div>
+                             <p style="font-size: 0.8rem; text-align: center; color: var(--text-light); margin-top: 24px;"><i>*Source: Internal analysis based on data from professional colleges.</i></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">Business Model</div>
+                <div class="slide-content">
+                    <div class="slide-header" style="margin-bottom: 24px;">
+                        <h2 class="title animated" style="--delay: 100ms;">A Scalable, Multi-Tiered SaaS Model.</h2>
+                        <p class="subtitle-narrative animated" style="--delay: 150ms;">Our pricing is designed to grow with our clients, from solo practitioners to entire hospital networks.</p>
+                    </div>
+                    <div class="grid animated" style="--delay:200ms; grid-template-columns: 1.5fr 1fr; gap: 32px;">
+                        <div class="info-card" style="padding: 24px;">
+                            <div class="three-col-grid">
+                                <div class="pricing-tier">
+                                    <h4><i class="fas fa-user"></i> Pro</h4>
+                                    <p class="price">$29<span class="per-month">.99/mo</span></p>
+                                    <ul class="features">
+                                        <li><i class="fas fa-check"></i> Unlimited Transcriptions</li>
+                                        <li><i class="fas fa-check"></i> Core AI Models</li>
+                                        <li><i class="fas fa-check"></i> Standard Support</li>
+                                    </ul>
+                                    <a href="#" class="btn" style="background-color: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue);">For Individuals</a>
+                                </div>
+                                <div class="pricing-tier highlight">
+                                    <h4><i class="fas fa-users"></i> Teams</h4>
+                                    <p class="price">$25<span class="per-month">/user/mo</span></p>
+                                    <ul class="features">
+                                        <li><i class="fas fa-check"></i> Everything in Pro</li>
+                                        <li><i class="fas fa-check"></i> Team Dashboard</li>
+                                        <li><i class="fas fa-check"></i> Centralized Billing</li>
+                                    </ul>
+                                     <a href="#" class="btn">For Clinics</a>
+                                </div>
+                                <div class="pricing-tier">
+                                    <h4><i class="fas fa-hospital"></i> Enterprise</h4>
+                                    <p class="price">Custom</p>
+                                    <ul class="features">
+                                        <li><i class="fas fa-check"></i> Custom Integrations</li>
+                                        <li><i class="fas fa-check"></i> HL7/FHIR Support</li>
+                                        <li><i class="fas fa-check"></i> Dedicated Onboarding</li>
+                                    </ul>
+                                     <a href="#" class="btn" style="background-color: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue);">For Hospitals</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-card" style="background-color: #F1F5F9; border-color: #CBD5E1; justify-content: center;">
+                            <h3 style="margin-top:0; color: var(--text-dark); text-align: center;">The ROI is Clear</h3>
+                            <p style="text-align: center;">Saving 2 hours daily allows for <strong>~2 extra consultations.</strong></p>
+                            <div class="text-center" style="margin: 16px 0;">
+                                <span style="font-size: 2rem; font-weight: 800; color: var(--green);">+$2,000 USD</span><br>
+                                <span style="font-weight: 700;">In Additional Monthly Revenue*</span>
+                            </div>
+                            <p style="font-size: 0.8rem; text-align: center; color: var(--text-light); line-height: 1.4;">*The Vitta Health subscription pays for itself in less than one hour of work.</p>
+                        </div>
+                     </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="slide-eyebrow animated">Go-to-Market Strategy</div>
+                <div class="slide-content">
+                    <div class="slide-header text-center mx-auto max-w-900" style="margin-bottom: 24px;">
+                        <h2 class="title animated" style="--delay: 100ms; font-size: 3rem;">Launch Plan & KPIs (Q4 2025)</h2>
+                        <p class="subtitle-narrative animated" style="--delay: 150ms; max-width: 100%; margin-top: 16px;">Our launch is focused on a concentrated 3-month sprint to validate our commercial model and establish a strong user base.</p>
+                    </div>
+                    <div class="info-card animated" style="--delay: 200ms;">
+                        <div class="interactive-chart-wrapper">
+                            <div class="axis-title left"><span>Users & Demos</span></div>
+                            <div class="axis-title right"><span>Cumulative MRR ($)</span></div>
+                            <div class="y-axis-labels">
+                                <span>80</span><span>60</span><span>40</span><span>20</span><span>0</span>
+                            </div>
+                            <div class="y-axis-labels-right">
+                                <span>$2,500</span><span>$1,875</span><span>$1,250</span><span>$625</span><span>$0</span>
+                            </div>
+                            <div class="interactive-chart">
+                                <div class="chart-grid-line"></div><div class="chart-grid-line"></div><div class="chart-grid-line"></div>
+                                
+                                <div class="chart-bar-group" data-label="Oct 2025">
+                                    <div class="chart-bar" style="height: 50%; background-color: var(--demo-color); --delay: 400ms;"><span class="tooltip">40 Demos</span></div>
+                                    <div class="chart-bar" style="height: 18.75%; background-color: var(--accent-blue); --delay: 500ms;"><span class="tooltip">15 Users</span></div>
+                                    <div class="chart-bar" style="height: 18%; background-color: var(--green); --delay: 600ms;"><span class="tooltip">$450 MRR</span></div>
+                                </div>
+                                <div class="chart-bar-group" data-label="Nov 2025">
+                                    <div class="chart-bar" style="height: 62.5%; background-color: var(--demo-color); --delay: 700ms;"><span class="tooltip">50 Demos</span></div>
+                                    <div class="chart-bar" style="height: 31.25%; background-color: var(--accent-blue); --delay: 800ms;"><span class="tooltip">25 Users</span></div>
+                                    <div class="chart-bar" style="height: 48%; background-color: var(--green); --delay: 900ms;"><span class="tooltip">$1,200 MRR</span></div>
+                                </div>
+                                <div class="chart-bar-group" data-label="Dec 2025">
+                                    <div class="chart-bar" style="height: 75%; background-color: var(--demo-color); --delay: 1000ms;"><span class="tooltip">60 Demos</span></div>
+                                    <div class="chart-bar" style="height: 43.75%; background-color: var(--accent-blue); --delay: 1100ms;"><span class="tooltip">35 Users</span></div>
+                                    <div class="chart-bar" style="height: 90%; background-color: var(--green); --delay: 1200ms;"><span class="tooltip">$2,250 MRR</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-legend">
+                            <div class="legend-item"><span class="legend-color" style="background-color: var(--demo-color);"></span>Demos Scheduled</div>
+                            <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-blue);"></span>New Paying Users</div>
+                            <div class="legend-item"><span class="legend-color" style="background-color: var(--green);"></span>Cumulative MRR</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">Traction & Validation</div>
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="title animated" style="--delay: 100ms;">Early validation shows strong product-market fit.</h2>
+                    </div>
+                    <div class="grid animated" style="--delay: 200ms; grid-template-columns: 1fr 1fr; gap: 32px; align-items: stretch;">
+                        
+                        <div class="info-card">
+                            <h3 style="margin-top:0;">Proven Value & Recognition</h3>
+                            <ul>
+                                <li><strong>105+ appointments</strong> successfully processed by beta users.</li>
+                                <li><strong>Over 15 minutes saved</strong> per clinical note on average.</li>
+                                <li><strong>Confirmed intent to convert</strong> to paid plans from all beta users.</li>
+                                <li>Finalist in the entrepreneurship reality show <strong>DMNTS.</strong></li>
+                                <li>Selected for <strong>Emprelatam</strong> & <strong>Avantlab</strong> accelerator programs.</li>
+                                <li>Formal partnership with the <strong>Life Science Center of Innovation at Clínica Bíblica.</strong></li>
+                            </ul>
+                        </div>
+    
+                        <div class="info-card" style="background-color: #EFF6FF; border-color: #60A5FA; justify-content: center;">
+                            <h3 style="margin-top:0; color: #1E40AF; text-align: center;">Voice of the Customer</h3>
+                            <p style="font-size: 1.1rem; font-style: italic; text-align: center; line-height: 1.6; color: #1E3A8A;">"Vitta Health is a game-changer. It doesn't just save me time; it has brought back the joy of focusing on my patients."</p>
+                            <p style="font-weight: 700; text-align: center; margin-top: 16px;">- Dr. Ana Pérez, Nutritionist & Beta Tester</p>
+                        </div>
+    
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" style="align-items: flex-start;">
+                <div class="slide-eyebrow animated">Founder & Advisors</div>
+                <div class="slide-content">
+                    <div class="slide-header text-center max-w-900 mx-auto mb-36">
+                        <h2 class="title title-small animated" style="--delay: 100ms;">The Team Making It Happen.</h2>
+                    </div>
+
+                    <div class="info-card animated max-w-700 mx-auto" style="--delay: 200ms; padding: 24px;">
+                        <div style="display: flex; align-items: center; gap: 24px; text-align: left;">
+                            <img src="https://res.cloudinary.com/dpuptoe0o/image/upload/IMG_2121_hh6fpj" alt="Founder Photo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <h3 style="font-size: 1.6rem; margin: 0;">Monserrat Alvarez</h3>
+                                <p style="font-weight: 700; color: var(--accent-blue); margin-top: 4px; margin-bottom: 8px;">Founder & CEO</p>
+                                <ul style="padding-left: 18px; font-size: 0.9rem; margin:0; line-height: 1.5;">
+                                    <li><strong>Visionary Health Tech Entrepreneur</strong> with deep domain expertise in clinical workflows and digital health solutions.</li>
+                                    <li><strong>Full-stack developer;</strong> architected and built the Vitta Health MVP from the ground up.</li>
+                                    <li>Participant in top-tier accelerator programs: <strong>Emprelatam & Avantlab.</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center" style="margin-top: 24px;">
+                        <h3 class="animated" style="--delay: 300ms; font-weight: 700; color: var(--text-dark); margin-bottom: 16px;">Key Advisors</h3>
+                        <div class="grid animated" style="--delay: 400ms; grid-template-columns: repeat(2, 1fr); gap: 24px; text-align: left; align-items: stretch; max-width: 800px; margin-left: auto; margin-right: auto;">
+                            
+                            <div class="info-card" style="padding: 16px;">
+                                <h4 style="margin:0 0 4px 0;">Technical & Public Health Advisor</h4>
+                                <p style="font-weight: 700; color: var(--accent-blue); margin:0; font-size: 0.9rem;">Moises Campos</p>
+                                <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">**Ex-CTO of the CCSS**. Guides tech strategy and national healthcare alignment.</p>
+                            </div>
+
+                            <div class="info-card" style="padding: 16px;">
+                                <h4 style="margin:0 0 4px 0;">Clinical Innovation Advisor</h4>
+                                <p style="font-weight: 700; color: var(--accent-blue); margin:0; font-size: 0.9rem;">Dr. Briansy Aguilar</p>
+                                <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.4;">Innovation Director at **Clínica Bíblica Hospital**. Ensures clinical validation & PMF.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                 <div class="slide-eyebrow animated">The Vitta Health Advantage</div>
+                 <div class="slide-content">
+                    <div class="slide-header" style="margin-bottom:24px;">
+                        <h2 class="title animated" style="--delay: 100ms;">Why We Win in Latin America</h2>
+                    </div>
+                    <div class="grid animated" style="--delay: 200ms; grid-template-columns: 1.2fr 1fr; align-items: start; gap: 32px;">
+                        <div class="info-card" style="padding: 24px; margin: 0;">
+                            <table class="comp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Capability</th>
+                                        <th>Traditional EMRs</th>
+                                        <th>Emerging LATAM AI</th>
+                                        <th class="highlight-col">Vitta Health</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Ambient Voice-to-Note</td>
+                                        <td class="cross">✕</td>
+                                        <td class="check">✓</td>
+                                        <td class="check">✓</td>
+                                    </tr>
+                                    <tr>
+                                        <td>High-Accuracy LATAM Transcription</td>
+                                        <td class="cross">✕</td>
+                                        <td class="cross">✕</td>
+                                        <td class="check">✓</td>
+                                    </tr>
+                                     <tr>
+                                        <td>Individual Physician Focus (UX/Price)</td>
+                                        <td class="cross">✕</td>
+                                        <td class="cross">✕</td>
+                                        <td class="check">✓</td>
+                                    </tr>
+                                     <tr>
+                                        <td>Local Partnerships & Support</td>
+                                        <td class="cross">✕</td>
+                                        <td class="cross">✕</td>
+                                        <td class="check">✓</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="info-card" style="background-color: #EFF6FF; border-color: #60A5FA; margin: 0;">
+                            <h3 style="margin-top: 0; color: #1E40AF;">Our Unfair Advantage</h3>
+                            <ul class="advantage-list">
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    <div><strong>Hyper-Localized AI:</strong> Our models are trained specifically on diverse Latin American accents and clinical jargon, providing unmatched accuracy that generic models can't replicate.</div>
+                                </li>
+                                 <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    <div><strong>Clinical Access Moat:</strong> Strategic partnerships with leading institutions like Clínica Bíblica provide a unique pipeline for data, validation, and go-to-market credibility.</div>
+                                </li>
+                                  <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    <div><strong>Founder's Dual Expertise:</strong> A technical founder with deep clinical workflow expertise allows for rapid, doctor-centric product development that truly solves the user's core problem.</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">Roadmap</div>
+                <div class="slide-content">
+                     <div class="grid">
+                        <div>
+                             <div class="slide-header">
+                                <h2 class="title animated" style="--delay: 100ms;">A clear path to market leadership.</h2>
+                            </div>
+                            <p class="animated" style="--delay: 200ms;">Our phased approach focuses on dominating the local market before replicating success internationally.</p>
+                        </div>
+                         <div class="animated" style="--delay: 200ms;">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="duration">Q4 2025</div>
+                                    <h4>Commercial Launch</h4>
+                                    <p>Launch in Costa Rica, targeting 75 paying users.</p>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="duration">2026</div>
+                                    <h4>Scale & Dominate</h4>
+                                    <p>Expand to new specialties, target B2B, and reach 1,000 subscribers.</p>
+                                </div>
+                                 <div class="timeline-item">
+                                    <div class="duration">2027+</div>
+                                    <h4>International Expansion</h4>
+                                    <p>Execute precision entry into a strategic LATAM city (e.g., Bogotá, Colombia).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide">
+                <div class="slide-eyebrow animated">Financial Projections</div>
+                 <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="title animated" style="--delay: 100ms;">Path to Sustainable Growth.</h2>
+                    </div>
+                    <div class="info-card animated" style="--delay: 200ms;">
+                        <p class="text-center max-w-800 mx-auto" style="margin-bottom: 32px;">Our projections are based on the roadmap targets and a conservative market penetration rate. The goal is to reach breakeven within 24 months.</p>
+                         <table class="comp-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Year 1 (2026)</th>
+                                    <th>Year 2 (2027)</th>
+                                    <th>Year 3 (2028)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Paying Users</td>
+                                    <td>~700</td>
+                                    <td>~2,500</td>
+                                    <td>~6,000</td>
+                                </tr>
+                                <tr>
+                                    <td>MRR (Monthly Recurring Revenue)</td>
+                                    <td>$21k</td>
+                                    <td>$75k</td>
+                                    <td>$180k</td>
+                                </tr>
+                                 <tr>
+                                    <td>ARR (Annual Recurring Revenue)</td>
+                                    <td>$250k</td>
+                                    <td>$900k</td>
+                                    <td>$2.1M</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide">
+                <div class="slide-eyebrow animated">Sustainable Unit Economics</div>
+                <div class="slide-content">
+                    <div class="slide-header">
+                        <h2 class="title animated" style="--delay: 100ms;">A Profitable & Efficient Model</h2>
+                    </div>
+                    <div class="grid animated" style="--delay: 200ms; grid-template-columns: repeat(2, 1fr); max-width: 900px; margin: 0 auto; gap: 32px;">
+                        <div class="info-card text-center">
+                            <i class="fas fa-undo-alt value-prop-icon"></i>
+                            <h3 style="margin-top: 0;">Rapid Payback Period</h3>
+                            <p class="stat-highlight" style="font-size: 4rem;">< 1 Month</p>
+                            <p>With our target CAC and pricing, we recoup acquisition costs almost instantly, enabling capital-efficient scaling.</p>
+                        </div>
+                        <div class="info-card text-center">
+                             <i class="fas fa-percentage value-prop-icon"></i>
+                             <h3 style="margin-top: 0;">High Gross Margin</h3>
+                            <p class="stat-highlight" style="font-size: 4rem;">~90%</p>
+                            <p>Our lean, software-based infrastructure ensures high profitability on every subscription, fueling reinvestment into growth.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="slide text-center">
+                 <div class="slide-eyebrow animated">Our Vision</div>
+                 <div class="slide-content">
+                    <div class="mx-auto">
+                        <p class="eyebrow animated">Vitta Health</p>
+                        <h2 class="slide-title-1 animated" style="--delay: 100ms; font-size: 4.5rem;">Let's give time back to medicine.</h2>
+                        <p class="slide-subtitle animated mx-auto" style="--delay: 200ms; margin-top: 24px;">We are building the future of healthcare in Latin America. Join us.</p>
+                        <div class="animated" style="--delay: 300ms;">
+                             <a href="mailto:info@vitta.health" class="cta-button">Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="slide-footer">
+            <span class="slide-brand">Vitta Health</span>
+        </div>
+        <div class="deck-ui">
+            <button id="prev-btn" class="nav-arrow" disabled aria-label="Previous Slide">
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <button id="next-btn" class="nav-arrow" aria-label="Next Slide">
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slideWrapper = document.querySelector('.slide-wrapper');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const totalSlides = slides.length;
+            
+            let currentSlide = 0;
+            let demoTimeouts = []; 
+
+            // Function to jump to a specific slide based on URL hash
+            function goToSlideFromHash() {
+                const initialHash = window.location.hash.substring(1);
+                if (initialHash) {
+                    const targetSlide = document.getElementById(initialHash);
+                    if (targetSlide) {
+                        const targetIndex = Array.from(slides).indexOf(targetSlide);
+                        if (targetIndex !== -1) {
+                            currentSlide = targetIndex;
+                        }
+                    }
+                }
+            }
+            
+            // --- Robust Live Demo Logic ---
+            const demoSlide = document.getElementById('live-demo');
+            if (demoSlide) {
+                const steps = [1, 2, 3];
+                const stepIndicators = steps.map(i => document.getElementById(`demo-step-${i}`));
+                const contents = steps.map(i => document.getElementById(`demo-content-${i}`));
+                const transcriptText = document.getElementById('demo-transcript-text');
+                const summaryText = document.getElementById('demo-summary-text');
+
+                function resetDemoElements() {
+                    if (transcriptText) transcriptText.style.opacity = '0';
+                    if (summaryText) summaryText.style.opacity = '0';
+                    
+                    const spinner2 = document.getElementById('demo-spinner-2');
+                    const status2 = document.getElementById('demo-status-2');
+                    if (spinner2) spinner2.style.display = 'block';
+                    if (status2) status2.textContent = 'Transcribing audio...';
+
+                    const spinner3 = document.getElementById('demo-spinner-3');
+                    const status3 = document.getElementById('demo-status-3');
+                    if (spinner3) spinner3.style.display = 'block';
+                    if (status3) status3.textContent = 'Generating AI summary...';
+                }
+
+                function jumpToStep(step) {
+                    // Clear any running timeouts before starting a new sequence
+                    demoTimeouts.forEach(clearTimeout);
+                    demoTimeouts = [];
+                    
+                    resetDemoElements();
+
+                    stepIndicators.forEach((el, index) => el.classList.toggle('active', (index + 1) === step));
+                    contents.forEach((el, index) => el.classList.toggle('visible', (index + 1) === step));
+
+                    if (step === 2) {
+                        demoTimeouts.push(setTimeout(() => {
+                            document.getElementById('demo-spinner-2').style.display = 'none';
+                            document.getElementById('demo-status-2').textContent = 'Transcript Ready';
+                            if(transcriptText) transcriptText.style.opacity = '1';
+                        }, 1000));
+                    } else if (step === 3) {
+                        // Ensure step 2 elements are shown as 'complete'
+                        document.getElementById('demo-spinner-2').style.display = 'none';
+                        document.getElementById('demo-status-2').textContent = 'Transcript Ready';
+                        if(transcriptText) transcriptText.style.opacity = '1';
+                        
+                        demoTimeouts.push(setTimeout(() => {
+                           document.getElementById('demo-spinner-3').style.display = 'none';
+                           document.getElementById('demo-status-3').textContent = 'AI Notes Ready';
+                           if(summaryText) summaryText.style.opacity = '1';
+                        }, 1000));
+                    }
+                }
+
+                function startAutomaticDemo() {
+                    jumpToStep(1);
+                    demoTimeouts.push(setTimeout(() => jumpToStep(2), 2500));
+                    demoTimeouts.push(setTimeout(() => jumpToStep(3), 6000));
+                }
+
+                stepIndicators.forEach(el => {
+                    el.addEventListener('click', () => {
+                        const step = parseInt(el.dataset.step, 10);
+                        jumpToStep(step);
+                    });
+                });
+
+                // **CRITICAL FIX**: Observer to start AND stop the demo
+                const slideObserver = new MutationObserver((mutations) => {
+                    for (const mutation of mutations) {
+                        if (mutation.attributeName === 'class') {
+                            if (demoSlide.classList.contains('active')) {
+                                // Slide is now active, start the demo
+                                startAutomaticDemo();
+                            } else {
+                                // Slide is no longer active, clear all timers and reset
+                                demoTimeouts.forEach(clearTimeout);
+                                demoTimeouts = [];
+                                resetDemoElements();
+                            }
+                            return; // No need to check other mutations
+                        }
+                    }
+                });
+                slideObserver.observe(demoSlide, { attributes: true });
+            }
+
+            // --- Core Deck Navigation ---
+            function updateDeck() {
+                slideWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                });
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+                const progress = totalSlides > 1 ? (currentSlide / (totalSlides - 1)) * 100 : 0;
+                progressBar.style.width = `${progress}%`;
+            }
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateDeck();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateDeck();
+                }
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                // Use spacebar or right arrow to go next
+                if(e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextBtn.click();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevBtn.click();
+                }
+            });
+
+            // --- Initialization ---
+            goToSlideFromHash();
+            updateDeck();
+
+        });
+    </script>
+</body>
+</html>

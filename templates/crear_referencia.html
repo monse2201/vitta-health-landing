@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Medical Referral - {{ paciente.nombre }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename=css_file if css_file else 'css/create_document.css') }}">
+    <style>
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #007bff; /* Bootstrap primary blue */
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 500;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 15px 25px;
+        }
+        .card-body {
+            padding: 25px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .patient-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .patient-info h5 {
+            margin-bottom: 5px;
+            color: #0056b3;
+        }
+        .patient-info p {
+            margin-bottom: 3px;
+            font-size: 0.95rem;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-directions"></i> New Medical Referral
+            </div>
+            <div class="card-body">
+                {% if paciente and visita %}
+                <div class="patient-info">
+                    <h5>Patient and Visit Information</h5>
+                    <p><strong>Patient:</strong> {{ paciente.nombre }}</p>
+                    <p><strong>Visit ID:</strong> {{ visita.id }}</p>
+                    <p><strong>Visit Date:</strong> {{ visita.fecha.strftime('%d/%m/%Y %H:%M') if visita.fecha else 'N/A' }}</p>
+                    <p><strong>Visit Template:</strong> {{ visita.plantilla or 'N/A' }}</p>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('nueva_referencia_para_visita', visita_id=visita.id) }}">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="referred_specialty" class="required-field">Referred Specialty</label>
+                            <input type="text" class="form-control" id="referred_specialty" name="referred_specialty" 
+                                   value="{{ form_data.especialidad_referida if form_data else '' }}" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="referred_doctor_name">Referred Doctor's Name (Optional)</label>
+                            <input type="text" class="form-control" id="referred_doctor_name" name="referred_doctor_name"
+                                   value="{{ form_data.medico_referido_nombre if form_data else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="referred_institution">Referred Institution (Optional)</label>
+                        <input type="text" class="form-control" id="referred_institution" name="referred_institution"
+                               value="{{ form_data.institucion_referida if form_data else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="referral_reason" class="required-field">Reason for Referral</label>
+                        <textarea class="form-control" id="referral_reason" name="referral_reason" rows="4" required>{{ form_data.motivo_referencia if form_data else '' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="relevant_clinical_summary">Relevant Clinical Summary (Auto-filled from visit)</label>
+                        <textarea class="form-control" id="relevant_clinical_summary" name="relevant_clinical_summary" rows="6">{{ form_data.resumen_clinico_relevante if form_data else '' }}</textarea>
+                        <small class="form-text text-muted">This field is pre-filled with the visit's AI summary or notes if available. You can edit it.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attached_studies_info">Attached Studies Information (Optional)</label>
+                        <textarea class="form-control" id="attached_studies_info" name="attached_studies_info" rows="3"
+                                  placeholder="E.g., Chest X-ray (15/05/2025), Complete Blood Count (14/05/2025)">{{ form_data.estudios_adjuntos_info if form_data else '' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Referral Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="pending" {% if (form_data and form_data.estado == 'pendiente') or not form_data %}selected{% endif %}>Pending</option>
+                            <option value="completed" {% if form_data and form_data.estado == 'realizada' %}selected{% endif %}>Completed</option>
+                            <option value="responded" {% if form_data and form_data.estado == 'respondida' %}selected{% endif %}>Responded by specialist</option>
+                            <option value="canceled" {% if form_data and form_data.estado == 'cancelada' %}selected{% endif %}>Canceled</option>
+                        </select>
+                    </div>
+
+                    <hr>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-save"></i> Save Referral</button>
+                        <a href="{{ url_for('perfil_paciente', paciente_id=paciente.id) }}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

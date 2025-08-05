@@ -1,0 +1,1103 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style type="text/css">
+/* ... (Your existing CSS without changes) ... */
+:root {
+    --font-family-primary: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --body-background: #f4f5f7;
+    --card-background: #ffffff;
+    --text-primary: #1f1f1f;
+    --text-secondary: #5e5e5e;
+    --text-muted: #7a7a7a;
+    --accent-color: #007bff; 
+    --accent-color-light: #cfe2ff; 
+    --border-color-light: #e1e1e1;
+    --border-color-strong: #c8c8c8;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 3px 6px rgba(0,0,0,0.06);
+    --border-radius-sm: 3px;
+    --border-radius-md: 5px;
+}
+
+body {
+    font-family: var(--font-family-primary);
+    background-color: var(--body-background);
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.profile-page-container {
+    max-width: 1320px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.profile-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background-color: var(--card-background);
+    padding: 15px 20px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-top-bar .back-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+.profile-top-bar .back-link i {
+    margin-right: 8px;
+    color: var(--text-muted);
+}
+.profile-top-bar .profile-actions .btn-icon {
+    background-color: transparent;
+    border: 1px solid var(--border-color-light);
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.profile-top-bar .profile-actions .btn-icon i {
+    margin-left: 6px;
+}
+
+.profile-main-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(400px, 2fr) minmax(260px, 1fr);
+    gap: 25px;
+}
+
+.patient-info-panel,
+.activity-timeline-panel,
+.summary-card-panel .summary-card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+}
+.summary-card-panel {
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.patient-info-panel .patient-summary {
+    text-align: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-light);
+}
+.patient-avatar-ref {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+    overflow: hidden;
+    background-color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.8rem;
+}
+.patient-avatar-ref img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.patient-name-ref {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.patient-name-id { 
+    font-size: 0.7em; 
+    color: var(--text-secondary); 
+    font-weight: 400;
+    margin-left: 8px;
+}
+
+.patient-meta-ref {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+.patient-contact-icons-ref a {
+    color: var(--text-muted);
+    margin: 0 7px;
+    font-size: 1.1rem;
+    text-decoration: none;
+}
+.patient-contact-icons-ref a:hover {
+    color: var(--accent-color);
+}
+
+.patient-details-list-ref .detail-item-ref {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    padding: 9px 0;
+    border-bottom: 1px solid #f3f3f3;
+}
+.patient-details-list-ref .detail-item-ref:last-child {
+    border-bottom: none;
+}
+.patient-details-list-ref .detail-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex-basis: 35%;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+.patient-details-list-ref .detail-value {
+    color: var(--text-primary);
+    text-align: right;
+    flex-basis: 65%;
+    word-break: break-word;
+}
+.detail-value input[type="text"],
+.detail-value input[type="email"],
+.detail-value input[type="tel"],
+.detail-value input[type="date"], /* Added for date input */
+.detail-value select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.88rem;
+    font-family: var(--font-family-primary);
+    background-color: #fdfdfd;
+}
+.detail-value input:focus,
+.detail-value select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+.edit-mode { display: none !important; } 
+.patient-info-panel.editing .view-mode { display: none !important; }
+.patient-info-panel.editing .edit-mode { display: block !important; }
+
+.edit-form-actions {
+    margin-top: 20px;
+    text-align: right; 
+}
+.edit-form-actions .btn {
+     margin-left: 8px; 
+}
+.edit-form-actions .btn:first-child {
+    margin-left: 0;
+}
+
+.delete-action-container {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color-light);
+    text-align: right; 
+}
+
+.btn {
+    padding: 8px 15px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+}
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+.btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+.btn-secondary {
+    background-color: var(--text-muted);
+    color: white;
+    border-color: var(--text-muted);
+}
+.btn-secondary:hover { background-color: #5a6268; border-color: #545b62;}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+.btn-outline-primary {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    background-color: transparent;
+}
+.btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.detail-value.treatment-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 10px;
+}
+.status-active { background-color: #d4edda; color: #155724; }
+.status-on-follow-up, .status-follow-up { background-color: #fff3cd; color: #856404; }
+.status-not-specified { background-color: #e9ecef; color: #495057; }
+.status-completed { background-color: #cce5ff; color: #004085;}
+
+.activity-timeline-panel .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color-light);
+}
+.activity-timeline-panel .timeline-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+.btn-link-sort {
+    background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 500;
+}
+.btn-link-sort i { margin-left: 4px; }
+
+.timeline-ref .timeline-group-header {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 25px 0 12px 0;
+    padding: 5px 0;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.timeline-ref .timeline-group-header .group-toggle-icon { font-size: 0.9rem; }
+
+.timeline-ref .timeline-group-items {
+    padding-left: 19px;
+    border-left: 2px solid var(--border-color-light);
+    margin-left: 19px;
+}
+.timeline-ref .timeline-group-items.collapsed {
+    display: none;
+}
+
+.timeline-item-ref {
+    display: flex;
+    position: relative;
+    padding: 12px 0;
+    margin-left: 15px;
+}
+
+.timeline-icon-ref {
+    position: absolute;
+    left: -40px;
+    top: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 0 0 3px var(--card-background);
+}
+.timeline-content-ref {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.timeline-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+.timeline-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+.timeline-item-details-link {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-left: 15px;
+    align-self: flex-start;
+    padding-top: 2px;
+    text-decoration: none;
+}
+.timeline-item-details-link:hover {
+    color: var(--accent-color);
+}
+.timeline-item-details-link i.fa-external-link-alt { margin-right: 3px; }
+
+.timeline-ref .no-activity, .summary-card .no-notes, .summary-card .no-recipes, .summary-card .no-references, .summary-card .no-nutritional-plans {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.summary-card h3 { 
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 15px; 
+    padding-bottom: 10px; 
+    border-bottom: 1px solid var(--border-color-light); 
+    display: flex;
+    align-items: center;
+}
+.summary-card h3 i { 
+    margin-right: 10px;
+    color: var(--accent-color); 
+    font-size: 1.1em;
+}
+
+.notes-summary-card .notes-list-ref .note-item-ref {
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f3f3;
+    font-size: 0.85rem;
+}
+.notes-summary-card .notes-list-ref .note-item-ref:first-child { padding-top: 0; }
+.notes-summary-card .notes-list-ref .note-item-ref:last-child { border-bottom: none; padding-bottom: 0;}
+.notes-summary-card .note-content-ref {
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.8em; 
+    line-height: 1.4em;
+}
+.notes-summary-card .note-date-ref {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.btn-link-view-all {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    margin-top: 12px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.btn-link-view-all:hover { text-decoration: underline; }
+
+.list-group {
+    padding-left: 0;
+    margin-bottom: 0;
+    border-radius: var(--border-radius-sm);
+}
+.list-group-flush .list-group-item {
+    border-right-width: 0;
+    border-left-width: 0;
+    border-radius: 0;
+}
+.list-group-item {
+    position: relative;
+    display: block;
+    padding: 0.75rem 1.25rem; 
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color-light);
+}
+.list-group-item:first-child {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+.list-group-item:last-child {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+    border-bottom-width: 0; 
+}
+.list-group-item + .list-group-item { 
+    border-top-width: 0;
+}
+.d-flex { display: flex !important; }
+.justify-content-between { justify-content: space-between !important; }
+.align-items-center { align-items: center !important; }
+.text-muted { color: var(--text-muted) !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+
+/* Styles for modals (from Bootstrap, adapted) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0;
+}
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: 0.5rem;
+    pointer-events: none;
+}
+.modal.fade .modal-dialog {
+    transition: transform .3s ease-out;
+    transform: translate(0, -50px);
+}
+.modal.show .modal-dialog {
+    transform: none;
+}
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+}
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: var(--card-background);
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: var(--border-radius-md);
+    outline: 0;
+}
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+    border-bottom: 1px solid var(--border-color-light);
+    border-top-left-radius: calc(var(--border-radius-md) - 1px);
+    border-top-right-radius: calc(var(--border-radius-md) - 1px);
+}
+.modal-header .btn-close {
+    padding: 0.5rem 0.5rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+.modal-title {
+    margin-bottom: 0;
+    line-height: 1.5;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+}
+.modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border-top: 1px solid var(--border-color-light);
+    border-bottom-right-radius: calc(var(--border-radius-md) - 1px);
+    border-bottom-left-radius: calc(var(--border-radius-md) - 1px);
+}
+.modal-footer > * {
+    margin: 0.25rem;
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--card-background);
+    background-clip: padding-box;
+    border: 1px solid var(--border-color-light);
+    appearance: none;
+    border-radius: var(--border-radius-sm);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.form-control:focus {
+    color: var(--text-primary);
+    background-color: var(--card-background);
+    border-color: var(--accent-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem var(--accent-color-light);
+}
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 500px;
+        margin: 1.75rem auto;
+    }
+    .modal-dialog-centered {
+        min-height: calc(100% - 3.5rem);
+    }
+}
+
+
+@media (max-width: 1200px) {
+    .profile-main-grid {
+        grid-template-columns: minmax(260px, 1fr) 2fr minmax(240px, 1fr);
+    }
+}
+@media (max-width: 992px) {
+    .profile-main-grid {
+        grid-template-columns: 1fr 1.5fr; 
+    }
+    .summary-card-panel {
+        grid-column: 1 / -1; 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+@media (max-width: 768px) {
+    .profile-page-container { padding: 0 15px; margin-top: 15px; }
+    .profile-main-grid {
+        grid-template-columns: 1fr; 
+    }
+    .profile-top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 15px;
+    }
+    .activity-timeline-panel .timeline-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .edit-form-actions, .delete-action-container { 
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px; 
+    }
+    .edit-form-actions .btn, .delete-action-container .btn {
+        flex-grow: 1;
+        max-width: 200px; 
+    }
+    .delete-action-container {
+        margin-top: 15px; 
+    }
+}
+</style>
+
+<div class="profile-page-container">
+    <div class="profile-top-bar">
+        <a href="{{ url_for('pacientes_page') }}" class="back-link"> <i class="fas fa-arrow-left"></i> Back to Patients </a>
+        <div class="profile-actions">
+            {# Removed existing options button as modals will handle edit/delete #}
+        </div>
+    </div>
+
+    <div class="profile-main-grid">
+        <aside class="patient-info-panel" id="patientInfoPanel">
+            <div class="patient-summary">
+                <div class="patient-avatar-ref">
+                    {% if paciente.url_avatar %}
+                        <img src="{{ paciente.url_avatar }}" alt="Photo of {{ paciente.nombre }}">
+                    {% else %}
+                        <span>{{ paciente.nombre[0]|upper if paciente.nombre else 'P' }}</span>
+                    {% endif %}
+                </div>
+                <h1 class="patient-name-ref">
+                    {{ paciente.nombre }}
+                    {% if paciente.identificacion_documento and paciente.identificacion_documento|string|lower not in ['n/a', '', none, 'none'] %} 
+                        <span class="patient-name-id"> (ID: {{ paciente.identificacion_documento }})</span>
+                    {% endif %}
+                </h1>
+                <p class="patient-meta-ref">
+                    {{ paciente.ubicacion if paciente.ubicacion else "Location not available" }} <br>
+                    {% if visitas and visitas|length > 0 %}
+                        Last activity: {{ visitas[0].fecha_formateada if visitas and visitas[0] and visitas[0].fecha_formateada else "N/A" }}
+                    {% else %}
+                        No activity registered
+                    {% endif %}
+                </p>
+                <div class="patient-contact-icons-ref">
+                    {% if paciente.telefono and paciente.telefono|string|lower not in ['n/a', 'none'] %}
+                        <a href="tel:{{ paciente.telefono }}" title="Phone"><i class="fas fa-phone-alt"></i></a>
+                    {% endif %}
+                    {% if paciente.email and paciente.email|string|lower not in ['n/a', 'none'] %}
+                        <a href="mailto:{{ paciente.email }}" title="Email"><i class="fas fa-envelope"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="patient-details-list-ref">
+                <div class="detail-item-ref">
+                    <span class="detail-label">System ID</span> 
+                    <span class="detail-value view-mode">{{ paciente.id }}</span>
+                </div>
+                
+                <div class="detail-item-ref">
+                    <span class="detail-label">Identification</span>
+                    <span class="detail-value view-mode">
+                        {{ paciente.identificacion_documento if paciente.identificacion_documento and paciente.identificacion_documento|string|lower not in ['n/a', '', 'none'] else 'N/A' }}
+                    </span>
+                </div>
+
+                <div class="detail-item-ref">
+                    <span class="detail-label">First Name(s)</span>
+                    <span class="detail-value view-mode">{{ paciente.nombre.split(' ')[0] if paciente.nombre else 'N/A' }}</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Last Name(s)</span>
+                    <span class="detail-value view-mode">{{ paciente.nombre.split(' ', 1)[1] if paciente.nombre and ' ' in paciente.nombre else 'N/A' }}</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Date of Birth</span>
+                    <span class="detail-value view-mode">{{ paciente.fecha_nacimiento.strftime('%d/%m/%Y') if paciente.fecha_nacimiento else 'N/A' }}</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Age</span>
+                    <span class="detail-value view-mode">{{ paciente.edad if paciente.edad is not none else 'N/A' }} years</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value view-mode">{{ paciente.telefono if paciente.telefono and paciente.telefono|string|lower not in ['n/a', 'none'] else 'N/A' }}</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value view-mode">{{ paciente.email if paciente.email and paciente.email|string|lower not in ['n/a', 'none'] else 'N/A' }}</span>
+                </div>
+                <div class="detail-item-ref">
+                    <span class="detail-label">Treatment Status</span>
+                    <span class="detail-value view-mode treatment-status-badge status-{{ (paciente.estado_tratamiento if paciente.estado_tratamiento else 'not-specified')|lower|replace(' ', '-') }}">
+                        {{ paciente.estado_tratamiento if paciente.estado_tratamiento else 'Not specified' }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="edit-form-actions">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editPatientModal"><i class="fas fa-edit"></i> Edit Profile</button>
+            </div>
+
+            <div class="delete-action-container">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                    <i class="fas fa-trash-alt"></i> Delete Patient
+                </button>
+            </div>
+        </aside>
+
+        <main class="activity-timeline-panel">
+            <div class="timeline-header">
+                <h2>Activity History</h2>
+                <div class="timeline-controls">
+                    <button class="btn-link-sort">By date <i class="fas fa-sort"></i></button>
+                </div>
+            </div>
+            <div class="timeline-ref">
+                {% set current_year_month = "" %}
+                {% if visitas %}
+                    {% for visit in visitas %}
+                        {% set visit_year_month = "Unknown Date" %}
+                        {% if visit.fecha_formateada %}
+                            {% set date_parts = visit.fecha_formateada.split(' ')[0].split('/') %}
+                            {% if date_parts|length == 3 %}
+                                {% set visit_year = date_parts[2] %}
+                                {% set visit_month_number = date_parts[1] %}
+                                {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+                                {% if visit_month_number.isdigit() and 1 <= visit_month_number|int <= 12 %}
+                                    {% set visit_month_name = months[visit_month_number|int -1] %}
+                                    {% set visit_year_month = visit_month_name + " " + visit_year %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if visit_year_month != current_year_month %}
+                            {% if not loop.first %}</div>{% endif %}
+                            <div class="timeline-group-header" 
+                                 data-group="{{ visit_year_month|lower|replace(' ', '-') }}">
+                                {% set count_this_month = namespace(value=0) %}
+                                {% if visit_year_month != "Unknown Date" %}
+                                  {% for v_check in visits %}
+                                      {% if v_check.fecha_formateada %}
+                                          {% set parts_check = v_check.fecha_formateada.split(' ')[0].split('/') %}
+                                          {% if parts_check|length == 3 %}
+                                              {% set v_check_year = parts_check[2] %}
+                                              {% set v_check_month_number = parts_check[1] %}
+                                              {% if v_check_year == visit_year and v_check_month_number == visit_month_number %}
+                                                  {% set count_this_month.value = count_this_month.value + 1 %}
+                                              {% endif %}
+                                          {% endif %}
+                                      {% endif %}
+                                  {% endfor %}
+                                {% endif %}
+                                <span>{{ visit_year_month|upper }} ({{ count_this_month.value if visit_year_month != "Unknown Date" else '0' }})</span>
+                                <i class="fas fa-chevron-down group-toggle-icon"></i>
+                            </div>
+                            <div class="timeline-group-items" id="group-{{ visit_year_month|lower|replace(' ', '-') }}">
+                            {% set current_year_month = visit_year_month %}
+                        {% endif %}
+
+                        <div class="timeline-item-ref">
+                            <div class="timeline-icon-ref">
+                                {% if "summary" in visit.tipo_visita|lower or "document" in visit.tipo_visita|lower %}
+                                    <i class="fas fa-file-alt"></i>
+                                {% elif ("recorded" in visit.tipo_visita|lower or "appointment" in visit.tipo_visita|lower) and not ("summary" in visit.tipo_visita|lower) %}
+                                    <i class="fas fa-microphone-alt"></i>
+                                {% elif 'consultation' in visit.tipo_visita|default('')|lower %}
+                                    <i class="fas fa-stethoscope"></i>
+                                {% else %}
+                                    <i class="fas fa-notes-medical"></i>
+                                {% endif %}
+                            </div>
+                            <div class="timeline-content-ref">
+                                <span class="timeline-title">
+                                    {{ visit.tipo_visita | default('Visit') | capitalize }} - {{ visit.fecha_formateada.split(' ')[0] if visit.fecha_formateada else 'Date N/A' }}
+                                    ({{ visit.fecha_relativa if visit.fecha_relativa else ''}})
+                                </span>
+                                <span class="timeline-description">
+                                    {% if visit.resumen_ai %}
+                                        {{ visit.resumen_ai|striptags|truncate(100, True) }}
+                                    {% elif visit.transcripcion_corta and visit.transcripcion_corta != 'Not available' %}
+                                        {{ visit.transcripcion_corta|truncate(100, True) }}
+                                    {% elif visit.archivos_adjuntos_display and visit.archivos_adjuntos_display|length > 0 %}
+                                        Attached files: {{ visit.archivos_adjuntos_display|join(', ')|truncate(70, True) }}
+                                    {% else %}
+                                        Visit details.
+                                    {% endif %}
+                                </span>
+                            </div>
+                             <a href="{{ url_for('historial_visitas', visita_reciente=visita.id) }}" class="timeline-item-details-link" title="View {{ visit.tipo_visita | lower }}">
+                                <i class="fas fa-external-link-alt"></i> View
+                            </a>
+                        </div>
+                        {% if loop.last %}</div>{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="no-activity">No activity registered.</p>
+                {% endif %}
+            </div>
+        </main>
+
+        <aside class="summary-card-panel">
+            <div class="summary-card notes-summary-card">
+                <h3><i class="fas fa-sticky-note"></i> General Notes</h3>
+                 {% if notas %}
+                    <div class="notes-list-ref">
+                      {% for note in notas|sort(attribute='fecha', reverse=True)|slice(0,3) %}
+                        <div class="note-item-ref">
+                            <p class="note-content-ref" title="{{ note.contenido|striptags }}">{{ note.contenido | striptags | truncate(100, True) }}</p>
+                            <span class="note-date-ref">
+                                {{ note.fecha_formateada if note.fecha_formateada else 'Date N/A' }}
+                                ({{ note.fecha_relativa if note.fecha_relativa else '' }})
+                            </span>
+                        </div>
+                      {% endfor %}
+                    </div>
+                    {% if notas and notas|length > 3 %}
+                        <a href="#view-all-notes" class="btn-link-view-all">View all notes</a>
+                    {% endif %}
+                  {% else %}
+                    <p class="no-notes">No general notes.</p>
+                  {% endif %}
+            </div>
+            
+            <div class="summary-card notes-summary-card"> {# This is the card for AI Notes - reusing the general notes styling #}
+                <h3><i class="fas fa-robot"></i> AI Notes</h3>
+                <div class="notes-list-ref">
+                    {% set ai_notes_found = false %}
+                    {% for visit_data in visitas %} {# Iterate through visits to find AI notes #}
+                        {% if visit_data.ruta_notas_ai_pdf %}
+                            <div class="note-item-ref">
+                                <p class="note-content-ref">AI Notes from the visit on {{ visit_data.fecha_formateada.split(' ')[0] if visit_data.fecha_formateada else 'N/A' }}</p>
+                                <span class="note-date-ref">
+                                    <a href="{{ url_for('descargar_notas_ai_pdf', visita_id=visit_data.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-file-pdf"></i> View PDF
+                                    </a>
+                                </span>
+                            </div>
+                            {% set ai_notes_found = true %}
+                        {% elif visit_data.notas_ai and not visit_data.notas_ai.startswith("[Error") %}
+                            <div class="note-item-ref">
+                                <p class="note-content-ref" title="{{ visit_data.notas_ai|striptags }}">AI Notes from the visit on {{ visit_data.fecha_formateada.split(' ')[0] if visit_data.fecha_formateada else 'N/A' }}: {{ visit_data.notas_ai|striptags|truncate(80, True) }}</p>
+                                <span class="note-date-ref">
+                                    <a href="{{ url_for('historial_visitas', visita_reciente=visit_data.id) }}" class="btn btn-sm btn-outline-primary" title="View visit for notes">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </span>
+                            </div>
+                            {% set ai_notes_found = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if not ai_notes_found %}
+                        <p class="no-notes">No AI notes registered for this patient.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-card recipes-summary-card">
+                <h3><i class="fas fa-file-prescription"></i> Medical Prescriptions</h3>
+                <div class="card-body" style="padding:0;">
+                    {% if recetas %}
+                        <ul class="list-group list-group-flush">
+                            {% for prescription_item in recetas %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        Prescription from {{ prescription_item.fecha_emision.strftime('%d/%m/%Y') if prescription_item.fecha_emision else 'N/A' }}
+                                        {% if prescription_item.medico_emisor_receta %}
+                                            <small class="text-muted">- Dr. {{ prescription_item.medico_emisor_receta.nombre }}</small>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">Status: {{ prescription_item.estado.capitalize() }}</small>
+                                        {% if prescription_item.visita_id %}
+                                           <small class="text-muted"> (Associated with Visit ID: {{ prescription_item.visita_id }})</small>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('ver_receta', receta_id=prescription_item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-recipes text-muted" style="padding: 0.75rem 1.25rem;">No prescriptions registered for this patient.</p>
+                    {% endif %}
+                    {% if visitas and visitas|length > 0 %}
+                        <a href="{{ url_for('nueva_receta_para_visita', visita_id=visitas[0].id ) }}" 
+                           class="btn btn-primary mt-3" style="display: block; width: fit-content; margin-left: auto; margin-right: auto;">
+                           <i class="fas fa-plus"></i> New Prescription for Last Visit
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="summary-card references-summary-card">
+                <h3><i class="fas fa-directions"></i> Referrals Issued</h3>
+                <div class="card-body" style="padding:0;">
+                    {% if referencias_paciente %}
+                        <ul class="list-group list-group-flush">
+                            {% for referral_item in referencias_paciente %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        Referral to: <strong>{{ referral_item.especialidad_referida }}</strong>
+                                        <br>
+                                        <small class="text-muted">Issued: {{ referral_item.fecha_emision.strftime('%d/%m/%Y') if referral_item.fecha_emision else 'Date N/A' }}</small>
+                                        <br>
+                                        <small class="text-muted">Status: {{ referral_item.estado | capitalize }}</small>
+                                        {% if referral_item.visita_id %}
+                                           <small class="text-muted"> (Visit ID: {{ referral_item.visita_id }})</small>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('ver_referencia', referencia_id=referral_item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-references text-muted" style="padding: 0.75rem 1.25rem;">No medical referrals registered for this patient.</p>
+                    {% endif %}
+                    
+                    {% if visitas and visitas|length > 0 %}
+                        <a href="{{ url_for('nueva_referencia_para_visita', visita_id=visitas[0].id ) }}" 
+                           class="btn btn-info mt-3" style="display: block; width: fit-content; margin-left: auto; margin-right: auto; background-color: #17a2b8; border-color: #17a2b8; color:white;">
+                           <i class="fas fa-plus"></i> New Referral for Last Visit
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-card nutritional-plans-summary-card">
+                <h3><i class="fas fa-apple-alt" style="color: #28a745;"></i> Nutritional Plans</h3>
+                <div class="card-body" style="padding:0;">
+                    {% if planes_nutricionales %}
+                        <ul class="list-group list-group-flush">
+                            {% for plan_item in planes_nutricionales %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        Plan from {{ plan_item.fecha_emision.strftime('%d/%m/%Y') if plan_item.fecha_emision else 'N/A' }}
+                                        {% if plan_item.medico_emisor_plan %}
+                                            <small class="text-muted">- Prof. {{ plan_item.medico_emisor_plan.nombre }}</small>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">Status: {{ plan_item.estado.capitalize() }}</small>
+                                        {% if plan_item.visita_id %}
+                                           <small class="text-muted"> (Visit ID: {{ plan_item.visita_id }})</small>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('ver_plan_nutricional', plan_id=plan_item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-nutritional-plans text-muted" style="padding: 0.75rem 1.25rem;">No nutritional plans registered for this patient.</p>
+                    {% endif %}
+                    
+                    {% if visitas and visitas|length > 0 %}
+                        <a href="{{ url_for('nuevo_plan_nutricional_para_visita_page', visita_id=visitas[0].id ) }}" 
+                           class="btn mt-3" style="display: block; width: fit-content; margin-left: auto; margin-right: auto; background-color: #28a745; border-color: #28a745; color:white;">
+                           <i class="fas fa-plus"></i> New Nutritional Plan
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+    </div> 
+</div> 
+
+{# Edit Patient Modal #}
+<div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('guardar_perfil_paciente', paciente_id=paciente.id) }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPatientModalLabel">Edit Patient Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name(s)</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ paciente.nombre.split(' ')[0] if paciente.nombre else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Last Name(s)</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ ' '.join(paciente.nombre.split(' ')[1:]) if paciente.nombre and ' ' in paciente.nombre else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="patient_identification_document" class="form-label">ID / Identification Document</label>
+                        <input type="text" class="form-control" id="patient_identification_document" name="patient_identification_document" value="{{ paciente.identificacion_documento or '' }}">
+                    </div>
+                    {# NEW: Date of Birth field in edit modal #}
+                    <div class="mb-3">
+                        <label for="patient_dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="patient_dob" name="patient_dob"
+                               value="{{ paciente.fecha_nacimiento.strftime('%Y-%m-%d') if paciente.fecha_nacimiento else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="patient_phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="patient_phone" name="patient_phone" value="{{ paciente.telefono or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="patient_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="patient_email" name="patient_email" value="{{ paciente.email or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="patient_treatment_status" class="form-label">Treatment Status</label>
+                        <input type="text" class="form-control" id="patient_treatment_status" name="patient_treatment_status" value="{{ paciente.estado_tratamiento or '' }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Confirm Delete Modal #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this patient? This action is irreversible and will delete all their associated visits, notes, prescriptions, referrals, and nutritional plans.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="formDeletePatient" method="POST" action="{{ url_for('eliminar_paciente', paciente_id=paciente.id) }}">
+                    <button type="submit" class="btn btn-danger">Delete Patient</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("[PATIENT_PROFILE.HTML] DOM and main script loaded.");
+
+    document.querySelectorAll('.timeline-group-header').forEach((header, index) => {
+        const groupItemsId = 'group-' + header.dataset.group;
+        const groupItems = document.getElementById(groupItemsId);
+        const icon = header.querySelector('.group-toggle-icon');
+
+        function toggleGroup(collapse) {
+            if (groupItems) {
+                groupItems.classList.toggle('collapsed', collapse);
+                groupItems.style.display = collapse ? 'none' : ''; 
+                if (icon) {
+                    icon.classList.toggle('fa-chevron-down', !collapse);
+                    icon.classList.toggle('fa-chevron-right', collapse);
+                }
+            }
+        }
+        
+        if (header) {
+            header.addEventListener('click', () => {
+                if (groupItems) {
+                    toggleGroup(groupItems.classList.contains('collapsed') ? false : true);
+                }
+            });
+        }
+        if (index !== 0 && document.querySelectorAll('.timeline-group-header').length > 1) { 
+             toggleGroup(true);
+        } else if (document.querySelectorAll('.timeline-group-header').length > 0) {
+             toggleGroup(false);
+        }
+    });
+});
+</script>
+
+{% endblock %}

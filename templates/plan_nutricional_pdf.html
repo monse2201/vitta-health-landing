@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nutritional Plan - {{ plan.paciente_plan.nombre }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            color: #333;
+        }
+        .document-container-scribe {
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px 40px;
+        }
+        .header-document {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .header-document h1 {
+            font-size: 24pt;
+            color: #212529;
+            margin: 0;
+        }
+        .header-document p {
+            margin: 0;
+            font-size: 9pt;
+            color: #6c757d;
+        }
+        .info-section {
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-section strong { font-weight: bold; }
+        .section-title {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #212529;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #007bff;
+        }
+        .info-grid {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: -15px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            flex: 1 1 45%;
+            margin-right: 15px;
+            margin-bottom: 15px;
+        }
+        .info-box strong {
+            display: block;
+            font-size: 9pt;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .info-box span {
+            font-size: 11pt;
+            color: #212529;
+        }
+        .meals-grid {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -8px; /* Counter negative margin of items */
+        }
+        .meal-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1 1 45%; /* Two columns */
+            margin: 0 8px 16px;
+            page-break-inside: avoid;
+        }
+        .meal-box h4 {
+            font-size: 12pt;
+            color: #007bff;
+            margin: 0 0 10px 0;
+        }
+        .meal-box ul {
+            padding-left: 20px;
+            margin: 0;
+            list-style-type: '✓  ';
+        }
+        .meal-box ul li {
+            margin-bottom: 6px;
+        }
+        .notes-section {
+            page-break-inside: avoid;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 8pt;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container-scribe">
+        <div class="header-document">
+            <div>
+                <h1>Nutritional Plan</h1>
+                <p>Issued by Vitta Health Scribe</p>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <p><strong>Patient:</strong> {{ plan.paciente_plan.nombre }}</p>
+            <p><strong>Patient ID:</strong> {{ plan.paciente_plan.identificacion_documento or 'N/A' }}</p>
+            <p><strong>Date of Issue:</strong> {{ plan.fecha_emision.strftime('%d/%m/%Y') }}</p>
+        </div>
+
+        <div class="info-section">
+            <p><strong>Professional:</strong> {{ plan.medico_emisor_plan.nombre }}</p>
+            <p><strong>Specialty:</strong> {{ plan.medico_emisor_plan.especialidad or 'N/A' }}</p>
+            <p><strong>Professional License:</strong> {{ plan.medico_emisor_plan.licencia_profesional or 'N/A' }}</p>
+        </div>
+
+        <div class="section-title">Main Objective</div>
+        <p>{{ contenido.objetivo_principal or 'Not specified' }}</p>
+
+        {% if contenido.recomendaciones_generales %}
+        <div class="section-title">General Recommendations</div>
+        <ul>
+            {% for rec in contenido.recomendaciones_generales %}
+            <li>{{ rec }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="section-title">Daily Plan Example</div>
+        <div class="meals-grid">
+            {% for meal_name, options in contenido.plan_diario_tipo.items() %}
+            <div class="meal-box">
+                <h4>{{ meal_name }}</h4>
+                <ul>
+                    {% for food_option in options %}
+                    <li>{{ food_option }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if plan.notas_adicionales %}
+        <div class="section-title">Additional Notes</div>
+        <div class="notes-section">
+            <p>{{ plan.notas_adicionales }}</p>
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>This plan is a guide and may require adjustments. Consult your professional with any questions.</p>
+        </div>
+    </div>
+</body>
+</html>

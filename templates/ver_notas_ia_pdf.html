@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Notes - {{ visita.id }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS variable definition for consistency */
+        :root {
+            --vitta-blue: #007bff;
+            --vitta-blue-dark: #005cb8;
+            --vitta-blue-light: #e7f3ff;
+            --text-dark: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6; /* A lighter border color for lines */
+            --background-color: #f8f9fa; /* Not visible in the final PDF, but useful for the browser */
+            --background-secondary: #ffffff; /* White background for all content sections */
+            --white-color: #ffffff;
+            --danger-color: #dc3545;
+            --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family-sans-serif);
+            background-color: var(--background-color);
+            color: var(--text-dark);
+            font-size: 10pt; /* Base font size, more compact */
+            line-height: 1.3; /* Lines even closer together */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Specific styles for print/PDF (WeasyPrint) */
+        @media print {
+            body {
+                background-color: #fff;
+                font-size: 9pt; /* Base font size for final print */
+            }
+
+            .document-container-scribe {
+                max-width: 100%;
+                margin: 0;
+                padding: 0; /* No padding at the main document container level in print */
+                box-shadow: none;
+                border: none;
+                box-sizing: border-box;
+            }
+
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+
+            .info-item, .section-title, .section-header {
+                page-break-inside: avoid;
+            }
+
+            @page {
+                margin: 0.8cm 1.2cm; /* Even tighter page margins (top/bottom, left/right) */
+                @bottom-center {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-family: var(--font-family-sans-serif);
+                    font-size: 7pt; /* Page number font size */
+                    color: var(--text-muted);
+                }
+            }
+        }
+
+        /* General document container styles */
+        .document-container-scribe {
+            max-width: 800px; /* A slightly narrower width like the reference */
+            margin: 15px auto; /* Drastically reduced vertical margin */
+            background-color: var(--white-color);
+            padding: 20px 30px; /* Reduced padding */
+            border-radius: 0;
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .header-document {
+            margin-bottom: 10px; /* Reduced */
+            padding-bottom: 0;
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Aligns to the top */
+        }
+        .header-document .title-section {
+            flex-grow: 1;
+            text-align: center; /* Center the main title */
+            min-width: 250px; /* Ensure it has space even if empty */
+        }
+        .header-document .title-section h1 {
+            font-size: 24px; /* A bit larger for the main title */
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0; /* Remove margin */
+            display: block; /* Back to block for the title */
+            border-bottom: none; /* The line is handled with hr */
+            padding-bottom: 0;
+        }
+        .header-document .title-section .text-muted {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 3px;
+        }
+        .header-document .institution-details {
+            font-size: 11px;
+            line-height: 1.1;
+            width: 250px; /* Fixed width for the doctor/clinic info block */
+            flex-shrink: 0;
+        }
+        .header-document .institution-details.left {
+            text-align: left;
+            margin-right: 15px; /* Space between clinic info and center */
+        }
+        .header-document .institution-details.right {
+            text-align: right;
+            margin-left: 15px; /* Space between doctor info and center */
+        }
+        .header-document .institution-details p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* General separator lines */
+        .separator-line {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 8px 0; /* Adjusted spacing */
+        }
+        .thick-separator-line {
+            border: none;
+            border-top: 2px solid var(--text-dark);
+            margin: 8px 0 15px 0; /* Adjusted spacing */
+        }
+
+        .section-title {
+            font-size: 1em; /* Smaller section titles */
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 15px; /* Spacing above */
+            margin-bottom: 5px; /* Reduced */
+            padding-bottom: 3px; /* More reduced */
+            border-bottom: none; /* The line is handled with hr */
+        }
+
+        /* Patient Information, now with a 2-column grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns for info items */
+            gap: 3px 15px; /* Reduced spacing between rows and columns */
+            margin-bottom: 10px; /* Reduced bottom spacing */
+        }
+        .info-item {
+            background-color: var(--white-color);
+            padding: 1px 0; /* Minimum padding */
+            border-radius: 0;
+            border: none;
+            display: flex; /* To align label and value */
+            line-height: 1.1; /* More compact */
+        }
+        .info-item strong {
+            width: 75px; /* Fixed width for labels like "Name:" */
+            flex-shrink: 0;
+            color: var(--text-dark);
+            font-size: 0.85em; /* Slightly smaller */
+            font-weight: 600;
+            margin-bottom: 0;
+            text-align: left;
+        }
+        .info-item span, .info-item p {
+            flex-grow: 1;
+            font-size: 0.85em; /* Slightly smaller */
+            font-weight: 400;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* AI GENERATED NOTES - EMPHASIZING COMPACTNESS */
+        .markdown-render {
+            background-color: var(--white-color);
+            padding: 0;
+            border-radius: 0;
+            border: none;
+            white-space: pre-wrap;
+            line-height: 1.3; /* Adjusted for more compactness */
+            font-size: 0.9em; /* Slightly larger than base for main content readability */
+            margin-top: 5px; /* More reduced */
+        }
+        .markdown-render h1, .markdown-render h2, .markdown-render h3, .markdown-render h4 {
+            color: var(--text-dark);
+            margin-top: 0.5em; /* More reduced top margins */
+            margin-bottom: 0.2em; /* More reduced bottom margins */
+            font-weight: 700;
+            page-break-after: avoid;
+            font-size: 1em; /* Adjusted, similar to a paragraph */
+        }
+        /* Specific adjustments for SOAP titles if markdown generates them with h1/h2 */
+        .markdown-render h1 { font-size: 1.1em; }
+        .markdown-render h2 { font-size: 1.05em; }
+        .markdown-render h3 { font-size: 1em; } /* This is the most likely size for Subjective, Objective, etc. */
+        .markdown-render h4 { font-size: 0.95em; }
+
+        .markdown-render strong { font-weight: 700; }
+        .markdown-render em { font-style: italic; }
+
+        .markdown-render ul {
+            padding-left: 15px; /* More reduced for lists */
+            margin-top: 0.2em; /* More reduced */
+            list-style-type: '✓ ';
+            margin-bottom: 0.5em; /* More reduced */
+        }
+        .markdown-render li {
+            margin-bottom: 0.1rem; /* Minimal spacing between list items */
+            padding-left: 1px; /* Minimal spacing */
+            color: var(--text-dark);
+        }
+        .markdown-render p {
+            margin-bottom: 0.4em; /* Spacing between paragraphs */
+            page-break-inside: avoid;
+        }
+
+        /* Style for AI error messages within the content */
+        .markdown-render .error-message {
+            color: var(--danger-color);
+            font-weight: 600;
+            background-color: #ffe0e0;
+            padding: 4px;
+            border-radius: 2px;
+            border: 1px solid #ffb3b3;
+            margin-top: 4px;
+            font-size: 0.75em;
+        }
+
+        /* Static footer at the end of the document */
+        .document-footer {
+            text-align: center;
+            margin-top: 15px; /* Reduced */
+            font-size: 0.7em; /* Smaller */
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container-scribe">
+        <div class="header-document">
+            {# Information about the doctor's institution/clinic on the left #}
+            <div class="institution-details left">
+                {% if logo_clinica_base64 %}
+                    <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" style="max-height: 60px; margin-bottom: 10px; display: block;">
+                {% endif %}
+                {% if show_clinic_name %}
+                    <p><strong>{{ medico.clinica_nombre or 'Clinic Name' }}</strong></p>
+                {% endif %}
+                {% if show_clinic_address %}
+                    <p>{{ medico.clinica_direccion or 'Clinic Address' }}</p>
+                {% endif %}
+                {% if show_clinic_phone %}
+                    <p>Phone: {{ medico.clinica_telefono or 'Phone' }}</p>
+                {% endif %}
+                {% if show_clinic_website %}
+                    <p>Web: {{ medico.clinica_website or 'Website' }}</p>
+                {% endif %}
+            </div>
+            
+            {# Main title now more neutral #}
+            <div class="title-section">
+                <h1>Medical Visit Report</h1> {# New more general title #}
+                <span class="text-muted">Visit ID: {{ visita.id }}</span>
+            </div>
+            
+            {# Doctor's Information on the right #}
+            <div class="institution-details right">
+                 {% if medico %}
+                    <p><strong>{{ medico.nombre }}</strong></p>
+                    <p>{{ medico.especialidad or 'Specialty not indicated' }}</p>
+                    {% if show_doctor_license %}
+                        <p>{{ medico.licencia_profesional or 'License N/A' }}</p>
+                    {% endif %}
+                    {% if show_doctor_phone %}
+                        <p>Tel: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
+                    {% endif %}
+                    {% if show_doctor_bio %}
+                        <p>{{ medico.biografia or 'Bio N/A' }}</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {# Thick line below the main header #}
+        <hr class="thick-separator-line">
+
+        {# PATIENT INFORMATION SECTION #}
+        {% if paciente %}
+        <div class="section-title">Patient Information</div>
+        <hr class="separator-line">
+        <div class="info-grid">
+            <div class="info-item"><strong>Name:</strong> <span>{{ paciente.nombre }}</span></div>
+            <div class="info-item"><strong>Document:</strong> <span>{{ paciente.identificacion_documento or 'N/A' }}</span></div>
+            <div class="info-item"><strong>Visit Date:</strong> <span>{{ visita.fecha.strftime('%d/%m/%Y %H:%M') if visita.fecha else 'N/A' }}</span></div>
+            <div class="info-item"><strong>Visit Type:</strong> <span>{{ visita.tipo_visita.replace('_', ' ').capitalize() if visita.tipo_visita else 'N/A' }}</span></div>
+            <div class="info-item"><strong>AI Template:</strong> <span>{{ visita.plantilla or 'General' }}</span></div>
+            <div class="info-item"><strong>AI Language:</strong> <span>{{ idioma_generacion | upper }}</span></div>
+        </div>
+        {% endif %}
+
+        {# "Content of AI Generated Notes" NOW GOES HERE (after Patient Information) #}
+        <div class="section-title" style="margin-top: 15px;">Visit Notes</div> {# Adjusted title #}
+        <hr class="separator-line">
+        <div class="markdown-render">
+            {% if notas_contenido_html %}
+                {# The content is already rendered to HTML from app.py #}
+                {{ notas_contenido_html | safe }}
+            {% else %}
+                <div class="error-message">No notes were found for this visit.</div>
+            {% endif %}
+        </div>
+        
+        <div class="document-footer">
+            Generated by Vitta Health Scribe &copy; {{ current_year }}
+        </div>
+    </div>
+</body>
+</html>

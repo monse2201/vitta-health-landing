@@ -1,0 +1,567 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{# --- NEW: Library for generating the image --- #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+    /* ... (All your existing CSS goes here, no need to change it) ... */
+    :root {
+        --vitta-blue: #007bff;
+        --vitta-blue-dark: #005cb8;
+        --vitta-blue-light: #e7f3ff;
+        --text-dark: #212529;
+        --text-secondary: #495057;
+        --text-muted: #6c757d;
+        --border-color: #e9ecef;
+        --background-color: #f8f9fa;
+        --background-secondary: #f8f9fa;
+        --white-color: #ffffff;
+        --danger-color: #dc3545;
+        --font-family-sans-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-family-sans-serif);
+        background-color: var(--background-color);
+        color: var(--text-dark);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    .document-container-scribe {
+        max-width: 900px;
+        margin: 40px auto;
+        background-color: var(--white-color);
+        padding: 40px 50px;
+        border-radius: 12px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.07);
+        border: 1px solid var(--border-color);
+    }
+    .header-document {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .header-document .title-section h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .header-document .title-section h1 i {
+        margin-right: 15px;
+        font-size: 1.2em;
+        color: var(--vitta-blue);
+    }
+    .header-document .title-section .text-muted {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    .header-document .institution-details {
+        text-align: right;
+        font-size: 14px;
+    }
+    .header-document .institution-details p {
+        margin: 2px 0;
+        color: var(--text-secondary);
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .info-item {
+        background-color: var(--background-secondary);
+        padding: 1rem 1.2rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+    .info-item strong {
+        display: block;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .info-item span, .info-item p {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        word-wrap: break-word;
+        margin: 0;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-top: 2.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--vitta-blue);
+    }
+    
+    .meals-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between; 
+    }
+    .meal-section {
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--white-color);
+        box-sizing: border-box;
+        width: 48%; 
+        margin-bottom: 1.5rem; 
+    }
+
+    .meal-section h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--vitta-blue);
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    .meal-section ul {
+        padding-left: 20px;
+        list-style-type: '✓   ';
+        margin: 0;
+    }
+     .meal-section ul li {
+        margin-bottom: 0.6rem;
+        padding-left: 5px;
+        color: var(--text-secondary);
+    }
+    .text-content-display {
+        background-color: var(--background-secondary);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        white-space: pre-wrap;
+        font-family: 'Menlo', 'Courier New', monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .footer-actions {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 10px 18px;
+        font-size: 14px;
+        border-radius: 6px;
+        transition: all .2s ease-in-out;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn i { margin-right: 8px; }
+    
+    .btn-primary { color: var(--white-color); background-color: var(--vitta-blue); border-color: var(--vitta-blue); }
+    .btn-primary:hover { background-color: var(--vitta-blue-dark); border-color: var(--vitta-blue-dark); }
+
+    .btn-secondary { color: var(--text-dark); background-color: #e2e6ea; border-color: #dae0e5; }
+    .btn-secondary:hover { background-color: #d3d9df; border-color: #c7ced3; }
+
+    .modal-scribe {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        overflow: auto;
+        background-color: rgba(33, 37, 41, 0.6);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+    }
+    .modal-scribe-content {
+        background-color: var(--white-color);
+        margin: 8% auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 550px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-scribe-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .modal-scribe-header h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+    }
+    .modal-scribe-header .close-scribe-modal {
+        font-size: 1.6rem;
+        font-weight: 700;
+        opacity: .5;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .modal-scribe-body {
+        padding: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    .form-control {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 15px;
+        font-family: inherit;
+        color: var(--text-dark);
+        background-color: var(--white-color);
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    .form-control:focus {
+        border-color: var(--vitta-blue);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+    .modal-scribe-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--background-secondary);
+    }
+
+    @media print {
+        body { background-color: #fff; font-size: 11pt; }
+        .document-container-scribe { box-shadow: none; border: none; padding: 0; margin: 0; max-width: 100%; }
+        .footer-actions, .navbar, header, .breadcrumb, .modal-scribe { display: none !important; }
+    }
+</style>
+
+<div class="document-container-scribe" id="nutritional-plan-container">
+    {# --- The plan content remains exactly the same --- #}
+    <div class="header-document">
+        <div class="institution-details" style="text-align: left; width: 250px;">
+            {% if logo_clinica_base64 %}
+                <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" style="max-height: 60px; margin-bottom: 10px; display: block;">
+            {% endif %}
+            {% if show_clinic_name %}
+                <p><strong>{{ medico.clinica_nombre or 'Clinic Name' }}</strong></p>
+            {% endif %}
+            {% if show_clinic_address %}
+                <p>{{ medico.clinica_direccion or 'Clinic Address' }}</p>
+            {% endif %}
+            {% if show_clinic_phone %}
+                <p>Phone: {{ medico.clinica_telefono or 'Phone' }}</p>
+            {% endif %}
+            {% if show_clinic_website %}
+                <p>Web: {{ medico.clinica_website or 'Website' }}</p>
+            {% endif %}
+        </div>
+        <div class="title-section" style="flex-basis: 250px; text-align: center; flex-grow: 1;">
+            <h1><i class="fas fa-utensils"></i> Nutritional Plan</h1>
+            <span class="text-muted">Plan ID: {{ plan.id }}</span>
+        </div>
+        <div class="institution-details" style="text-align: right; width: 250px;">
+            {% if medico %}
+                <p><strong>{{ medico.nombre }}</strong></p>
+                <p>{{ medico.especialidad or 'Specialty not indicated' }}</p>
+                {% if show_doctor_license %}
+                    <p>License: {{ medico.licencia_profesional or 'N/A' }}</p>
+                {% endif %}
+                {% if show_doctor_phone %}
+                    <p>Tel: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
+                {% endif %}
+                {% if show_doctor_bio %}
+                    <p>{{ medico.biografia or 'Bio N/A' }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if plan.paciente_plan %}
+    <div class="section-title">Patient Information</div>
+    <div class="info-grid">
+        <div class="info-item"><strong>Name:</strong> <span>{{ plan.paciente_plan.nombre }}</span></div>
+        <div class="info-item"><strong>Document:</strong> <span>{{ plan.paciente_plan.identificacion_documento or 'N/A' }}</span></div>
+    </div>
+    {% endif %}
+
+    <div class="section-title">Plan Details</div>
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Date of Issue:</strong>
+            <span>{{ plan.fecha_emision.strftime('%d/%m/%Y %H:%M') if plan.fecha_emision else 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Main Objective:</strong>
+            <p>{{ contenido.objetivo_principal or 'Not specified' }}</p>
+        </div>
+    </div>
+
+    {% if contenido.recomendaciones_generales and contenido.recomendaciones_generales|length > 0 %}
+    <div class="section-title">General Recommendations</div>
+    <div class="meal-section" style="width: 100%;">
+        <ul>
+            {% for recommendation in contenido.recomendaciones_generales %}
+            <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if contenido.plan_diario_tipo %}
+    <div class="section-title">Daily Plan Example</div>
+    <div class="meals-grid">
+        {% for meal_name, options in contenido.plan_diario_tipo.items() %}
+            {% if options and options|length > 0 %}
+            <div class="meal-section">
+                <h4>{{ meal_name }}</h4>
+                <ul>
+                    {% for food_option in options %}
+                    <li>{{ food_option }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if plan.notas_adicionales %}
+    <div class="section-title">Additional Notes from the Professional</div>
+    <div class="text-content-display">
+        {{ plan.notas_adicionales }}
+    </div>
+    {% endif %}
+</div>
+
+{# --- MODIFIED BUTTONS SECTION --- #}
+<div class="document-container-scribe footer-actions">
+    <a href="{{ url_for('perfil_paciente', paciente_id=plan.paciente_id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+    <button type="button" class="btn btn-secondary" onclick="window.print();">
+        <i class="fas fa-print"></i> Print
+    </button>
+    <button type="button" id="btnDownloadImage" class="btn btn-primary">
+        <i class="fas fa-camera"></i> Download Image
+    </button>
+    <button type="button" class="btn btn-primary" id="btnOpenSharePlanModal">
+        <i class="fas fa-envelope"></i> Share
+    </button>
+</div>
+
+{# --- MODAL (unchanged in its HTML) --- #}
+<div id="sharePlanModal" class="modal-scribe">
+    <div class="modal-scribe-content">
+        <div class="modal-scribe-header">
+            <h5>Share Nutritional Plan</h5>
+            <button type="button" class="close-scribe-modal" onclick="document.getElementById('sharePlanModal').style.display='none';">&times;</button>
+        </div>
+        <div class="modal-scribe-body">
+            <form id="formSharePlan" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="recipient_email_plan">Recipient's Email *</label>
+                    <input type="email" class="form-control" id="recipient_email_plan" required>
+                </div>
+                <div class="form-group">
+                    <label for="email_subject_plan">Subject (Optional)</label>
+                    <input type="text" class="form-control" id="email_subject_plan">
+                </div>
+                <div class="form-group">
+                    <label for="additional_message_plan">Additional Message (Optional)</label>
+                    <textarea class="form-control" id="additional_message_plan" rows="3"></textarea>
+                </div>
+                <div id="share-plan-feedback" style="display:none; margin-top:10px;"></div>
+            </form>
+        </div>
+        <div class="modal-scribe-footer">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('sharePlanModal').style.display='none';">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnSendPlanEmail"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+    </div>
+</div>
+
+{# --- MODIFIED SCRIPT TO HANDLE IMAGE GENERATION --- #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sharePlanModal = document.getElementById('sharePlanModal');
+    const btnOpenSharePlanModal = document.getElementById('btnOpenSharePlanModal');
+    const btnDownloadImage = document.getElementById('btnDownloadImage');
+    const planContainer = document.getElementById('nutritional-plan-container');
+
+    // Function to capture the plan as an image and perform an action
+    async function generateImage(action) {
+        // Temporarily hide buttons so they don't appear in the capture
+        document.querySelector('.footer-actions').style.display = 'none';
+
+        const canvas = await html2canvas(planContainer, {
+            scale: 2, // Increases image resolution
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        });
+
+        // Show buttons again
+        document.querySelector('.footer-actions').style.display = 'flex';
+        
+        if (action.type === 'download') {
+            const link = document.createElement('a');
+            link.download = action.filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } else if (action.type === 'share') {
+            sendEmailWithImage(canvas.toDataURL('image/png'));
+        }
+    }
+
+    // Button to download the image
+    btnDownloadImage.addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        const patientName = {{ plan.paciente_plan.nombre | tojson }}.replace(/ /g, '_');
+        const filename = `Nutritional_Plan_${patientName}_{{ plan.id }}.png`;
+        
+        generateImage({ type: 'download', filename: filename }).finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-camera"></i> Download Image';
+        });
+    });
+
+    // Open the share modal
+    if (btnOpenSharePlanModal) {
+        btnOpenSharePlanModal.addEventListener('click', function() {
+            sharePlanModal.style.display = 'block';
+            const patientName = {{ plan.paciente_plan.nombre | tojson }};
+            const planDate = "{{ plan.fecha_emision.strftime('%d/%m/%Y') if plan.fecha_emision else 'N/A' }}";
+            const subjectInput = document.getElementById('email_subject_plan');
+            if (subjectInput.value.trim() === '') {
+                 subjectInput.value = `Nutritional Plan: ${patientName} - Issued ${planDate}`;
+            }
+        });
+    }
+
+    // Logic for the modal's "Send" button
+    document.getElementById('btnSendPlanEmail').addEventListener('click', function() {
+        const recipientEmail = document.getElementById('recipient_email_plan').value;
+        if (!recipientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+            showFeedback(document.getElementById('share-plan-feedback'), "Please enter a valid email.", "error");
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating and Sending...';
+        showFeedback(document.getElementById('share-plan-feedback'), "Generating plan image...", "proceso");
+
+        // Generate the image and then send it
+        generateImage({ type: 'share' });
+    });
+
+    function sendEmailWithImage(imageDataBase64) {
+        const recipientEmail = document.getElementById('recipient_email_plan').value;
+        const subject = document.getElementById('email_subject_plan').value;
+        const additionalMessage = document.getElementById('additional_message_plan').value;
+        const feedbackDiv = document.getElementById('share-plan-feedback');
+        const btn = document.getElementById('btnSendPlanEmail');
+        
+        const data = {
+            recipient_email: recipientEmail,
+            subject: subject,
+            additional_message: additionalMessage,
+            image_data: imageDataBase64 // <-- The Base64 image
+        };
+
+        showFeedback(feedbackDiv, "Sending email...", "proceso");
+
+        fetch(`/api/nutritional_plan/{{ plan.id }}/share_email`, { 
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) throw new Error(data.error || 'Unknown server error.');
+            showFeedback(feedbackDiv, data.message || "Sent successfully", "exito");
+            setTimeout(() => { sharePlanModal.style.display = 'none'; }, 2500);
+        })
+        .catch(error => {
+            console.error('Error sharing nutritional plan:', error);
+            showFeedback(feedbackDiv, "Error: " + error.message, "error");
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+        });
+    }
+
+    // Modal functions (unchanged)
+    sharePlanModal.querySelector('.close-scribe-modal').addEventListener('click', () => sharePlanModal.style.display = 'none');
+    sharePlanModal.querySelector('.modal-scribe-footer .btn-secondary').addEventListener('click', () => sharePlanModal.style.display = 'none');
+    window.addEventListener('click', (event) => {
+        if (event.target == sharePlanModal) {
+            sharePlanModal.style.display = 'none';
+        }
+    });
+
+    function showFeedback(divElement, message, type) {
+        divElement.textContent = message;
+        divElement.className = '';
+        divElement.style.padding = '10px';
+        divElement.style.borderRadius = '6px';
+        divElement.style.display = 'block';
+        divElement.style.textAlign = 'center';
+        divElement.style.border = '1px solid transparent';
+
+        if (type === 'exito') {
+            divElement.style.backgroundColor = '#d4edda';
+            divElement.style.color = '#155724';
+            divElement.style.borderColor = '#c3e6cb';
+        } else if (type === 'error') {
+            divElement.style.backgroundColor = '#f8d7da';
+            divElement.style.color = '#721c24';
+            divElement.style.borderColor = '#f5c6cb';
+        } else if (type === 'proceso') {
+            divElement.style.backgroundColor = '#cce5ff';
+            divElement.style.color = '#004085';
+            divElement.style.borderColor = '#b8daff';
+        }
+    }
+});
+</script>
+{% endblock %}

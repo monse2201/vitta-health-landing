@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitta Health</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #465e78;
+            --secondary-color: #465e78;
+            --accent-color: #7eafe8;
+            --success-color: #87e3cf;
+            --completed-color: #7f8c8d;
+            --warning-color: #f57f17;
+            --text-color: #465e78;
+            --text-color-light: #7f8c8d;
+            --bg-color: #f4f6f8;
+            --white-color: #ffffff;
+            --border-color: #dfe4ea;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Lato', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container { max-width: 1200px; margin: 40px auto; background: transparent; border: none; box-shadow: none; }
+        .header {
+            background: var(--primary-color); padding: 40px; text-align: center; color: var(--white-color);
+            border-radius: var(--border-radius); margin-bottom: 40px;
+        }
+        .header h1 { font-size: 2.2rem; font-weight: 700; }
+        .header p { font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+        .dashboard-panel {
+            background-color: var(--white-color); border: 1px solid var(--border-color);
+            padding: 30px; border-radius: var(--border-radius); margin-bottom: 40px; box-shadow: var(--shadow);
+        }
+        .dashboard-panel h3 { text-align: center; font-size: 1.6rem; color: var(--primary-color); margin-bottom: 25px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+        .data-card { background-color: var(--bg-color); padding: 20px; border-radius: var(--border-radius); text-align: center; transition: all 0.3s ease; }
+        .data-card .value { font-size: 2.2rem; font-weight: 700; color: var(--primary-color); }
+        .data-card .label { font-size: 0.9rem; color: var(--text-color-light); margin-top: 5px; }
+        #kpis-panel .data-card .value { color: var(--warning-color); }
+        
+        #summary-roadmap-container { display: flex; justify-content: space-between; margin-bottom: 40px; padding: 20px 0; position: relative; }
+        .summary-step { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; position: relative; cursor: pointer; }
+        .summary-step .step-number {
+            width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--border-color);
+            background-color: var(--white-color); color: var(--text-color-light); font-weight: 700;
+            display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.3s ease;
+        }
+        .summary-step .step-title { font-size: 0.9rem; font-weight: 700; color: var(--text-color-light); margin-top: 10px; transition: color 0.3s ease; }
+        #summary-roadmap-container::before { content: ''; position: absolute; top: 38px; left: 8%; width: 84%; height: 3px; background-color: var(--border-color); z-index: 1; }
+        .summary-step.completed .step-number { border-color: var(--completed-color); color: var(--completed-color); }
+        .summary-step.completed .step-title { color: var(--completed-color); }
+        .summary-step.current .step-number { border-color: var(--success-color); background-color: var(--success-color); color: white; }
+        .summary-step.current .step-title { color: var(--success-color); }
+        .summary-step:hover .step-number { border-color: var(--accent-color); }
+        .summary-step:hover .step-title { color: var(--accent-color); }
+        .phase-accordion {
+            background-color: var(--white-color); border: 1px solid var(--border-color);
+            border-radius: var(--border-radius); margin-bottom: 15px;
+            box-shadow: var(--shadow); overflow: hidden; transition: all 0.4s ease;
+        }
+        .phase-accordion.current { border-left: 5px solid var(--success-color); }
+        .phase-summary { padding: 20px 25px; cursor: pointer; display: flex; align-items: center; gap: 20px; transition: background-color 0.3s ease; }
+        .phase-summary:hover { background-color: #fafafa; }
+        .phase-summary .phase-number { flex-shrink: 0; width: 40px; height: 40px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; transition: all 0.3s ease; }
+        .phase-accordion.current .phase-summary .phase-number { background-color: var(--success-color); }
+        .phase-summary .summary-content { flex-grow: 1; }
+        .phase-summary .summary-title { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
+        .phase-summary .summary-duration { font-size: 0.9rem; color: var(--text-color-light); margin-top: 4px; }
+        .phase-summary .expand-icon { font-size: 1.5rem; color: var(--text-color-light); transform: rotate(0deg); transition: transform 0.4s ease; }
+        .phase-accordion.active .phase-summary .expand-icon { transform: rotate(180deg); }
+        .phase-details { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, opacity 0.3s ease, padding 0.5s ease; padding: 0 25px; }
+        .phase-accordion.active .phase-details { max-height: 5000px; opacity: 1; padding: 0px 25px 25px 25px; border-top: 1px solid var(--border-color); }
+        .phase-details-content { padding-top: 25px; }
+        .phase-description { line-height: 1.6; margin-bottom: 20px; font-style: italic; color: var(--secondary-color);}
+        .task-tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+        .tab-btn {
+            background: none; border: none; padding: 10px 20px; font-size: 1rem;
+            font-weight: 700; color: var(--text-color-light); cursor: pointer;
+            border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.3s ease;
+        }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--accent-color); }
+        .tab-content-panel { display: none; }
+        .tab-content-panel.active { display: block; }
+        .tasks-container h4 { margin-top: 20px; margin-bottom: 10px; color: var(--primary-color); font-size: 1.1rem; }
+        .phase-tasks { list-style: none; padding-left: 0; margin-bottom: 20px; }
+        .phase-tasks li { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .phase-tasks li .icon { margin-top: 0; }
+        .phase-tasks li.completed { color: var(--text-color-light); }
+        
+        .phase-tasks details > summary, details > summary { list-style: none; cursor: pointer;}
+        .phase-tasks details > summary::-webkit-details-marker, details > summary::-webkit-details-marker { display: none; }
+        .phase-tasks .task-text { flex-grow: 1; }
+        .phase-tasks summary { font-weight: 700; }
+        .phase-tasks details ul { list-style: none; padding-left: 25px; margin-top: 8px; font-size: 0.95rem; }
+        .phase-tasks details li { margin-bottom: 4px; font-weight: 400;}
+
+        .btn { border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.3s ease; }
+        .btn-primary { background-color: var(--secondary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-color); transform: translateY(-2px); }
+        .btn-secondary { background-color: var(--border-color); color: var(--secondary-color); }
+        .btn-secondary:hover { background-color: #c8d6e5; }
+        .icon { display: inline-block; width: 20px; height: 20px; background-color: currentColor; mask-size: cover; flex-shrink: 0; }
+        .icon-check { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); }
+        .icon-circle { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3C/svg%3E"); }
+        .phase-tasks li .icon-check { color: var(--success-color); }
+        .phase-tasks li:not(.completed) .icon-circle { color: var(--border-color); width: 10px; height: 10px; align-self: center; }
+        
+        /* Elegant Timeline Styles */
+        .elegant-timeline-container { padding: 40px 10px; margin-top: 25px; }
+        .timeline-summary {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+            transition: margin-bottom 0.3s ease;
+        }
+        details[open] > .timeline-summary {
+            margin-bottom: 60px;
+        }
+        .elegant-timeline { position: relative; display: flex; justify-content: space-between; }
+        .elegant-timeline::before { content: ''; position: absolute; top: 50%; transform: translateY(-50%); left: 15px; right: 15px; height: 3px; background-color: var(--border-color); z-index: 1; }
+        .elegant-timeline-step { position: relative; z-index: 2; text-align: center; width: 20%; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; }
+        .timeline-content-above { margin-bottom: 20px; transition: all 0.3s ease; opacity: 0.8; }
+        .timeline-content-above .value { font-size: 2rem; font-weight: 700; color: var(--primary-color); line-height: 1; display: block; }
+        .timeline-content-above .growth { display: block; font-size: 0.8rem; color: var(--success-color); font-weight: 700; opacity: 0; height: 1.2em; transition: opacity 0.3s ease; }
+        .conversion-goal { opacity: 0; transform: translateY(-5px); transition: all 0.3s ease; font-size: 0.85rem; color: var(--accent-color); font-weight: 700; margin-top: 8px; height: 1.2em; }
+        .timeline-marker { width: 20px; height: 20px; background-color: var(--white-color); border: 4px solid var(--secondary-color); border-radius: 50%; transition: all 0.3s ease; }
+        .timeline-content-below { margin-top: 15px; font-size: 0.9rem; font-weight: 700; color: var(--text-color-light); transition: all 0.3s ease; opacity: 0.8; }
+        .elegant-timeline-step:hover { transform: translateY(-5px); }
+        .elegant-timeline-step:hover .timeline-marker { background-color: var(--accent-color); border-color: var(--accent-color); transform: scale(1.1); }
+        .elegant-timeline-step:hover .timeline-content-above, .elegant-timeline-step:hover .timeline-content-below { opacity: 1; }
+        .elegant-timeline-step:hover .timeline-content-above .growth { opacity: 1; }
+        .elegant-timeline-step:hover .conversion-goal { opacity: 1; transform: translateY(0); }
+
+        /* --- TASK CARD STYLES (UNIFIED) --- */
+        .task-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding-top: 15px;
+        }
+        .task-card {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--primary-color);
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        .task-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .task-card-header .icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background-color: transparent !important;
+        }
+        .task-card-header h5 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        .task-card-body ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .task-card-body li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+        .task-card-body li::before {
+            content: '🔹';
+            color: var(--accent-color);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            flex-shrink: 0;
+        }
+        .task-card.product { border-top-color: #3498db; }
+        .task-card.strategy { border-top-color: #2ecc71; }
+        .task-card.marketing { border-top-color: #f39c12; }
+        .task-card.market { border-top-color: #9b59b6; }
+        .task-card.technical { border-top-color: #34495e; }
+        .task-card.commercial { border-top-color: #e74c3c; }
+        .task-card.july { border-top-color: #1abc9c; }
+        .task-card.kpi { border-top-color: var(--warning-color); }
+        .task-card.b2b { border-top-color: #e74c3c; }
+        .task-card.evolution { border-top-color: #8e44ad; }
+        .task-card.saturation { border-top-color: #2980b9; }
+
+
+        .task-card.product .icon { color: #3498db; }
+        .task-card.strategy .icon { color: #2ecc71; }
+        .task-card.marketing .icon { color: #f39c12; }
+        .task-card.market .icon { color: #9b59b6; }
+        .task-card.technical .icon { color: #34495e; }
+        .task-card.commercial .icon { color: #e74c3c; }
+        .task-card.july .icon { color: #1abc9c; }
+        .task-card.kpi .icon { color: var(--warning-color); }
+        .task-card.b2b .icon { color: #e74c3c; }
+        .task-card.evolution .icon { color: #8e44ad; }
+        .task-card.saturation .icon { color: #2980b9; }
+
+
+        /* --- NEW DYNAMIC ANIMATION STYLES --- */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out;
+            will-change: opacity, transform;
+        }
+
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- INTEGRATED STYLES --- */
+        .info-card-container {
+            background-color: var(--bg-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+        .info-card-container p {
+            text-align: center;
+            line-height: 1.6;
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+        .info-card-container strong {
+            color: var(--primary-color);
+        }
+        .benefits-grid .data-card .value {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            height: 40px; /* Give a fixed height for alignment */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+         .benefits-grid .data-card .label {
+            font-size: 0.9rem;
+            height: 50px; /* Give a fixed height for alignment */
+        }
+        .benefits-grid .data-card {
+             background-color: var(--white-color);
+             border: 1px solid var(--border-color);
+        }
+        
+        /* --- NEW KPI LIST STYLES --- */
+        .kpi-list-container {
+            padding-top: 15px;
+        }
+        .kpi-month-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .kpi-month-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 5px;
+        }
+        .kpi-month-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .kpi-list {
+            list-style: none;
+            padding-left: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .kpi-list li {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .kpi-icon {
+            font-size: 1.3rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+            width: 25px;
+            text-align: center;
+        }
+        .kpi-text .value {
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        .kpi-text .label {
+            color: var(--text-color-light);
+            margin-left: 6px;
+        }
+        .kpi-summary {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        .kpi-summary-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        .kpi-summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin: 5px 0;
+        }
+        .kpi-summary-label {
+            color: var(--text-color-light);
+            font-size: 0.9rem;
+        }
+        .kpi-justification {
+            font-size: 0.9rem;
+            color: var(--text-color-light);
+            font-style: italic;
+            margin-top: 15px;
+            padding: 0 5px;
+            line-height: 1.5;
+        }
+
+        /* --- COLLAPSIBLE PANEL STYLES --- */
+        .collapsible-panel {
+            background-color: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .collapsible-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        .collapsible-panel > summary:hover {
+            background-color: #fafafa;
+        }
+        .collapsible-panel > summary::-webkit-details-marker {
+            display: none;
+        }
+        .collapsible-panel h3 {
+            margin: 0;
+            text-align: left;
+        }
+        .collapsible-panel .expand-icon {
+            font-size: 1.5rem;
+            color: var(--text-color-light);
+            transform: rotate(0deg);
+            transition: transform 0.4s ease;
+        }
+        .collapsible-panel[open] > summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .collapsible-panel[open] > summary .expand-icon {
+            transform: rotate(180deg);
+        }
+        .collapsible-content {
+            padding: 30px;
+        }
+        .expansion-market-summary-text {
+            color: var(--text-color-light);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-left: 15px;
+        }
+
+        /* --- DYNAMIC FINANCIAL STYLES --- */
+        .financial-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+            padding-top: 25px;
+        }
+        .financial-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 1px solid #e8edf1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+        }
+        .financial-card h4 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+        .financial-card h4 .icon {
+             margin-right: 10px;
+             font-size: 1.2em;
+             background: none;
+        }
+
+        .financial-item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+        .financial-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 5px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+        .financial-item:last-child {
+            border-bottom: none;
+        }
+        .financial-item .name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--secondary-color);
+        }
+        .financial-item .icon {
+            font-size: 1.2rem;
+        }
+        .financial-item .amount {
+            font-weight: 700;
+            font-family: monospace, sans-serif;
+        }
+        .financial-subtotal {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 2px solid var(--border-color);
+            text-align: right;
+        }
+        .financial-subtotal .label {
+            font-size: 0.9rem;
+            color: var(--text-color-light);
+            display: block;
+        }
+        .financial-subtotal .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .financial-subtotal .annual-calc {
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+        
+        .financial-summary-breakdown {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .summary-item, .summary-operator {
+            text-align: center;
+        }
+        .summary-item .label {
+            font-size: 0.9rem;
+            color: var(--text-color-light);
+        }
+        .summary-item .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        .summary-item.total .value {
+            color: var(--success-color);
+            font-size: 2.5rem;
+        }
+        .summary-operator {
+            font-size: 2rem;
+            color: var(--text-color-light);
+            font-weight: 300;
+        }
+        
+        #financial-equity-combined-container .task-card-grid {
+            border-top: 2px solid var(--border-color);
+            margin-top: 30px;
+            padding-top: 30px;
+        }
+        
+        /* --- NEW & DYNAMIC MARKET POTENTIAL STYLES --- */
+        .market-potential-section {
+            margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border-color);
+        }
+        .market-potential-section:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+        .market-potential-section h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .expansion-list-wrapper {
+            background-color: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        .expansion-list { list-style: none; padding: 0; margin: 0; }
+        .expansion-list details {
+            border-bottom: 1px solid #f0f2f5;
+            transition: background-color 0.2s ease;
+        }
+        .expansion-list details:last-of-type { border-bottom: none; }
+        .expansion-list details[open] { background-color: #f8fafd; }
+        .expansion-list summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+        }
+        .expansion-list summary::-webkit-details-marker { display: none; }
+        .expansion-list summary:hover .item-name { color: var(--accent-color); }
+        .expansion-item-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .item-icon { font-size: 1.5rem; margin-right: 15px; width: 25px; text-align: center; }
+        .item-name { flex-grow: 1; font-weight: 500; color: var(--secondary-color); transition: color 0.2s ease; }
+        .item-count { font-weight: 700; font-size: 1.1rem; color: var(--primary-color); }
+        .item-expand-icon {
+            margin-left: auto;
+            font-size: 1.5rem;
+            color: var(--text-color-light);
+            transition: transform 0.3s ease;
+        }
+        details[open] > summary .item-expand-icon { transform: rotate(180deg); }
+
+        .expansion-details-content {
+            padding: 20px 25px 25px 60px; /* Aligns with text */
+            border-top: 1px dashed var(--border-color);
+            background-color: #fafcfe;
+        }
+
+        .expansion-list details.is-hidden {
+           display: none;
+        }
+        .expansion-toggle-wrapper { padding: 15px; text-align: center; background-color: #f8f9fa; }
+        .toggle-expansion-list { width: 100%; }
+
+        .market-opportunity-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 25px;
+            margin-top: 15px;
+        }
+        .opportunity-card {
+            background-color: #fcfdff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .opportunity-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        .opportunity-card-total {
+            font-size: 0.85rem;
+            color: var(--text-color-light);
+            margin-bottom: 15px;
+            transition: color 0.3s ease;
+        }
+        .opportunity-card-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            line-height: 1;
+        }
+        .opportunity-card-label {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-top: 8px;
+        }
+        .opportunity-card.total {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border-color: var(--primary-color);
+        }
+        .opportunity-card.total .opportunity-card-title {
+            color: var(--white-color);
+        }
+        .opportunity-card.total .opportunity-card-total {
+            color: var(--white-color);
+            opacity: 0.8;
+        }
+        .opportunity-card.total .opportunity-card-value {
+            color: var(--white-color);
+            font-size: 4rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .opportunity-card.total .opportunity-card-label {
+            color: var(--white-color);
+            opacity: 0.9;
+        }
+
+        /* --- NEW BREAKDOWN STYLES --- */
+        #expansion-summary-section, .expansion-details-content {
+            background-color: var(--white-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-top: 25px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        .breakdown-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            align-items: start;
+        }
+        .breakdown-column h5 {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+        }
+        .breakdown-item .label {
+            font-size: 1rem;
+            color: var(--text-color-light);
+        }
+        .breakdown-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .breakdown-revenue .value {
+            color: var(--success-color);
+            font-size: 1.8rem;
+        }
+        .breakdown-revenue .arr-value {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-color-light);
+            margin-left: 8px;
+        }
+        .breakdown-revenue .label {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 992px) {
+            .market-opportunity-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .financial-summary-breakdown { flex-direction: column; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Vitta Health</h1>
+            <p>AI Platform for Clinical Automation</p>
+        </div>
+
+        <div id="dashboard-container"></div>
+        <div id="summary-roadmap-container"></div>
+        <div id="roadmap-container"></div>
+        <div id="market-potential-container"></div>
+        <div id="kpis-container"></div>
+        <div id="demo-roadmap-container"></div>
+        <div id="financial-equity-combined-container"></div>
+
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let appData = {
+                currentStatus: {
+                    title: `📊 Current Status - Beta Phase`,
+                    metrics: [ { value: "3", label: "Beta Users" }, { value: "105", label: "Appointments" }, { value: "1,5 min", label: "Transcription Time" } ]
+                },
+                roadmap: [
+                    {
+                        id: 1, title: 'Beta Validation',
+                        duration: `July - September 2025`, status: 'current',
+                        description: 'Validation of the product with early users in Costa Rica to refine the solution before launch. The initial sales focus is on nutritionists and physical therapists.',
+                        taskSections: {
+                            "July": {
+                                icon: "📋",
+                                kpis: [
+                                    { value: '3', label: 'Beta Users' },
+                                    { value: '90%', label: 'Transcription Success' },
+                                    { value: '105', label: 'Appointments' },
+                                    { value: '1,5 min', label: 'Transcription Time' }
+                                ],
+                                tasks: [
+                                    {
+                                        title: "Customization for Nutritionists",
+                                        points: ["Reason for Consultation", "History", "Physical Exam", "Diagnoses/Impressions", "Treatment/Follow-up Plan", "Reference Meal Plan"]
+                                    },
+                                    {
+                                        title: "Customization for Physical Therapists",
+                                        points: ["Reason for Consultation", "History", "Physical Exam", "Evaluation", "Post-consultation Actions"]
+                                    },
+                                    {
+                                        title: "Professional Identity Verification",
+                                        points: ["Verification against the professional college's database.", "Check for 'active' status to use the platform.", "Limitation of functions according to the validated profession."]
+                                    },
+                                    {
+                                        title: "Document Customization",
+                                        points: ["Allow adding a custom logo.", "Include clinic information.", "Add professional's information."]
+                                    },
+                                    {
+                                        title: "Feedback and Analysis",
+                                        points: ["Systematic collection of feedback from beta users.", "Analysis of usage metrics to identify improvements."]
+                                    }
+                                ]
+                            },
+                            "August & September": {
+                                subTabs: {
+                                    "⚙️ Product": {
+                                        icon: "⚙️",
+                                        tasks: [
+                                            {
+                                                title: "Key Features",
+                                                points: ["Digital signature integration.", "Connection to the College of Pharmacists' drug database.", "Final stability and performance tests of the platform."]
+                                            }
+                                        ]
+                                    },
+                                    "👥 Users": {
+                                        sections: [
+                                            {
+                                                title: 'Goals for August',
+                                                kpis: [
+                                                    { icon: '👥', value: '15', label: 'Beta Users' },
+                                                    { icon: '✅', value: '95%', label: 'Transcription Success' },
+                                                    { icon: '🗓️', value: '200', label: 'Appointments' },
+                                                    { icon: '⏱️', value: '< 1 min', label: 'Transcription Time' }
+                                                ]
+                                            },
+                                            {
+                                                title: 'Goals for September',
+                                                kpis: [
+                                                    { icon: '👥', value: '40', label: 'Beta Users' },
+                                                    { icon: '✅', value: '95%', label: 'Transcription Success' },
+                                                    { icon: '🗓️', value: '400', label: 'Appointments' },
+                                                    { icon: '⏱️', value: '< 1 min', label: 'Transcription Time' }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "📈 Marketing": {
+                                        icon: "📈",
+                                        tasks: [
+                                            {
+                                                title: "Strategy Pillars",
+                                                points: [
+                                                    "<strong>Market Education:</strong> Teach nutritionists and physical therapists how AI can optimize their time and clinical documentation.",
+                                                    "<strong>Trust Building:</strong> Generate credibility through beta user testimonials and key strategic alliances."
+                                                ]
+                                            },
+                                            {
+                                                title: "Brand Positioning",
+                                                points: [
+                                                    "<strong>Specialized Innovation:</strong> An AI platform designed specifically for health professionals in Costa Rica.",
+                                                    "<strong>Trusted and Validated Partner:</strong> Leveraging the alliance with the Life Science Center of Innovation at Clínica Bíblica.",
+                                                    "<strong>Co-created Platform:</strong> Communication focused on collaboration with professionals to build the ideal tool together."
+                                                ]
+                                            },
+                                            {
+                                                title: "Channels and Tactics",
+                                                points: [
+                                                    "<strong>Public Relations & Alliances:</strong> Joint press release with Clínica Bíblica and exclusive webinars for professional associations.",
+                                                    "<strong>Content Marketing:</strong> Blog/LinkedIn articles and case studies with real results of time savings.",
+                                                    "<strong>Professional Social Networks:</strong> Use LinkedIn as the main channel to disseminate content and interact in health groups."
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                 }
+                            },
+                           "🤝 Partnerships": {
+                                title: `Strategic Alliance with <br><img src="https://res.cloudinary.com/dpuptoe0o/image/upload/v1722310342/1_h9gx9f.png" alt="Logo of Life Science Center of Innovation, Clínica Bíblica" style="height: 80px; object-fit: contain; margin-top: 10px;">`,
+                                objective: "To validate, improve, and scale Vitta Health in real clinical environments, with the support of one of the most recognized medical institutions in the region.",
+                                benefits_title: "Key benefits:",
+                                benefits: [
+                                    { value: "🔬 Validation", label: "Functional validation with active physicians." },
+                                    { value: "💡 Co-development", label: "Co-development of functionalities with clinical experts." },
+                                    { value: "🛡️ Compliance", label: "Support in ethical and regulatory compliance." }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        id: 2, 
+                        title: 'Commercial Launch',
+                        duration: 'October - December 2025', 
+                        status: 'future', 
+                        description: 'The open deployment in Costa Rica begins, turning beta validation into sustainable revenue. The goal is to consolidate paying customers and fine-tune the product before scaling.',
+                        taskSections: {
+                            "Product": {
+                                icon: "🚀",
+                                tasks: [
+                                    { 
+                                        title: "Billing System",
+                                        points: [
+                                            "Integration with local payment gateways.",
+                                            "Development of a monthly/annual subscription flow.",
+                                            "Creation of a payment management panel for users."
+                                        ]
+                                    },
+                                    { 
+                                        title: "Final Platform Polishing",
+                                        points: [
+                                            "Implement the top 5 priority improvements from beta feedback.",
+                                            "General optimization of performance and loading times.",
+                                            "Final review and adjustment of the user interface (UI/UX)."
+                                        ]
+                                    },
+                                    { 
+                                        title: "Support and Onboarding",
+                                        points: [
+                                            "Creation of a knowledge base and video tutorials.",
+                                            "Configuration of a ticket system for support.",
+                                            "Definition of the welcome protocol for new clients."
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Strategy": {
+                                icon: "🎯",
+                                tasks: [
+                                    {
+                                        title: "Final Pricing Model",
+                                        points: [
+                                            "Official announcement of the $29.99 USD subscription.",
+                                            "Clarify benefits and features included in the plan.",
+                                            "Discount strategy for early adopters."
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Marketing": {
+                                icon: "📣",
+                                tasks: [
+                                    {
+                                        title: "Digital Launch Campaign",
+                                        points: [
+                                            "Launch of campaigns on Google & LinkedIn Ads.",
+                                            "Specific segmentation for nutritionists and physical therapists.",
+                                            "Measurement of Customer Acquisition Cost (CAC)."
+                                        ]
+                                    },
+                                    {
+                                        title: "Sales and Press Materials",
+                                        points: [
+                                            "Design and publication of the new pricing page.",
+                                            "Production of the official platform demo video.",
+                                            "Writing and design of 2 case studies from the beta phase."
+                                        ]
+                                    }
+                                ]
+                            },
+                            "KPIs": {
+                                sections: [
+                                    {
+                                        title: 'October Goals',
+                                        kpis: [ 
+                                            { icon: '👥', value: '10', label: 'Paying Users' },
+                                            { icon: '✅', value: '98%', label: 'Transcription Success' },
+                                            { icon: '🗓️', value: '550', label: 'Appointments' },
+                                            { icon: '⏱️', value: '< 45s', label: 'Transcription Time' }
+                                        ]
+                                    },
+                                    {
+                                        title: 'November Goals',
+                                        kpis: [
+                                            { icon: '👥', value: '25', label: 'Paying Users' },
+                                            { icon: '✅', value: '98%', label: 'Transcription Success' },
+                                            { icon: '🗓️', value: '800', label: 'Appointments' },
+                                            { icon: '⏱️', value: '< 45s', label: 'Transcription Time' }
+                                        ]
+                                    },
+                                    {
+                                        title: 'December Goals',
+                                        kpis: [
+                                            { icon: '👥', value: '40', label: 'Paying Users' },
+                                            { icon: '✅', value: '98%', label: 'Transcription Success' },
+                                            { icon: '🗓️', value: '1050', label: 'Appointments' },
+                                            { icon: '⏱️', value: '< 40s', label: 'Transcription Time' }
+                                        ]
+                                    }
+                                ],
+                                summary: {
+                                    title: 'Projected Total for the Quarter',
+                                    value: '75',
+                                    label: 'New Subscribers'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        id: 3, 
+                        title: 'National Expansion & Scaling',
+                        duration: 'Q1-Q2 2026 (January - June)', 
+                        status: 'future', 
+                        description: 'Following a successful commercial launch, this phase focuses on accelerated growth and establishing Vitta Health as the market leader in Costa Rica. The strategy is to execute two key initiatives in parallel: expand the platform to new medical specialties to increase the potential market, and simultaneously deepen the product\'s technical capabilities to attract larger clients and build competitive entry barriers.',
+                        taskSections: {
+                            "Market Expansion": {
+                                icon: "📈",
+                                tasks: [
+                                    {
+                                        title: "New Medical Segments",
+                                        points: [
+                                            "Initiate expansion into General Medicine and Pediatrics.",
+                                            "Include research, product adaptation, and campaign launches for these segments.",
+                                        ]
+                                    },
+                                    {
+                                        title: "Advanced Templates",
+                                        points: [
+                                            "Develop and launch advanced, customized templates for the new medical specialties.",
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Technical Deepening": {
+                                icon: "⚙️",
+                                tasks: [
+                                    {
+                                        title: "Hospital Integration",
+                                        points: [
+                                            "Advance the integration project with hospital systems (HL7/FHIR).",
+                                            "Seek a first proof of concept with an allied clinic."
+                                        ]
+                                    },
+                                    {
+                                        title: "Security Certifications",
+                                        points: [
+                                            "Formally begin the process to obtain data security certifications (HIPAA).",
+                                            "Conduct necessary preparation audits."
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Commercial Scaling": {
+                                icon: "🚀",
+                                tasks: [
+                                    {
+                                        title: "Organic Growth",
+                                        points: [
+                                            "Launch a formal referral program to incentivize growth.",
+                                        ]
+                                    },
+                                    {
+                                        title: "Marketing Optimization",
+                                        points: [
+                                            "Scale investment in the campaigns with the highest ROI from Phase 2.",
+                                        ]
+                                    },
+                                    {
+                                        title: "Thought Leadership",
+                                        points: [
+                                            "Produce and distribute content (reports, whitepapers) to position the brand.",
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Goals & KPIs": {
+                                sections: [
+                                    {
+                                        title: 'Overall Growth',
+                                        kpis: [
+                                            { icon: '👥', value: '600', label: 'Active Subscribers' },
+                                            { icon: '💰', value: '$18,000+', label: 'MRR (USD)' }
+                                        ],
+                                        justification: 'The goal of 600 subscribers represents more than double the customer base of Phase 2, demonstrating strong market traction. The MRR is calculated based on 600 subscribers at an average price of $29.99.'
+                                    },
+                                    {
+                                        title: 'Expansion Performance',
+                                        kpis: [
+                                            { icon: '➕', value: '150', label: 'Subscribers (New Specialties)' }
+                                        ],
+                                        justification: 'This goal validates the success of the expansion strategy and product adaptation for the General Medicine and Pediatrics markets.'
+                                    },
+                                    {
+                                        title: 'Technical & Product Progress',
+                                        kpis: [
+                                            { icon: '🏥', value: '1 PoC', label: 'HL7/FHIR Integration' },
+                                            { icon: '🛡️', value: '✓', label: 'HIPAA Audit Completed' }
+                                        ],
+                                        justification: 'A successful PoC demonstrates the platform\'s technical ability to operate in more complex clinical environments. The preparation audit is a critical and tangible step toward obtaining a key security certification.'
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        id: 4, 
+                        title: 'Consolidation & National Market Dominance',
+                        duration: 'Q3-Q4 2026 (July - December)', 
+                        status: 'future', 
+                        description: 'This phase redirects all efforts to a single objective: to achieve an undisputed position of dominance in the Costa Rican market. The strategy focuses on two fronts: moving the product "upmarket" to capture enterprise clients (clinics and hospitals) by leveraging the technical advancements of the previous phase, and deepening the product\'s value to saturate the market of independent professionals.',
+                        taskSections: {
+                            "B2B Market Capture": {
+                                icon: "🏢",
+                                tasks: [
+                                    {
+                                        title: "Finalize HL7/FHIR Integration",
+                                        icon: '🔗',
+                                        type: 'b2b',
+                                        points: ["Take the proof of concept to a functional production implementation with a first clinical client."]
+                                    },
+                                    {
+                                        title: "Develop Enterprise Plan & Offering",
+                                        icon: '💼',
+                                        type: 'b2b',
+                                        points: ["Create a specific pricing model and offering for clinics, including multi-user administration and centralized reporting."]
+                                    },
+                                    {
+                                        title: "Reach Final Phase of HIPAA Certification",
+                                        icon: '🛡️',
+                                        type: 'b2b',
+                                        points: ["Complete the remaining steps after the audit to formally obtain certification, a key selling point."]
+                                    }
+                                ]
+                            },
+                            "Product Evolution": {
+                                icon: "💡",
+                                tasks: [
+                                    {
+                                        title: "Launch of Analytics Module",
+                                        icon: '📊',
+                                        type: 'evolution',
+                                        points: ["Offer a dashboard with practice statistics (e.g., common diagnoses, consultation times) to increase retention."]
+                                    },
+                                    {
+                                        title: "Predictive AI Development (Pilot)",
+                                        icon: '🧠',
+                                        type: 'evolution',
+                                        points: ["Initiate an internal pilot project to explore predictive functionalities with the accumulated data."]
+                                    },
+                                    {
+                                        title: "Integrations Marketplace",
+                                        icon: '🔌',
+                                        type: 'evolution',
+                                        points: ["Launch a first version that allows connecting Vitta Health with other tools (accounting, scheduling)."]
+                                    }
+                                ]
+                            },
+                            "Marketing & Market Saturation": {
+                                icon: "🎯",
+                                tasks: [
+                                    {
+                                        title: "'Industry Standard' Marketing",
+                                        icon: '🏆',
+                                        type: 'saturation',
+                                        points: ["Shift the messaging from 'a new solution' to 'the tool that all leading professionals are using'."]
+                                    },
+                                    {
+                                        title: "Launch Specialty-Specific Campaigns",
+                                        icon: '📢',
+                                        type: 'saturation',
+                                        points: ["Create ultra-specific niche marketing campaigns for specialties with lower penetration."]
+                                    }
+                                ]
+                            },
+                            "Goals & KPIs": {
+                                sections: [
+                                    {
+                                        title: 'Growth & Market Penetration',
+                                        kpis: [
+                                            { icon: '👥', value: '1,000', label: 'Active Subscribers' },
+                                            { icon: '📈', value: '> 25%', label: 'Market Share (Private)' }
+                                        ],
+                                        justification: 'A growth of 400 new users over Phase 3 demonstrates acceleration towards dominance. The market share is calculated on 3,570 private nutritionists and physical therapists.'
+                                    },
+                                    {
+                                        title: 'Enterprise (B2B) Market Success',
+                                        kpis: [
+                                            { icon: '🏢', value: '3', label: 'Clinic Contracts' },
+                                            { icon: '✅', value: '1', label: 'Productive HL7/FHIR Integration' }
+                                        ],
+                                        justification: 'Validates the success of the "upmarket" strategy and the ability to close more complex sales. The integration milestone demonstrates technical capability in production.'
+                                    },
+                                    {
+                                        title: 'Product Advancement',
+                                        kpis: [
+                                            { icon: '📊', value: '20%', label: 'Adoption of Analytics Module' }
+                                        ],
+                                        justification: 'Measures not only development, but also the relevance and value that new tools bring to users.'
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        id: 5, 
+                        title: 'Digital & Precision Expansion',
+                        duration: '2027+', 
+                        status: 'future',
+                        description: 'This phase marks the beginning of international expansion with a "precision surgery" approach. Instead of a massive and costly national rollout, the strategy is to concentrate 100% of resources on conquering a single, strategic metropolitan market in a new country (e.g., Mexico City, Bogotá, or Santiago). The entry will be executed remotely, leveraging an intensive digital marketing model and the growth "playbook" already validated in Costa Rica, always ensuring that new users join and remain directly on the Vitta Health platform.',
+                        taskSections: {
+                            "Milestones & Tasks": {
+                                icon: "🗺️",
+                                type: 'task-card-grid',
+                                tasks: [
+                                    {
+                                        title: "Market Preparation (First Half 2027)",
+                                        icon: '🏗️',
+                                        type: 'strategy',
+                                        points: [
+                                            "<strong>Metropolitan Market Selection:</strong> Conduct an analysis to choose a single target city, based on the concentration of health professionals, digital competition, and regulatory ease.",
+                                            "<strong>Cultural and Product Adaptation:</strong> Perform deep localization, not just of the language, but of medical terminology, idioms, and workflows specific to that city.",
+                                            "<strong>Compliance and Operations:</strong> Ensure compliance with local data protection laws and enable payment gateways to process local currency frictionlessly."
+                                        ]
+                                    },
+                                    {
+                                        title: "Digital Entry Execution (Second Half 2027)",
+                                        icon: '🚀',
+                                        type: 'marketing',
+                                        points: [
+                                            "<strong>Geofenced Precision Marketing:</strong> Launch LinkedIn and Google advertising campaigns exclusively targeting health professionals within the geographical limits of the selected city.",
+                                            "<strong>Create a Remote 'Assault Team':</strong> Assign a small, dedicated team within Costa Rica to become the expert on this new market, handling all demos, support, and customer success remotely. No physical offices will be opened.",
+                                            "<strong>Partnerships with Local Influencers:</strong> Identify and collaborate with 2-3 influential doctors or opinion leaders within that city to act as ambassadors and quickly build local trust."
+                                        ]
+                                    }
+                                ]
+                            },
+                            "KPIs & Goals (2027)": {
+                                sections: [
+                                    {
+                                        title: 'Establishment in the New Market',
+                                        kpis: [
+                                            { icon: '🌍', value: '1', label: 'City Launched Internationally' },
+                                            { icon: '👥', value: '200', label: 'Paying Subscribers (Target City)' }
+                                        ],
+                                        justification: 'The goal of 200 paying subscribers demonstrates the successful conquest of a market beachhead.'
+                                    },
+                                    {
+                                        title: 'Validation of the Expansion Model',
+                                        kpis: [
+                                            { icon: '💸', value: '< $300', label: 'Customer Acquisition Cost (CAC)' },
+                                            { icon: '✅', value: '70%', label: 'Self-Service Onboarding Rate' }
+                                        ],
+                                        justification: 'A low CAC validates the profitability of the digital entry model, while a high self-service rate proves the product is intuitive enough to scale remotely.'
+                                    },
+                                    {
+                                        title: 'Financial Viability',
+                                        kpis: [
+                                            { icon: '💰', value: '$6,000', label: 'MRR from New Market' }
+                                        ],
+                                        justification: 'Generating $6k in MRR exclusively from the new city confirms the financial viability of the business at an international level.'
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                marketPotential: {
+                    title: "🎯 Market Potential Analysis",
+                    description: "The initial strategy focuses on a validated niche market of nutritionists and physical therapists, followed by a phased expansion into other medical specialties, representing a significant growth opportunity in Costa Rica.",
+                    subscriptionPrice: 29.99,
+                    initialMarket: {
+                        title: "Phase 1: Initial Focus (Nutritionists & Physical Therapists)",
+                        total: 3570,
+                        tasks: [
+                            {
+                                title: 'Market: Nutritionists',
+                                icon: '🍎',
+                                type: 'market',
+                                points: [
+                                    "<strong>Total Registered:</strong> 1,532",
+                                    "<strong>In Private Practice:</strong> 1,010",
+                                ]
+                            },
+                            {
+                                title: 'Market: Physical Therapists',
+                                icon: '‍🏋️',
+                                type: 'market',
+                                points: [
+                                    "<strong>Total Registered:</strong> 3,940",
+                                    "<strong>In Private Practice:</strong> 2,560",
+                                ]
+                            }
+                        ]
+                    },
+                    expansionMarket: {
+                        title: "Phase 2: Expansion Opportunities (Click to analyze)",
+                        total: 3723, // This is the total of all items below, calculated for convenience
+                        goal_percentage: 40,
+                        items: [
+                            { name: "Pediatrics", count: 779, icon: "👶" },
+                            { name: "Internal Medicine", count: 610, icon: "🩺" },
+                            { name: "Gynecology & Obstetrics", count: 670, icon: "🤰" },
+                            { name: "General Surgery", count: 456, icon: "🩹" },
+                            { name: "Orthopedics & Traumatology", count: 309, icon: "🦴" },
+                            { name: "Dermatology", count: 191, icon: "✨" },
+                            { name: "Geriatrics & Gerontology", count: 187, icon: "👴" },
+                            { name: "Cardiology", count: 171, icon: "❤️" },
+                            { name: "Gastroenterology", count: 138, icon: "💊" },
+                            { name: "Physical Medicine & Rehabilitation", count: 128, icon: "💪" },
+                            { name: "Endocrinology", count: 84, icon: "🧬" },
+                        ]
+                    }
+                },
+                demoRoadmap: {
+                    title: '📈 Demo & Conversion Projection',
+                    summary: 'The goal is to convert prospects into active users through product demonstrations, based on a projected conversion rate of 75%.',
+                    objectives: {
+                        title: '🎯 Demonstration Objectives (2025-2026)',
+                        tasks: [
+                            {
+                                title: 'Q3 2025 (Beta)',
+                                icon: '🧪',
+                                type: 'strategy',
+                                points: [
+                                    "<strong>Demos to Perform:</strong> 50",
+                                    "<strong>Objective:</strong> Acquire ~37 beta users",
+                                    "<strong>Focus:</strong> Product validation"
+                                ]
+                            },
+                            {
+                                title: 'Q4 2025 (Commercial Launch)',
+                                icon: '🚀',
+                                type: 'commercial',
+                                points: [
+                                    "<strong>Demos to Perform:</strong> 102",
+                                    "<strong>Objective:</strong> Acquire first 75 paying customers",
+                                    "<strong>Focus:</strong> Initial market penetration"
+                                ]
+                            },
+                            {
+                                title: 'H1 2026 (National Expansion)',
+                                icon: '📈',
+                                type: 'evolution',
+                                points: [
+                                    "<strong>Demos to Perform:</strong> ~118 per month",
+                                    "<strong>Objective:</strong> Reach 600 subscribers",
+                                    "<strong>Focus:</strong> Scaling user base"
+                                ]
+                            },
+                            {
+                                title: 'H2 2026 (Market Consolidation)',
+                                icon: '🏢',
+                                type: 'b2b',
+                                points: [
+                                    "<strong>Demos to Perform:</strong> ~90 per month",
+                                    "<strong>Objective:</strong> Reach 1,000 subscribers",
+                                    "<strong>Focus:</strong> High-value & B2B clients"
+                                ]
+                            }
+                        ]
+                    },
+                    strategy: {
+                        title: '🗺️ Strategy for Generating Demonstrations',
+                        tasks: [
+                            {
+                                title: 'Launch Phase (2025)',
+                                icon: '📣',
+                                type: 'marketing',
+                                points: [
+                                   "<strong>Lead Generation:</strong> Leverage the strategic alliance with Clínica Bíblica and content marketing efforts.",
+                                   "<strong>Conversion Focus:</strong> Drive demo sign-ups through targeted paid advertising campaigns on Google and LinkedIn."
+                                ]
+                            },
+                            {
+                                title: 'Expansion Phase (H1 2026)',
+                                icon: '➕',
+                                type: 'market',
+                                points: [
+                                   "<strong>Increase Volume:</strong> Expand the product to new specialties (General Medicine, Pediatrics) to broaden the top of the funnel.",
+                                   "<strong>Incentivize Growth:</strong> Launch a formal referral program to encourage word-of-mouth marketing."
+                                ]
+                            },
+                            {
+                                title: 'Consolidation Phase (H2 2026)',
+                                icon: '🔗',
+                                type: 'technical',
+                                points: [
+                                   "<strong>Shift to B2B:</strong> Attract demos from clinics and hospitals by leveraging the HL7/FHIR system integration.",
+                                   "<strong>Build Trust:</strong> Utilize the upcoming HIPAA certification as a key trust-builder and selling point for larger clients."
+                                ]
+                            }
+                        ]
+                    }
+                },
+                // --- START: MODIFIED DATA ---
+                kpis: {
+                    title: "🏆 Key KPIs & Current Performance",
+                    current: {
+                        title: "Current Performance (July 2025)"
+                    },
+                    upcoming: {
+                        title: "Upcoming Goals (August & September 2025)"
+                    },
+                    overall: {
+                        title: "Overall Project Targets",
+                        tasks: [
+                            {
+                                title: "Year 1 & 2 Targets",
+                                icon: "🎯",
+                                type: 'kpi',
+                                points: [
+                                    "<strong>User Retention:</strong> >95%",
+                                    "<strong>Target Transcription Time:</strong> < 40 seconds",
+                                    "<strong>Active Subscriptions (End of 2025):</strong> 75",
+                                    "<strong>Active Subscriptions (End of 2026):</strong> 1,000",
+                                    "<strong>Market Share (Private, End of 2026):</strong> >25%",
+                                    "<strong>B2B Clinic Contracts (End of 2026):</strong> 3+"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                // --- END: MODIFIED DATA ---
+                financials: {
+                    title: "💰 Financial Projection & Capital Required",
+                    subtitle: "Estimate for the Next 12 Months",
+                    initialInvestment: {
+                        title: "Initial Investment (One-Time)",
+                        icon: "🚀",
+                        items: [
+                            { name: "Corporation (S.A.) Creation", amount: 850, icon: "🏢" },
+                            { name: "Name & Trademark Registration", amount: 250, icon: "©️" },
+                            { name: "Costa Rican Health Chamber Fee", amount: 500, icon: "🏥" }
+                        ]
+                    },
+                    monthlyCosts: {
+                        title: "Recurring Monthly Costs",
+                        icon: "⚙️",
+                        items: [
+                            { name: "Maintenance & Operation (Servers, etc.)", amount: 200, icon: "☁️" },
+                            { name: "Human Talent", amount: 1000, icon: "👩‍💻" }
+                        ]
+                    },
+                    contingencyAmount: 4000
+                },
+                equityOffer: {
+                    title: "📈 Investment & Equity Offer",
+                    tasks: [
+                        {
+                            title: "Direct Equity Grant",
+                            icon: "🏢",
+                            type: 'strategy',
+                            points: [
+                                "Receive **5% of the company's shares**, granted immediately upon incorporation.",
+                                "This provides a direct, foundational stake in Vitta Health's ownership structure from day one."
+                            ]
+                        },
+                        {
+                            title: "SAFE Note for Future Equity",
+                            icon: "🚀",
+                            type: 'evolution',
+                            points: [
+                                "An additional **5% equity stake** offered via a SAFE (Simple Agreement for Future Equity).",
+                                "This investment converts to shares in a future financing round, aligning your success with our long-term growth."
+                            ]
+                        }
+                    ]
+                }
+            };
+            
+            const summaryContainer = document.getElementById('summary-roadmap-container');
+            const roadmapContainer = document.getElementById('roadmap-container');
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const marketPotentialContainer = document.getElementById('market-potential-container');
+            const kpisContainer = document.getElementById('kpis-container');
+            const demoRoadmapContainer = document.getElementById('demo-roadmap-container');
+            const financialEquityContainer = document.getElementById('financial-equity-combined-container');
+
+            function buildKpiCardHTML(kpi, customClass = '') {
+                 return `<div class="data-card ${customClass}"><div class="value" data-value="${kpi.value}"></div><div class="label">${kpi.label}</div></div>`;
+            }
+            
+            function buildTaskCardGridHTML(data, options = {}) {
+                const { id = '', suppressWrapper = false } = options;
+                
+                let gridHTML = data.tasks.map(task => `
+                    <div class="task-card ${task.type || ''}">
+                        <div class="task-card-header">
+                            <span class="icon">${task.icon || '🔹'}</span>
+                            <h5>${task.title}</h5>
+                        </div>
+                        <div class="task-card-body">
+                            <ul>
+                                ${task.points.map(point => `<li>${point}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `).join('');
+
+                const content = `<div class="task-card-grid">${gridHTML}</div>`;
+
+                if (suppressWrapper) { return content; }
+
+                return `<div class="dashboard-panel" ${id ? `id="${id}"` : ''}><h3>${data.title}</h3>${content}</div>`;
+            }
+
+            function buildMarketPotentialHTML(data) {
+                const initialMarketHTML = buildTaskCardGridHTML(data.initialMarket, { suppressWrapper: true });
+                
+                const expansionItems = [...data.expansionMarket.items];
+                expansionItems.sort((a, b) => b.count - a.count);
+                
+                const goalPercent = data.expansionMarket.goal_percentage / 100;
+                const price = data.subscriptionPrice;
+
+                const expansionListHTML = expansionItems.map((item, index) => {
+                    const isVisible = index < 5;
+                    const opportunity = Math.round(item.count * goalPercent);
+                    const projectedMRR = opportunity * price;
+                    const projectedARR = projectedMRR * 12;
+
+                    return `
+                    <details class="expansion-item-details ${!isVisible ? 'is-hidden' : ''}">
+                        <summary>
+                            <div class="expansion-item-content">
+                                <span class="item-icon">${item.icon}</span>
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-count">${item.count.toLocaleString()}</span>
+                            </div>
+                            <span class="item-expand-icon">▾</span>
+                        </summary>
+                        <div class="expansion-details-content">
+                            <div class="breakdown-grid">
+                                <div class="breakdown-column">
+                                    <h5>Market Breakdown</h5>
+                                    <div class="breakdown-item">
+                                        <span class="label">Professionals:</span>
+                                        <span class="value">${item.count.toLocaleString()}</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="label">Opportunity (${data.expansionMarket.goal_percentage}%):</span>
+                                        <span class="value">${opportunity.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                 <div class="breakdown-column">
+                                    <h5>Revenue Projection</h5>
+                                    <div class="breakdown-item breakdown-revenue">
+                                        <span class="label">MRR:</span>
+                                        <div>
+                                          <span class="value" data-value="$${projectedMRR.toFixed(2)}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="breakdown-item breakdown-revenue">
+                                        <span class="label">ARR:</span>
+                                        <div>
+                                          <span class="value" data-value="$${projectedARR.toFixed(2)}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    `;
+                }).join('');
+
+                const expansionMarketHTML = `
+                    <div class="expansion-list-wrapper">
+                        <div class="expansion-list">${expansionListHTML}</div>
+                        <div class="expansion-toggle-wrapper">
+                            <button class="btn btn-secondary toggle-expansion-list" data-show-text="Show All ${expansionItems.length} Specialties" data-hide-text="Show Top 5 Specialties">
+                                Show All ${expansionItems.length} Specialties
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                const initialTotal = data.initialMarket.total;
+                const expansionTotal = data.expansionMarket.total;
+                const grandTotal = initialTotal + expansionTotal;
+
+                const initialOpportunity = Math.round(initialTotal * goalPercent);
+                const expansionOpportunity = Math.round(expansionTotal * goalPercent);
+                const grandOpportunity = initialOpportunity + expansionOpportunity;
+
+                const opportunitySummaryHTML = `
+                    <div class="market-opportunity-summary">
+                        <div class="opportunity-card">
+                            <h5 class="opportunity-card-title">Initial Market (Niche)</h5>
+                            <p class="opportunity-card-total">Based on ${initialTotal.toLocaleString()} professionals</p>
+                            <div class="opportunity-card-value value" data-value="${initialOpportunity}"></div>
+                            <div class="opportunity-card-label">Potential Subscribers</div>
+                        </div>
+                        <div class="opportunity-card">
+                             <h5 class="opportunity-card-title">Expansion Market</h5>
+                             <p class="opportunity-card-total">Based on ${expansionTotal.toLocaleString()} professionals</p>
+                             <div class="opportunity-card-value value" data-value="${expansionOpportunity}"></div>
+                             <div class="opportunity-card-label">Potential Subscribers</div>
+                        </div>
+                        <div class="opportunity-card total">
+                            <h5 class="opportunity-card-title">Total Opportunity (TAM)</h5>
+                            <p class="opportunity-card-total">Based on ${grandTotal.toLocaleString()} professionals</p>
+                            <div class="opportunity-card-value value" data-value="${grandOpportunity}"></div>
+                            <div class="opportunity-card-label">Total Potential Subscribers</div>
+                        </div>
+                    </div>
+                `;
+                
+                const totalOpportunity = grandOpportunity;
+                const totalMRR = totalOpportunity * price;
+                const totalARR = totalMRR * 12;
+                
+                const totalSummaryHTML = `
+                    <div id="expansion-summary-section">
+                        <h4 class="breakdown-title">Total Market Revenue Projection (All Phases)</h4>
+                        <div class="breakdown-grid">
+                            <div class="breakdown-column">
+                                <h5>Total Market Breakdown</h5>
+                                <div class="breakdown-item">
+                                    <span class="label">Total Professionals:</span>
+                                    <span class="value" data-value="${grandTotal}"></span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="label">Potential Subscribers (${data.expansionMarket.goal_percentage}%):</span>
+                                    <span class="value" data-value="${totalOpportunity}"></span>
+                                </div>
+                            </div>
+                             <div class="breakdown-column">
+                                <h5>Total Revenue Projection</h5>
+                                <div class="breakdown-item breakdown-revenue">
+                                    <span class="label">Total MRR:</span>
+                                    <span class="value" data-value="$${totalMRR.toFixed(2)}"></span>
+                                </div>
+                                <div class="breakdown-item breakdown-revenue">
+                                    <span class="label">Total ARR:</span>
+                                    <span class="value" data-value="$${totalARR.toFixed(2)}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+
+                const content = `
+                    <p class="phase-description" style="text-align:center;">${data.description}</p>
+                    <div class="market-potential-section">
+                        <h4>${data.initialMarket.title}</h4>
+                        ${initialMarketHTML}
+                    </div>
+                    <div class="market-potential-section">
+                        <h4>${data.expansionMarket.title}</h4>
+                        ${expansionMarketHTML}
+                    </div>
+                     <div class="market-potential-section">
+                        <h4>Total Market Opportunity Summary (${data.expansionMarket.goal_percentage}% Target)</h4>
+                        ${opportunitySummaryHTML}
+                        ${totalSummaryHTML}
+                    </div>
+                `;
+
+                return `
+                    <details class="collapsible-panel" open>
+                        <summary>
+                            <h3>${data.title}</h3>
+                            <div class="expand-icon">▾</div>
+                        </summary>
+                        <div class="collapsible-content">
+                            ${content}
+                        </div>
+                    </details>
+                `;
+            }
+
+            function buildDemoRoadmapHTML(data) {
+                const objectivesHTML = buildTaskCardGridHTML({ title: data.objectives.title, tasks: data.objectives.tasks }, { suppressWrapper: true });
+                const strategyHTML = buildTaskCardGridHTML({ title: data.strategy.title, tasks: data.strategy.tasks }, { suppressWrapper: true });
+
+                const content = `
+                    <p class="phase-description" style="text-align:center;">${data.summary}</p>
+                    <div class="market-potential-section">
+                        <h4>${data.objectives.title}</h4>
+                        ${objectivesHTML}
+                    </div>
+                    <div class="market-potential-section">
+                        <h4>${data.strategy.title}</h4>
+                        ${strategyHTML}
+                    </div>
+                `;
+
+                return `
+                    <details class="collapsible-panel" open>
+                        <summary>
+                            <h3>${data.title}</h3>
+                            <div class="expand-icon">▾</div>
+                        </summary>
+                        <div class="collapsible-content">
+                            ${content}
+                        </div>
+                    </details>
+                `;
+            }
+            
+            function buildCombinedFinancialEquityHTML(financialsData, equityData) {
+                const initialTotal = financialsData.initialInvestment.items.reduce((sum, item) => sum + item.amount, 0);
+                const monthlyTotal = financialsData.monthlyCosts.items.reduce((sum, item) => sum + item.amount, 0);
+                const annualTotal = monthlyTotal * 12;
+                const contingencyTotal = financialsData.contingencyAmount;
+                const subTotal = initialTotal + annualTotal;
+                const grandTotal = subTotal + contingencyTotal;
+
+                const initialItemsHTML = financialsData.initialInvestment.items.map(item => `
+                    <li class="financial-item">
+                        <span class="name"><span class="icon">${item.icon}</span> ${item.name}</span>
+                        <span class="amount value" data-value="$${item.amount}"></span>
+                    </li>`).join('');
+
+                const monthlyItemsHTML = financialsData.monthlyCosts.items.map(item => `
+                     <li class="financial-item">
+                        <span class="name"><span class="icon">${item.icon}</span> ${item.name}</span>
+                        <span class="amount value" data-value="$${item.amount}"></span>
+                    </li>`).join('');
+
+                const financialsHTML = `
+                    <p class="phase-description" style="text-align:center; font-weight: bold; padding-top: 25px;">${financialsData.subtitle}</p>
+                    <div class="financial-details-grid">
+                        <div class="financial-card">
+                            <h4><span class="icon">${financialsData.initialInvestment.icon}</span>${financialsData.initialInvestment.title}</h4>
+                            <ul class="financial-item-list">${initialItemsHTML}</ul>
+                            <div class="financial-subtotal">
+                                <span class="label">Total Initial Investment</span>
+                                <span class="value" data-value="$${initialTotal}"></span>
+                            </div>
+                        </div>
+                        <div class="financial-card">
+                            <h4><span class="icon">${financialsData.monthlyCosts.icon}</span>${financialsData.monthlyCosts.title}</h4>
+                            <ul class="financial-item-list">${monthlyItemsHTML}</ul>
+                            <div class="financial-subtotal">
+                                <span class="label">Total Monthly / <span class="annual-calc">Annual: $${annualTotal.toLocaleString()}</span></span>
+                                <span class="value" data-value="$${monthlyTotal}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="financial-summary-breakdown">
+                         <div class="summary-item">
+                            <div class="label">Investment + 12-Month Ops</div>
+                            <div class="value" data-value="$${subTotal}"></div>
+                        </div>
+                        <div class="summary-operator">+</div>
+                        <div class="summary-item">
+                            <div class="label">Contingency Fund</div>
+                            <div class="value" data-value="$${contingencyTotal}"></div>
+                        </div>
+                        <div class="summary-operator">=</div>
+                        <div class="summary-item total">
+                            <div class="label">Total Capital Required</div>
+                            <div class="value" data-value="$${grandTotal}"></div>
+                        </div>
+                    </div>`;
+
+                const equityHTML = buildTaskCardGridHTML(equityData, { suppressWrapper: true });
+
+                return `
+                    <details class="collapsible-panel" open>
+                        <summary>
+                             <h3>💰 Financials & Investment Offer</h3>
+                             <div class="expand-icon">▾</div>
+                        </summary>
+                        <div class="collapsible-content">
+                            ${financialsHTML}
+                            ${equityHTML}
+                        </div>
+                    </details>
+                `;
+            }
+
+            function buildKpiListHTML(sectionData) {
+                let listHTML = '<div class="kpi-list-container">';
+                
+                if (sectionData.sections) {
+                    listHTML += sectionData.sections.map(subSection => {
+                        const kpis = subSection.kpis.map(kpi => `
+                            <li>
+                                <span class="kpi-icon">${kpi.icon || '🔹'}</span>
+                                <span class="kpi-text">
+                                    <span class="value" data-value="${kpi.value}"></span>
+                                    <span class="label">${kpi.label}</span>
+                                </span>
+                            </li>
+                        `).join('');
+
+                        let justificationHTML = subSection.justification ? `<p class="kpi-justification">${subSection.justification}</p>` : '';
+
+                        return `
+                            <div class="kpi-month-item">
+                                <h4 class="kpi-month-title">${subSection.title}</h4>
+                                <ul class="kpi-list">${kpis}</ul>
+                                ${justificationHTML}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                if (sectionData.summary) {
+                    listHTML += `
+                        <div class="kpi-summary">
+                            <div class="kpi-summary-title">${sectionData.summary.title}</div>
+                            <div class="kpi-summary-value value" data-value="${sectionData.summary.value}"></div>
+                            <div class="kpi-summary-label">${sectionData.summary.label}</div>
+                        </div>
+                    `;
+                }
+
+                listHTML += '</div>';
+                return listHTML;
+            }
+
+            // --- START: NEW/MODIFIED FUNCTION ---
+            function buildKpisSectionHTML(data, roadmapData) {
+                const currentKpis = roadmapData.find(p => p.id === 1).taskSections.July.kpis;
+                const currentKpisHTML = `<div class="dashboard-grid">${currentKpis.map(kpi => buildKpiCardHTML(kpi, 'kpi')).join('')}</div>`;
+
+                const upcomingKpiSections = roadmapData.find(p => p.id === 1).taskSections["August & September"].subTabs["👥 Users"].sections;
+                const upcomingKpisHTML = buildKpiListHTML({ sections: upcomingKpiSections });
+
+                const overallTargetsHTML = buildTaskCardGridHTML(data.overall, { suppressWrapper: true });
+
+                const content = `
+                    <div class="market-potential-section">
+                        <h4>${data.current.title}</h4>
+                        ${currentKpisHTML}
+                    </div>
+                    <div class="market-potential-section">
+                        <h4>${data.upcoming.title}</h4>
+                        ${upcomingKpisHTML}
+                    </div>
+                    <div class="market-potential-section">
+                        <h4>${data.overall.title}</h4>
+                        ${overallTargetsHTML}
+                    </div>
+                `;
+
+                return `
+                    <details class="collapsible-panel" open>
+                        <summary>
+                            <h3>${data.title}</h3>
+                            <div class="expand-icon">▾</div>
+                        </summary>
+                        <div class="collapsible-content">
+                            ${content}
+                        </div>
+                    </details>
+                `;
+            }
+            // --- END: NEW/MODIFIED FUNCTION ---
+
+            function buildPhaseAccordionHTML(phase) {
+                const descriptionHTML = `<p class="phase-description">${phase.description}</p>`;
+                
+                let tasksHTML;
+                if (phase.taskSections) {
+                    const sections = Object.keys(phase.taskSections);
+                    const tabs = sections.map((section, index) => `<button class="tab-btn ${index === 0 ? 'active' : ''}" data-section="${section}">${section}</button>`).join('');
+                    
+                    const contents = sections.map((section, index) => {
+                        const sectionData = phase.taskSections[section];
+                        let panelContent = '';
+
+                        if (sectionData.subTabs) {
+                            const subTabNames = Object.keys(sectionData.subTabs);
+                            const subTabButtons = subTabNames.map((name, i) => `<button class="tab-btn sub-tab-btn ${i === 0 ? 'active' : ''}" data-sub-section="${name}">${name}</button>`).join('');
+                            const subTabPanels = subTabNames.map((name, i) => {
+                                const subTabData = sectionData.subTabs[name];
+                                let subPanelContent = '';
+                                
+                                if (subTabData.sections) { 
+                                    subPanelContent += buildKpiListHTML(subTabData);
+                                }
+                                
+                                if (subTabData.tasks && subTabData.tasks.length > 0) { 
+                                     subPanelContent += buildTaskCardGridHTML({ tasks: subTabData.tasks, title: '' }, { suppressWrapper: true });
+                                }
+
+                                return `<div class="tab-content-panel sub-tab-panel ${i === 0 ? 'active' : ''}" data-sub-section="${name}">${subPanelContent}</div>`;
+                            }).join('');
+                            panelContent = `<div class="task-tabs sub-tabs">${subTabButtons}</div><div class="tab-content-container">${subTabPanels}</div>`;
+                        } else {
+                            if (sectionData.type === 'task-card-grid') {
+                                panelContent = buildTaskCardGridHTML(sectionData, { suppressWrapper: true });
+                            } else if (section.includes('Partnerships')) {
+                                const benefitsGrid = sectionData.benefits.map(kpi => buildKpiCardHTML(kpi, 'no-anim')).join('');
+                                panelContent = `
+                                    <h4 style="text-align:center;">${sectionData.title}</h4>
+                                    <div class="info-card-container">
+                                        <p>${sectionData.objective}</p>
+                                    </div>
+                                    <h4>${sectionData.benefits_title}</h4>
+                                    <div class="dashboard-grid monthly-kpis benefits-grid" style="margin-top:15px;">
+                                        ${benefitsGrid}
+                                    </div>
+                                `;
+                            } else {
+                                let kpisHTML = '';
+                                if (sectionData.sections) { 
+                                    kpisHTML = buildKpiListHTML(sectionData);
+                                } else if (sectionData.kpis) { 
+                                    kpisHTML = `<div class="dashboard-grid monthly-kpis">${sectionData.kpis.map(kpi => buildKpiCardHTML(kpi)).join('')}</div>`;
+                                }
+
+                                if (sectionData.tasks && sectionData.tasks.length > 0) {
+                                    kpisHTML += buildTaskCardGridHTML({ tasks: sectionData.tasks }, { suppressWrapper: true });
+                                }
+                                panelContent = kpisHTML;
+                            }
+                        }
+                        return `<div class="tab-content-panel ${index === 0 ? 'active' : ''}" data-section="${section}">${panelContent}</div>`;
+                    }).join('');
+                    tasksHTML = `<div class="tasks-container" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;"><div class="task-tabs">${tabs}</div><div class="tab-content-container">${contents}</div></div>`;
+                } else {
+                    tasksHTML = `<div class="tasks-container"><h4>Key Tasks:</h4><ul class="phase-tasks">${phase.tasks.map(task => `<li class="${task.done ? 'completed' : ''}"><span class="icon ${task.done ? 'icon-check' : 'icon-circle'}"></span><div class="task-text">${task.text}</div></li>`).join('')}</ul></div>`;
+                }
+
+                
+                return `<div class="phase-accordion ${phase.status}" data-phase-id="${phase.id}"><div class="phase-summary"><div class="phase-number">${phase.id}</div><div class="summary-content"><div class="summary-title">${phase.title}</div><div class="summary-duration">${phase.duration}</div></div><div class="expand-icon">▾</div></div><div class="phase-details"><div class="phase-details-content">${descriptionHTML}${tasksHTML}</div></div></div>`;
+            }
+            
+            function renderAll() {
+                dashboardContainer.innerHTML = `<div class="dashboard-panel" id="current-status-panel"><h3>${appData.currentStatus.title}</h3><div class="dashboard-grid">${appData.currentStatus.metrics.map(kpi => buildKpiCardHTML(kpi)).join('')}</div></div>`;
+                summaryContainer.innerHTML = appData.roadmap.map(phase => `<div class="summary-step ${phase.status}" data-phase-id="${phase.id}"><div class="step-number">${phase.id}</div><div class="step-title">${phase.title}</div></div>`).join('');
+                roadmapContainer.innerHTML = appData.roadmap.map(phase => buildPhaseAccordionHTML(phase)).join('');
+                marketPotentialContainer.innerHTML = buildMarketPotentialHTML(appData.marketPotential);
+                // --- MODIFIED LINE ---
+                kpisContainer.innerHTML = buildKpisSectionHTML(appData.kpis, appData.roadmap);
+                demoRoadmapContainer.innerHTML = buildDemoRoadmapHTML(appData.demoRoadmap);
+                financialEquityContainer.innerHTML = buildCombinedFinancialEquityHTML(appData.financials, appData.equityOffer);
+            }
+            
+            function setupEventListeners() {
+                document.body.addEventListener('click', function(e) {
+                    const parentAccordion = e.target.closest('.phase-accordion');
+                    if (parentAccordion) {
+                        const targetSummary = e.target.closest('.phase-summary');
+                        if (targetSummary) {
+                            parentAccordion.classList.toggle('active');
+                        }
+                    }
+                    
+                    const tabButton = e.target.closest('.tab-btn');
+                    if (tabButton) {
+                        const isSubTab = tabButton.classList.contains('sub-tab-btn');
+                        const container = tabButton.closest(isSubTab ? '.tab-content-panel' : '.tasks-container');
+                        if (isSubTab) {
+                            const subSectionName = tabButton.dataset.subSection;
+                            const subTabContainer = tabButton.closest('.sub-tabs').nextElementSibling;
+                            tabButton.parentElement.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+                            tabButton.classList.add('active');
+                            subTabContainer.querySelectorAll('.sub-tab-panel').forEach(panel => panel.classList.toggle('active', panel.dataset.subSection === subSectionName));
+                        } else {
+                            const sectionName = tabButton.dataset.section;
+                            container.querySelectorAll('.tab-btn:not(.sub-tab-btn)').forEach(btn => btn.classList.remove('active'));
+                            tabButton.classList.add('active');
+                            container.querySelectorAll('.tab-content-panel:not(.sub-tab-panel)').forEach(panel => panel.classList.toggle('active', panel.dataset.section === sectionName));
+                        }
+                    }
+                    
+                    const step = e.target.closest('.summary-step');
+                    if (step) {
+                        const phaseId = step.dataset.phaseId;
+                        const targetAccordion = document.querySelector(`.phase-accordion[data-phase-id="${phaseId}"]`);
+                        if (targetAccordion) {
+                            targetAccordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            if (!targetAccordion.classList.contains('active')) {
+                                setTimeout(() => targetAccordion.classList.add('active'), 300);
+                            }
+                        }
+                    }
+
+                    const collapsibleSummary = e.target.closest('.collapsible-panel > summary');
+                    if (collapsibleSummary) {
+                        e.preventDefault();
+                        const panel = collapsibleSummary.parentElement;
+                        panel.toggleAttribute('open');
+                    }
+
+                    const toggleBtn = e.target.closest('.toggle-expansion-list');
+                    if(toggleBtn) {
+                        const listWrapper = toggleBtn.closest('.expansion-list-wrapper');
+                        const allItems = listWrapper.querySelectorAll('.expansion-item-details');
+                        const isCollapsed = allItems.length > 5 && allItems[5].classList.contains('is-hidden');
+                        if (isCollapsed) {
+                            allItems.forEach(item => item.classList.remove('is-hidden'));
+                            toggleBtn.textContent = toggleBtn.dataset.hideText;
+                        } else {
+                            allItems.forEach((item, index) => {
+                                if (index >= 5) item.classList.add('is-hidden');
+                            });
+                            toggleBtn.textContent = toggleBtn.dataset.showText;
+                        }
+                    }
+                });
+                
+                const expansionDetails = document.querySelectorAll('.expansion-list .expansion-item-details');
+                expansionDetails.forEach(details => {
+                    details.addEventListener('toggle', () => {
+                        if (details.open) {
+                            expansionDetails.forEach(otherDetails => {
+                                if (otherDetails !== details) {
+                                    otherDetails.removeAttribute('open');
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+
+            function animateValue(obj, endValueStr, duration) {
+                if (!obj || obj.dataset.animated === 'true') return;
+                obj.dataset.animated = 'true';
+
+                const prefix = (endValueStr.match(/^([^\d.,]+)/) || [])[0] || '';
+                const suffix = (endValueStr.match(/([^\d.,\s]+)$/) || [])[0] || '';
+                
+                const numberPartStr = endValueStr.replace(prefix, '').replace(suffix, '').trim().replace(',', '.');
+                const end = parseFloat(numberPartStr);
+
+                if (isNaN(end)) {
+                    obj.textContent = endValueStr;
+                    return;
+                }
+                
+                let startTimestamp = null;
+                const decimalParts = numberPartStr.split('.');
+                const decimalPlaces = (decimalParts.length > 1) ? decimalParts[1].length : 0;
+
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const currentValue = progress * end;
+                    
+                    const formattedValue = currentValue.toLocaleString('de-DE', {
+                        minimumFractionDigits: decimalPlaces,
+                        maximumFractionDigits: decimalPlaces
+                    });
+                    
+                    obj.textContent = prefix + formattedValue + suffix;
+                    
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        const finalFormatted = end.toLocaleString('de-DE', {
+                            minimumFractionDigits: decimalPlaces,
+                            maximumFractionDigits: decimalPlaces
+                        });
+                        obj.textContent = prefix + finalFormatted + suffix;
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            function setupDynamicAnimations() {
+                const elementsToAnimate = document.querySelectorAll('.dashboard-panel, .task-card, .financial-card, .financial-summary-breakdown, .opportunity-card, .elegant-timeline-step, .kpi-month-item, #expansion-summary-section, .phase-accordion, .collapsible-panel');
+                
+                elementsToAnimate.forEach(el => el.classList.add('reveal-on-scroll'));
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            const valueElements = entry.target.querySelectorAll('.value[data-value]');
+                            valueElements.forEach(el => {
+                                animateValue(el, el.dataset.value, 1500);
+                            });
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '0px', threshold: 0.05 });
+
+                elementsToAnimate.forEach(el => observer.observe(el));
+            }
+            
+            // --- INITIALIZE ---
+            renderAll();
+            setupEventListeners();
+            setupDynamicAnimations();
+
+            document.querySelectorAll('.collapsible-panel, .phase-accordion.current').forEach(panel => {
+                 if(panel.classList.contains('phase-accordion')) {
+                    panel.classList.add('active');
+                 } else {
+                    panel.setAttribute('open', '');
+                 }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+/* 🔹 ESTILOS PARA AUTOMATIZACIONES (Aplicando Formato Global) */
+.automatizacion-container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 1100px; /* Se ajusta a la alineación del resto de la plataforma */
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Se alinea mejor en la pantalla */
+    margin-left: 5%; /* Aumenta el margen izquierdo para alinearlo con las demás páginas */
+    margin-top: 20px; /* Reducir espacio en blanco arriba */
+}
+
+/* 🔹 Contenedor Interno */
+.automatizacion-content {
+    width: 95%; /* Ajuste de margen lateral */
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* 🔹 TITULOS Y DESCRIPCIONES */
+.automatizacion-container h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #004080;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.automatizacion-container p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* 🔹 Configuración de Automatizaciones */
+.configuracion-automatizaciones {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 10px; /* Se sube la configuración más arriba */
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 🔹 BOTONES DE CONFIGURACIÓN */
+.botones-automatizacion {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px; /* Espacio entre la descripción y los botones */
+}
+
+.btn-automatizacion {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    width: 250px;
+    background: #004080;
+    color: white;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn-automatizacion:hover {
+    background: #002d5b;
+}
+
+/* 🔹 FORMULARIOS */
+.form-container {
+    display: none;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    width: 100%;
+    text-align: left;
+}
+
+/* 🔹 Mostrar cuando es necesario */
+.form-container.show {
+    display: block;
+}
+
+/* 🔹 Estilos para los Inputs y Selects */
+.form-container input,
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+/* 🔹 Botón Crear Nueva */
+#btn-crear-nueva {
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+}
+
+/* 🔹 Botón Guardar */
+.btn-success {
+    background: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+/* 🔹 Vista Previa del Chat */
+.vista-previa-chat {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔹 Mensajes de Chat */
+.mensaje-chat {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.usuario, .bot {
+    font-weight: bold;
+}
+
+.mensaje {
+    background: #e6f7ff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.usuario {
+    color: #004080;
+}
+
+.bot {
+    color: #28a745;
+}
+
+/* 🔹 Lista de Respuestas Rápidas */
+#lista-respuestas h3 {
+    color: #004080;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#respuestas-guardadas {
+    list-style: none;
+    padding: 0;
+}
+
+#respuestas-guardadas li {
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#respuestas-guardadas li strong {
+    color: #004080;
+}
+
+/* 🔹 Botones de Editar y Eliminar */
+.btn-editar {
+    background: #ffc107;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn-editar:hover {
+    background: #e0a800;
+}
+
+.btn-eliminar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn-eliminar:hover {
+    background: #c82333;
+}
+
+/* 🔹 RESPONSIVE */
+@media screen and (max-width: 1024px) {
+    .automatizacion-container {
+        width: 90%;
+        margin-left: 3%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .automatizacion-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        margin-left: 0;
+    }
+
+    .botones-automatizacion {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-automatizacion {
+        width: 100%;
+        max-width: 300px;
+    }
+}

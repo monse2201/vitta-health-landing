@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* Specific CSS for this page, similar to the previous one but adjusted */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+    }
+    .container-doc-config {
+        max-width: 1000px; /* A bit wider for the preview */
+        margin: 40px auto;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    .config-form-section, .document-preview-section {
+        flex: 1;
+        min-width: 350px; /* Minimum width for each column */
+    }
+    h2 {
+        font-size: 24px;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    h3 {
+        font-size: 18px;
+        color: #34495e;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+        font-size: 14px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+        outline: none;
+    }
+    .checkbox-group {
+        margin-top: 10px;
+    }
+    .checkbox-group div {
+        margin-bottom: 8px;
+    }
+    .checkbox-group input[type="checkbox"] {
+        margin-right: 8px;
+    }
+    .btn-primary-custom {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background-color 0.2s;
+        margin-top: 20px;
+    }
+    .btn-primary-custom:hover {
+        background-color: #0056b3;
+    }
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+    /* Document preview styles */
+    .preview-document {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 25px; /* More padding to simulate a document */
+        background-color: #fdfdfd;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        min-height: 500px; /* Minimum height for the preview */
+        overflow: auto;
+    }
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    .preview-logo {
+        max-width: 120px; /* A bit larger for the logo */
+        max-height: 70px;
+        display: block;
+        margin-bottom: 10px;
+    }
+    .preview-logo-placeholder {
+        width: 120px; height: 70px; border: 1px dashed #ccc; display: flex;
+        align-items: center; justify-content: center; font-size: 11px; color: #888;
+        margin-bottom: 10px;
+        background-color: #f0f0f0;
+    }
+    .preview-clinic-info, .preview-doctor-info {
+        font-size: 12px;
+        line-height: 1.4;
+        color: #555;
+    }
+    .preview-clinic-info { text-align: left; }
+    .preview-doctor-info { text-align: right; }
+    .preview-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 20px; /* Larger title */
+        margin-bottom: 20px;
+        color: var(--preview-main-color); /* Will use the color chosen by the user */
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--preview-main-color); /* Line with the chosen color */
+    }
+    .preview-content {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #333;
+    }
+    .preview-section-title {
+        font-weight: bold;
+        font-size: 16px;
+        border-bottom: 1px solid var(--preview-main-color); /* Line with the chosen color */
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+        color: var(--preview-main-color); /* Section title with the chosen color */
+    }
+
+    /* CSS variables for the preview */
+    :root {
+        --preview-main-color: #007bff; /* Fixed default color */
+    }
+</style>
+
+<div class="container-doc-config">
+    <div class="config-form-section">
+        <h2><i class="fas fa-file-invoice"></i> Document Configuration</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('configuracion_documentos') }}" method="POST" id="documentConfigForm">
+            <h3>Information to Display on Documents</h3>
+            <p class="text-muted">Select which information from your profile should appear on the generated documents. You can edit your profile information in the "My Profile" section.</p>
+            <div class="checkbox-group">
+                <div>
+                    <input type="checkbox" id="show_clinic_name_pdf" name="show_clinic_name_pdf" value="true" {% if user.show_clinic_name_pdf %}checked{% endif %}>
+                    <label for="show_clinic_name_pdf">Clinic Name</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_clinic_address_pdf" name="show_clinic_address_pdf" value="true" {% if user.show_clinic_address_pdf %}checked{% endif %}>
+                    <label for="show_clinic_address_pdf">Clinic Address</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_clinic_phone_pdf" name="show_clinic_phone_pdf" value="true" {% if user.show_clinic_phone_pdf %}checked{% endif %}>
+                    <label for="show_clinic_phone_pdf">Clinic Phone</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_clinic_website_pdf" name="show_clinic_website_pdf" value="true" {% if user.show_clinic_website_pdf %}checked{% endif %}>
+                    <label for="show_clinic_website_pdf">Clinic Website</label>
+                </div>
+                {# NEW CHECKBOX FOR THE LOGO #}
+                <div>
+                    <input type="checkbox" id="show_clinic_logo_pdf" name="show_clinic_logo_pdf" value="true" {% if user.show_clinic_logo_pdf %}checked{% endif %}>
+                    <label for="show_clinic_logo_pdf">Clinic Logo</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_doctor_license_pdf" name="show_doctor_license_pdf" value="true" {% if user.show_doctor_license_pdf %}checked{% endif %}>
+                    <label for="show_doctor_license_pdf">Doctor's Professional License</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_doctor_phone_pdf" name="show_doctor_phone_pdf" value="true" {% if user.show_doctor_phone_pdf %}checked{% endif %}>
+                    <label for="show_doctor_phone_pdf">Doctor's Professional Phone</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="show_doctor_bio_pdf" name="show_doctor_bio_pdf" value="true" {% if user.show_doctor_bio_pdf %}checked{% endif %}>
+                    <label for="show_doctor_bio_pdf">Doctor's Biography</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Configuration</button>
+        </form>
+    </div>
+
+    <div class="document-preview-section">
+        <h2><i class="fas fa-eye"></i> Document Preview</h2>
+        <div class="preview-document">
+            <div class="preview-header">
+                <div class="preview-clinic-info">
+                    {# The logo is loaded from 'logo_clinica_base64' which comes from the backend #}
+                    {# The visibility now also depends on the show_clinic_logo_pdf checkbox #}
+                    {% if logo_clinica_base64 %}
+                        <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" class="preview-logo" id="preview_logo" style="display: {{ 'block' if user.show_clinic_logo_pdf else 'none' }};">
+                    {% else %}
+                        <div class="preview-logo-placeholder" id="preview_logo_placeholder" style="display: {{ 'flex' if not logo_clinica_base64 or not user.show_clinic_logo_pdf else 'none' }};">
+                            No Logo
+                        </div>
+                    {% endif %}
+                    {# The text values here will be read from the span/strong elements and their visibility controlled by JS #}
+                    <p id="p_clinic_name" style="display: {{ 'block' if user.show_clinic_name_pdf else 'none' }};">
+                        <strong id="preview_clinic_name_val">{{ user.clinica_nombre or 'Clinic Name' }}</strong>
+                    </p>
+                    <p id="preview_clinic_address_p" style="display: {{ 'block' if user.show_clinic_address_pdf else 'none' }};">
+                        {{ user.clinica_direccion or 'Clinic Address' }}
+                    </p>
+                    <p id="preview_clinic_phone_p" style="display: {{ 'block' if user.show_clinic_phone_pdf else 'none' }};">
+                        Tel: <span id="preview_clinic_phone_val">{{ user.clinica_telefono or '0000-0000' }}</span>
+                    </p>
+                    <p id="preview_clinic_website_p" style="display: {{ 'block' if user.show_clinic_website_pdf else 'none' }};">
+                        Web: <span id="preview_clinic_website_val">{{ user.clinica_website or 'www.example.com' }}</span>
+                    </p>
+                </div>
+                <div class="preview-doctor-info">
+                    <p><strong>Dr. <span id="preview_doctor_name">{{ user.nombre or 'Doctor Name' }}</span></strong></p>
+                    <p><span id="preview_doctor_specialty">{{ user.especialidad or 'Medical Specialty' }}</span></p>
+                    <p id="preview_doctor_license_p" style="display: {{ 'block' if user.show_doctor_license_pdf else 'none' }};">
+                        License: <span id="preview_doctor_license_val">{{ user.licencia_profesional or 'XXXX-XXXX' }}</span>
+                    </p>
+                    <p id="preview_doctor_phone_p" style="display: {{ 'block' if user.show_doctor_phone_pdf else 'none' }};">
+                        Tel: <span id="preview_doctor_phone_val">{{ user.telefono_profesional or '0000-0000' }}</span>
+                    </p>
+                    <p id="preview_doctor_bio_p" style="display: {{ 'block' if user.show_doctor_bio_pdf else 'none' }};">
+                        Biography: <span id="preview_doctor_bio_val">{{ user.biografia or 'Personal biography' }}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="preview-title" id="preview_document_title">
+                EXAMPLE DOCUMENT
+            </div>
+            <div class="preview-content">
+                <div class="preview-section-title" id="preview_section_title_1">Patient Information</div>
+                <p><strong>Patient:</strong> John Doe</p>
+                <p><strong>Date:</strong> July 18, 2025</p>
+                <br>
+                <div class="preview-section-title" id="preview_section_title_2">Consultation Details</div>
+                <p>This is example text to show how the details of a consultation or AI-generated notes would look. The goal is to provide a clear idea of the final document design with the provided information.</p>
+                <p>A summary of the visit, the doctor's notes, or any other relevant content generated for the patient can be included.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // References to the preview elements
+        const previewLogo = document.getElementById('preview_logo');
+        const previewLogoPlaceholder = document.getElementById('preview_logo_placeholder');
+
+        const pClinicName = document.getElementById('p_clinic_name');
+        const previewClinicAddressP = document.getElementById('preview_clinic_address_p');
+        const previewClinicPhoneP = document.getElementById('preview_clinic_phone_p');
+        const previewClinicWebsiteP = document.getElementById('preview_clinic_website_p');
+        
+        const previewDoctorLicenseP = document.getElementById('preview_doctor_license_p');
+        const previewDoctorPhoneP = document.getElementById('preview_doctor_phone_p');
+        const previewDoctorBioP = document.getElementById('preview_doctor_bio_p');
+
+        // Form inputs for document configuration (checkboxes)
+        const checkboxes = {
+            show_clinic_name_pdf: document.getElementById('show_clinic_name_pdf'),
+            show_clinic_address_pdf: document.getElementById('show_clinic_address_pdf'),
+            show_clinic_phone_pdf: document.getElementById('show_clinic_phone_pdf'),
+            show_clinic_website_pdf: document.getElementById('show_clinic_website_pdf'),
+            show_doctor_license_pdf: document.getElementById('show_doctor_license_pdf'),
+            show_doctor_phone_pdf: document.getElementById('show_doctor_phone_pdf'),
+            show_doctor_bio_pdf: document.getElementById('show_doctor_bio_pdf'),
+            show_clinic_logo_pdf: document.getElementById('show_clinic_logo_pdf')
+        };
+
+        // User data is obtained from Jinja when the page loads
+        // This is the user data AS IT IS RENDERED IN THE INITIAL HTML.
+        // After a POST and redirection, this will be the updated data from the DB.
+        const userData = {
+            name: {{ user.nombre | tojson }},
+            specialty: {{ user.especialidad | tojson }},
+            professional_license: {{ user.licencia_profesional | tojson }},
+            professional_phone: {{ user.telefono_profesional | tojson }},
+            biography: {{ user.biografia | tojson }},
+            clinic_name: {{ user.clinica_nombre | tojson }},
+            clinic_address: {{ user.clinica_direccion | tojson }},
+            clinic_phone: {{ user.clinica_telefono | tojson }},
+            clinic_website: {{ user.clinica_website | tojson }},
+            clinic_logo_base64: {{ logo_clinica_base64 | tojson }}
+        };
+
+        function updatePreview() {
+            // Clinic logo
+            // Ensure the image src is only updated if there is a logo
+            if (checkboxes.show_clinic_logo_pdf.checked && userData.clinic_logo_base64) {
+                previewLogo.src = userData.clinic_logo_base64;
+                previewLogo.style.display = 'block';
+                previewLogoPlaceholder.style.display = 'none';
+            } else {
+                // If the checkbox is unchecked or there is no logo, hide the image and show the placeholder
+                previewLogo.src = ""; // Clear the src to prevent broken image errors
+                previewLogo.style.display = 'none';
+                previewLogoPlaceholder.style.display = 'flex'; 
+            }
+
+            // Clinic information
+            pClinicName.style.display = checkboxes.show_clinic_name_pdf.checked ? 'block' : 'none';
+            previewClinicAddressP.style.display = checkboxes.show_clinic_address_pdf.checked ? 'block' : 'none';
+            previewClinicPhoneP.style.display = checkboxes.show_clinic_phone_pdf.checked ? 'block' : 'none';
+            previewClinicWebsiteP.style.display = checkboxes.show_clinic_website_pdf.checked ? 'block' : 'none';
+
+            // Doctor information
+            previewDoctorLicenseP.style.display = checkboxes.show_doctor_license_pdf.checked ? 'block' : 'none';
+            previewDoctorPhoneP.style.display = checkboxes.show_doctor_phone_pdf.checked ? 'block' : 'none';
+            previewDoctorBioP.style.display = checkboxes.show_doctor_bio_pdf.checked ? 'block' : 'none';
+        }
+
+        // Event listeners to update the preview when checkboxes change
+        for (const key in checkboxes) {
+            if (checkboxes.hasOwnProperty(key)) {
+                checkboxes[key].addEventListener('change', updatePreview);
+            }
+        }
+
+        // Call updatePreview initially to load the default state and the logo
+        // This is crucial for the preview to reflect the initial state (or the post-POST state)
+        updatePreview();
+    });
+</script>
+{% endblock %}

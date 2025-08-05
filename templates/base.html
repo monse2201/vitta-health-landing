@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}VittaScribe{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-N9HV4FQ6');</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EX7PQ9VDPJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-EX7PQ9VDPJ');
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    html {
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --font-family-sans-serif: 'Inter', sans-serif;
+
+        --primary-blue: #2563EB;
+        --primary-blue-dark: #1D4ED8;
+        --primary-blue-light: #EFF6FF;
+        --primary-blue-lighter: #DBEAFE;
+
+        --neutral-900: #111827;
+        --neutral-800: #1F2937;
+        --neutral-700: #374151;
+        --neutral-600: #4B5563;
+        --neutral-500: #6B7280;
+        --neutral-400: #9CA3AF;
+        --neutral-300: #D1D5DB;
+        --neutral-200: #E5E7EB;
+        --neutral-100: #F3F4F6;
+        --neutral-50: #F9FAFB;
+
+        --sidebar-base-bg: var(--neutral-800);
+        --sidebar-text-color: var(--neutral-300);
+        --sidebar-icon-color: var(--neutral-400);
+        --sidebar-active-bg: var(--primary-blue);
+        --sidebar-active-text: #FFFFFF;
+        --sidebar-hover-bg: var(--neutral-700);
+        --sidebar-hover-text: #FFFFFF;
+        --sidebar-border-color: var(--neutral-700);
+
+        --card-bg: #FFFFFF;
+        --page-bg: var(--neutral-100);
+        --text-main: var(--neutral-900);
+        --text-secondary: var(--neutral-700);
+        --text-muted: var(--neutral-500);
+        --border-color: var(--neutral-200);
+
+        --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+        --border-radius-sm: 0.375rem;
+        --border-radius-md: 0.5rem;
+        --border-radius-lg: 0.75rem;
+    }
+
+    body {
+      margin: 0;
+      padding: 0; 
+      font-family: var(--font-family-sans-serif);
+      background-color: var(--page-bg);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .sidebar {
+      width: 80px;
+      height: 100vh;
+      background-color: var(--sidebar-base-bg);
+      color: var(--sidebar-text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 0;
+      transition: width 0.25s ease-in-out;
+      overflow-y: auto;
+      overflow-x: hidden; 
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+      border-right: 1px solid var(--sidebar-border-color);
+    }
+
+    .sidebar.expanded {
+      width: 270px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 24px;
+      white-space: nowrap;
+      padding: 0 10px;
+      overflow: hidden;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar.expanded .logo {
+        padding: 0 24px;
+        justify-content: flex-start;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--neutral-300);
+      opacity: 0;
+      transition: opacity 0.2s 0.1s ease;
+      margin-left: 6px;
+    }
+
+    .sidebar.expanded .logo span {
+      opacity: 1;
+    }
+
+    .logo-mini { display: block; font-weight: 700; }
+    .sidebar.expanded .logo-mini { display: none; }
+    .logo-full { display: none; font-weight: 700;}
+    .sidebar.expanded .logo-full { display: inline; }
+
+
+    .menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .menu li {
+        margin-bottom: 4px;
+    }
+
+    .menu a {
+      color: var(--sidebar-text-color);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      overflow: hidden; 
+      border-radius: var(--border-radius-md);
+      margin: 0 12px; 
+      height: 44px;
+      transition: background-color 0.2s ease, color 0.2s ease, padding 0.2s ease;
+    }
+
+    .sidebar:not(.expanded) .menu a {
+        justify-content: center;
+        padding: 0; 
+        margin: 0 8px; 
+    }
+    .sidebar.expanded .menu a {
+        padding: 0 16px; 
+        justify-content: flex-start;
+    }
+
+    .menu a i {
+      font-size: 1.1rem;
+      width: 22px; 
+      height: 22px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--sidebar-icon-color);
+      transition: margin-right 0.25s ease, color 0.2s ease;
+      flex-shrink: 0;
+      margin-right: 0; 
+    }
+
+    .sidebar.expanded .menu a i {
+        margin-right: 14px; 
+    }
+
+    .menu a .menu-text {
+      display: inline-block; 
+      vertical-align: middle; 
+      opacity: 0;
+      visibility: hidden;
+      max-width: 0; 
+      overflow: hidden; 
+      white-space: nowrap; 
+      margin-left: 0; 
+      transition: opacity 0.2s ease, 
+                  visibility 0s linear 0.2s, 
+                  max-width 0.2s ease,
+                  margin-left 0.2s ease; 
+    }
+
+    .sidebar.expanded .menu a .menu-text {
+      opacity: 1;
+      visibility: visible;
+      max-width: 180px; 
+      margin-left: 0; 
+      transition: opacity 0.25s 0.1s ease, 
+                  visibility 0s linear 0.1s, 
+                  max-width 0.25s 0.1s ease,
+                  margin-left 0.25s 0.1s ease;
+    }
+
+    .menu a:hover {
+      background-color: var(--sidebar-hover-bg);
+      color: var(--sidebar-hover-text);
+    }
+    .menu a:hover i {
+      color: var(--sidebar-hover-text);
+    }
+    .menu a.active {
+      background-color: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+      font-weight: 600;
+    }
+    .menu a.active i {
+       color: var(--sidebar-active-text);
+    }
+
+
+    .sidebar-footer {
+        padding: 12px 0; 
+        border-top: 1px solid var(--sidebar-border-color);
+    }
+
+    .configuracion-link-title {
+        font-size: 0.75rem;
+        color: var(--neutral-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        padding: 8px 24px 4px 24px; 
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        height: 0;
+        overflow: hidden;
+        transition: opacity 0.2s ease, height 0.25s ease, padding 0.25s ease, visibility 0s linear 0.2s;
+    }
+    .sidebar.expanded .configuracion-link-title {
+        opacity: 1;
+        visibility: visible;
+        height: auto;
+        transition: opacity 0.25s 0.1s ease, height 0.25s 0.1s ease, padding 0.25s 0.1s ease, visibility 0s linear 0.1s;
+    }
+
+    .sidebar-footer a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--sidebar-text-color);
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden; 
+        border-radius: var(--border-radius-md);
+        margin: 0 12px 4px 12px; 
+        height: 40px;
+        transition: background-color 0.2s ease, color 0.2s ease, padding 0.2s ease;
+    }
+     .sidebar:not(.expanded) .sidebar-footer a {
+        justify-content: center;
+        padding: 0; 
+        margin: 0 8px 4px 8px; 
+    }
+    .sidebar.expanded .sidebar-footer a {
+        padding: 0 16px; 
+        justify-content: flex-start;
+    }
+
+    .sidebar-footer a:hover {
+        background-color: var(--sidebar-hover-bg);
+        color: var(--sidebar-hover-text);
+    }
+     .sidebar-footer a:hover i {
+        color: var(--sidebar-hover-text);
+    }
+    .sidebar-footer a.active { 
+      background-color: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+    }
+    .sidebar-footer a.active i {
+       color: var(--sidebar-active-text);
+    }
+
+    .sidebar-footer a i {
+        font-size: 1.05rem;
+        width: 20px; 
+        height: 20px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: var(--sidebar-icon-color);
+        transition: margin-right 0.25s ease, color 0.2s ease;
+        flex-shrink: 0;
+        margin-right: 0; 
+    }
+    .sidebar.expanded .sidebar-footer a i {
+        margin-right: 14px; 
+    }
+
+    .sidebar-footer a .btn-text,
+    .sidebar-footer a .user-details {
+        opacity: 0;
+        visibility: hidden;
+        width: 0; 
+        overflow: hidden;
+        white-space: nowrap; 
+        transition: opacity 0.2s ease, visibility 0s linear 0.2s, width 0.2s ease;
+    }
+    .sidebar.expanded .sidebar-footer a .btn-text,
+    .sidebar.expanded .sidebar-footer a .user-details {
+        opacity: 1;
+        visibility: visible;
+        max-width: 180px; 
+        width: auto;
+        transition: opacity 0.25s 0.1s ease, 
+                    visibility 0s linear 0.1s, 
+                    max-width 0.25s 0.1s ease,
+                    width 0.25s 0.1s ease;
+    }
+
+    .user-profile-info {
+        display: flex;
+        align-items: center;
+        width: 100%; 
+    }
+
+    .user-avatar-initial {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--primary-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-right: 0; 
+        flex-shrink: 0;
+        transition: margin-right 0.25s ease;
+    }
+    .user-avatar-initial span { 
+        line-height: 32px; 
+        display: block;
+    }
+    .sidebar.expanded .user-avatar-initial {
+        margin-right: 10px; 
+    }
+    .user-avatar-initial img.user-avatar-image {
+        width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+    }
+
+    .user-name {
+        font-weight: 500;
+        color: var(--sidebar-text-color); 
+        font-size: 0.85rem;
+    }
+    .sidebar-footer a:hover .user-name {
+        color: var(--sidebar-hover-text); 
+    }
+     .sidebar-footer a.active .user-name {
+        color: var(--sidebar-active-text); 
+    }
+
+
+    .user-subtitle {
+        font-size: 0.75rem;
+        color: var(--neutral-400); 
+    }
+     .sidebar-footer a:hover .user-subtitle {
+        color: var(--neutral-300); 
+    }
+    .sidebar-footer a.active .user-subtitle {
+        color: var(--neutral-100); 
+    }
+
+
+    .main-content-wrapper {
+      flex-grow: 1;
+      margin-left: 80px;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.25s ease-in-out;
+      height: 100vh;
+    }
+    .sidebar.expanded + .main-content-wrapper {
+      margin-left: 270px;
+    }
+
+    .topbar {
+        background-color: var(--card-bg);
+        padding: 0 28px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 0;
+        z-index: 900;
+    }
+    .topbar-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .topbar-user-actions span {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .sidebar-toggle-mobile {
+        display: none;
+        background: none; border: none;
+        color: var(--text-muted); font-size: 1.5rem;
+        cursor: pointer; padding: 8px; border-radius: var(--border-radius-sm);
+    }
+     .sidebar-toggle-mobile:hover {
+        color: var(--text-main); background-color: var(--neutral-100);
+    }
+
+    .content-area {
+        padding-top: 15px;
+        padding-right: 28px;
+        padding-bottom: 28px;
+        padding-left: 28px;
+        flex-grow: 1;
+        overflow-y: auto;
+        background-color: var(--page-bg);
+    }
+
+    .toggle-sidebar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 32px;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.25s ease, background-color 0.2s ease, left 0.25s ease, right 0.25s ease;
+      z-index: 1001;
+    }
+    .sidebar.expanded .toggle-sidebar {
+        left: auto;
+        right: -16px; 
+        transform: translateX(0%);
+    }
+    .toggle-sidebar:hover {
+        background-color: var(--primary-blue-dark);
+    }
+    .toggle-sidebar i { transition: transform 0.25s ease; }
+    .sidebar.expanded .toggle-sidebar i { transform: rotate(180deg); }
+
+
+    .alert-messages-container {
+        position: fixed; top: 20px; right: 20px; z-index: 2000; width: auto; max-width:400px;
+    }
+    .alert {
+        padding: 14px 20px; margin-bottom: 12px; border: 1px solid transparent;
+        border-radius: var(--border-radius-md); font-weight: 500; display: flex; align-items: center; justify-content: space-between;
+        box-shadow: var(--shadow-md); font-size: 0.95rem; color: #fff;
+        opacity: 1;
+        transition: opacity 0.5s ease-out, transform 0.3s ease-out;
+    }
+    .alert.fade-out {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    .alert-success { background-color: #28a745; border-color: #1c7430;}
+    .alert-danger { background-color: #dc3545; border-color: #a71d2a;}
+    .alert-warning { background-color: #ffc107; color: var(--text-main); border-color: #d39e00;}
+    .alert-info { background-color: #17a2b8; border-color: #107586;}
+
+    .close-alert {
+        background: none; border: none; color: inherit;
+        font-size: 1.4em; line-height: 1; cursor: pointer; opacity: 0.7; padding: 0 0 0 15px;
+    }
+    .close-alert:hover { opacity: 1; }
+    
+    @media (max-width: 768px) { 
+        .sidebar {
+            transform: translateX(-100%); 
+            width: 270px; 
+            border-right: none; 
+            box-shadow: var(--shadow-lg); 
+        }
+        .sidebar.expanded { 
+            transform: translateX(0);
+        }
+        .main-content-wrapper {
+             margin-left: 0px !important; 
+        }
+        .toggle-sidebar { display: none !important; } 
+        .sidebar-toggle-mobile { display: block; } 
+
+        .content-area { 
+            padding-top: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9HV4FQ6"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <div class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <div class="logo-mini"><strong>V</strong></div>
+        <div class="logo-full">Vitta<span>Scribe</span></div>
+      </div>
+
+      <ul class="menu">
+        
+        {# --- ESTE BLOQUE HA SIDO CORREGIDO --- #}
+        {% if current_user.is_authenticated and current_user.role in ['admin', 'admin_super'] %}
+        <li>
+          <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            <i class="fas fa-user-shield fa-fw"></i><span class="menu-text">Panel Admin</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin_test_emails') }}" class="{% if request.endpoint == 'admin_test_emails' %}active{% endif %}">
+            <i class="fas fa-envelope-open-text fa-fw"></i><span class="menu-text">Probar Correos</span>
+          </a>
+        </li>
+        {% endif %}
+
+        <li>
+          <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-home fa-fw"></i><span class="menu-text">Inicio</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('grabar_cita') }}" class="{% if request.endpoint == 'grabar_cita' %}active{% endif %}">
+            <i class="fas fa-microphone-alt fa-fw"></i><span class="menu-text">Grabar Consulta</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('resumir_registros_page') }}" class="{% if request.endpoint == 'resumir_registros_page' %}active{% endif %}">
+            <i class="fas fa-file-import fa-fw"></i><span class="menu-text">Resumir Documentos</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('pacientes_page') }}" class="{% if request.endpoint in ['pacientes_page', 'perfil_paciente', 'agregar_paciente'] %}active{% endif %}">
+            <i class="fas fa-users fa-fw"></i><span class="menu-text">Pacientes</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('historial_visitas') }}" class="{% if request.endpoint in ['historial_visitas', 'ver_receta', 'ver_referencia', 'nueva_receta_para_visita', 'nueva_referencia_para_visita'] %}active{% endif %}">
+            <i class="fas fa-history fa-fw"></i><span class="menu-text">Historial de Visitas</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="configuracion-link-title">Cuenta</div>
+
+        <a href="{{ url_for('configuracion_perfil_profesional') }}" class="user-profile-sidebar-link {% if request.endpoint == 'configuracion_perfil_profesional' %}active{% endif %}" title="Mi Perfil y Configuración">
+            <div class="user-profile-info">
+                <div class="user-avatar-initial">
+                    {% if current_user and current_user.is_authenticated and current_user.url_foto_perfil %}
+                        <img src="{{ url_for('static', filename=current_user.url_foto_perfil.replace('\\', '/')) }}" alt="Mi perfil" class="user-avatar-image">
+                    {% else %}
+                        <span>{{ (current_user.nombre[0] if current_user and current_user.is_authenticated and current_user.nombre else 'U')|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ current_user.nombre if current_user and current_user.is_authenticated else 'Usuario' }}</span>
+                    <span class="user-subtitle">{{ current_user.especialidad if current_user and current_user.is_authenticated and current_user.especialidad else 'Configuración' }}</span>
+                </div>
+            </div>
+        </a>
+        
+        {# NUEVO: Enlace a Configuración de Documentos #}
+        <a href="{{ url_for('configuracion_documentos') }}" class="{% if request.endpoint == 'configuracion_documentos' %}active{% endif %}" title="Configuración de Documentos">
+            <i class="fas fa-file-alt fa-fw"></i><span class="btn-text">Configuración de Documentos</span>
+        </a>
+
+        <a href="{{ url_for('cambiar_contrasena_route') }}" class="{% if request.endpoint == 'cambiar_contrasena_route' %}active{% endif %}" title="Cambiar Contraseña">
+            <i class="fas fa-key fa-fw"></i><span class="btn-text">Cambiar Contraseña</span>
+        </a>
+        
+        <a href="{{ url_for('logout_route') }}" class="logout-link" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt fa-fw"></i><span class="btn-text">Cerrar sesión</span>
+        </a>
+    </div>
+    <button class="toggle-sidebar" id="toggleSidebar" title="Alternar barra lateral">
+      <i class="fas fa-chevron-left" id="toggleIcon"></i>
+    </button>
+  </div>
+
+  <div class="main-content-wrapper" id="mainContentWrapper">
+      <main class="content-area" id="contentAreaScrollable">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="alert-messages-container">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category if category else 'info' }}" role="alert">
+                  <span>{{ message }}</span>
+                  <button type="button" class="close-alert" onclick="this.parentElement.classList.add('fade-out'); setTimeout(() => { if (this.parentElement && this.parentElement.parentElement) this.parentElement.parentElement.removeChild(this.parentElement); else if(this.parentElement) this.parentElement.style.display='none'; }, 500);">&times;</button>
+                </div>
+              {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          {% block content %}
+          {% endblock %}
+      </main>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const mainContentWrapper = document.getElementById('mainContentWrapper');
+    const toggleIcon = document.getElementById('toggleIcon'); 
+    const desktopToggleButton = document.getElementById('toggleSidebar'); 
+    const mobileToggleButton = document.getElementById('sidebarToggleMobile'); 
+
+    let isDesktopSidebarManuallyExpanded = false;
+
+    function setDesktopSidebarState(isExpanded) {
+        if (sidebar) { 
+            if (isExpanded) {
+                sidebar.classList.add('expanded');
+                if (mainContentWrapper) mainContentWrapper.style.marginLeft = '270px';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-left');
+                    toggleIcon.classList.add('fa-chevron-right');
+                }
+            } else {
+                sidebar.classList.remove('expanded');
+                if (mainContentWrapper) mainContentWrapper.style.marginLeft = '80px';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-right');
+                    toggleIcon.classList.add('fa-chevron-left');
+                }
+            }
+        }
+    }
+
+    function handleDesktopToggle() {
+        if (sidebar) { 
+            isDesktopSidebarManuallyExpanded = !sidebar.classList.contains('expanded');
+            setDesktopSidebarState(isDesktopSidebarManuallyExpanded);
+            localStorage.setItem('sidebarDesktopExpanded', isDesktopSidebarManuallyExpanded.toString());
+        }
+    }
+
+    function handleMobileToggle() {
+        if (sidebar) { 
+             sidebar.classList.toggle('expanded'); 
+        }
+    }
+
+    function initializeSidebar() {
+        if (!sidebar) return; 
+
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            sidebar.classList.remove('expanded'); 
+            if (mainContentWrapper) mainContentWrapper.style.marginLeft = '0px';
+            if (desktopToggleButton) desktopToggleButton.style.display = 'none';
+            if (mobileToggleButton) mobileToggleButton.style.display = 'block';
+        } else { 
+            const savedState = localStorage.getItem('sidebarDesktopExpanded');
+            if (savedState !== null) {
+                isDesktopSidebarManuallyExpanded = (savedState === 'true');
+            } else {
+                isDesktopSidebarManuallyExpanded = false; 
+            }
+            setDesktopSidebarState(isDesktopSidebarManuallyExpanded);
+            
+            if (desktopToggleButton) desktopToggleButton.style.display = 'flex';
+            if (mobileToggleButton) mobileToggleButton.style.display = 'none';
+
+            sidebar.onmouseenter = function() {
+                if (!isDesktopSidebarManuallyExpanded && window.innerWidth > 768) {
+                    setDesktopSidebarState(true);
+                }
+            };
+            sidebar.onmouseleave = function() {
+                if (!isDesktopSidebarManuallyExpanded && window.innerWidth > 768) {
+                    setDesktopSidebarState(false);
+                }
+            };
+        }
+    }
+
+    if (desktopToggleButton) {
+        desktopToggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth > 768) handleDesktopToggle();
+        });
+    }
+
+    if (mobileToggleButton) {
+        mobileToggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handleMobileToggle();
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!sidebar) return; 
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile && sidebar.classList.contains('expanded')) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnMobileToggle = mobileToggleButton ? mobileToggleButton.contains(event.target) : false;
+            if (!isClickInsideSidebar && !isClickOnMobileToggle) {
+                sidebar.classList.remove('expanded');
+            }
+        }
+    });
+    
+    if(sidebar){
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
+                    sidebar.classList.remove('expanded');
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeSidebar();
+
+        const alertContainer = document.querySelector('.alert-messages-container');
+        if (alertContainer) {
+            setTimeout(() => {
+                const alerts = alertContainer.querySelectorAll('.alert');
+                alerts.forEach(alertNode => {
+                    alertNode.classList.add('fade-out');
+                    setTimeout(() => { 
+                        if (alertNode.parentNode) { 
+                           alertNode.parentNode.removeChild(alertNode); 
+                        }
+                        if (alertContainer.children.length === 0) {
+                        }
+                    }, 500); 
+                });
+            }, 7000); 
+        }
+    });
+
+    window.addEventListener('resize', initializeSidebar);
+
+  </script>
+  {% block scripts_extra %}{% endblock %}
+</body>
+</html>
+

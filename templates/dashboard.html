@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Dashboard - VittaScribe{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --font-family-sans-serif: 'Inter', sans-serif;
+        --primary-blue: #2563EB;
+        --primary-blue-dark: #1D4ED8;
+        --primary-blue-light: #EFF6FF;
+        --primary-blue-lighter: #DBEAFE;
+        --neutral-900: #111827;
+        --neutral-800: #1F2937;
+        --neutral-700: #374151;
+        --neutral-600: #4B5563;
+        --neutral-500: #6B7280;
+        --neutral-400: #9CA3AF;
+        --neutral-300: #D1D5DB;
+        --neutral-200: #E5E7EB;
+        --neutral-100: #F3F4F6;
+        --neutral-50: #F9FAFB;
+        --sidebar-bg: var(--neutral-800);
+        --sidebar-text-color: var(--neutral-300);
+        --sidebar-icon-color: var(--neutral-400);
+        --sidebar-active-bg: var(--primary-blue);
+        --sidebar-active-text: #FFFFFF;
+        --sidebar-hover-bg: var(--neutral-700);
+        --sidebar-hover-text: #FFFFFF;
+        --sidebar-border-color: var(--neutral-700);
+        --card-bg: #FFFFFF;
+        --page-bg: var(--neutral-100);
+        --text-main: var(--neutral-900);
+        --text-secondary: var(--neutral-700);
+        --text-muted: var(--neutral-500);
+        --text-placeholder: var(--neutral-400);
+        --border-color: var(--neutral-200);
+        --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+        --border-radius-sm: 0.375rem;
+        --border-radius-md: 0.5rem;
+        --border-radius-lg: 0.75rem;
+        --border-radius-xl: 1rem;
+    }
+
+    body {
+        margin: 0;
+        font-family: var(--font-family-sans-serif);
+        background-color: var(--page-bg);
+        color: var(--text-main);
+        font-size: 15px; 
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .dashboard-container { display: flex; min-height: 100vh; }
+
+    .sidebar {
+        width: 270px; /* Ancho por defecto (expandido) */
+        background-color: var(--sidebar-bg);
+        color: var(--sidebar-text-color);
+        display: flex;
+        flex-direction: column;
+        position: fixed; 
+        top: 0; left: 0; bottom: 0;
+        z-index: 1000;
+        transition: width 0.25s ease-in-out, transform 0.25s ease-in-out;
+        border-right: 1px solid var(--sidebar-border-color);
+        overflow-y: auto; 
+        overflow-x: hidden;
+    }
+
+    .sidebar.collapsed { width: 72px; }
+    
+    .sidebar.collapsed .sidebar-header .app-name,
+    .sidebar.collapsed .sidebar-nav ul li a span,
+    .sidebar.collapsed .sidebar-footer .config-section-title,
+    .sidebar.collapsed .user-profile-brief .user-name-brief { display: none; }
+    
+    .sidebar.collapsed .sidebar-nav ul li a i.fa-fw,
+    .sidebar.collapsed .sidebar-footer ul li a i.fa-fw {
+        margin-right: 0; font-size: 1.35rem; width: 100%;
+    }
+
+    .sidebar.collapsed .sidebar-header { padding: 0; justify-content: center; }
+    .sidebar.collapsed .sidebar-nav ul li a,
+    .sidebar.collapsed .sidebar-footer ul li a:not(.user-profile-link-wrapper) { 
+         justify-content: center; padding-left: 10px; padding-right: 10px; 
+    }
+    .sidebar.collapsed .user-profile-link-wrapper {
+        padding: 15px 0 !important; display: flex; justify-content: center;
+    }
+    .sidebar.collapsed .user-avatar-initial-small { margin-right: 0; }
+
+    .sidebar-header {
+        padding: 0 24px; 
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--sidebar-border-color);
+        height: 72px; flex-shrink: 0;
+    }
+    .sidebar-header .app-name {
+        font-size: 1.5rem; font-weight: 700; color: #FFFFFF; margin: 0; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-toggle, .sidebar-toggle-mobile {
+        background: none; border: none; color: var(--sidebar-icon-color); font-size: 1.4rem;
+        cursor: pointer; padding: 8px; border-radius: var(--border-radius-sm); line-height: 1;
+    }
+    .sidebar-toggle:hover, .sidebar-toggle-mobile:hover {
+        background-color: var(--neutral-700); color: #FFFFFF;
+    }
+    .sidebar-toggle-mobile { display: none; }
+
+    .sidebar-nav { flex-grow: 1; overflow-y: auto; padding-top: 12px; padding-bottom: 12px; }
+    .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar-nav ul li a {
+        display: flex; align-items: center; padding: 12px 24px; text-decoration: none;
+        color: var(--sidebar-text-color); font-weight: 500; font-size:0.9rem;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        white-space: nowrap; border-radius: var(--border-radius-md); margin: 2px 12px;
+        overflow: hidden;
+    }
+    .sidebar-nav ul li a:hover { background-color: var(--sidebar-hover-bg); color: var(--sidebar-hover-text); }
+    .sidebar-nav ul li.active a {
+        background-color: var(--sidebar-active-bg); color: var(--sidebar-active-text); font-weight: 600;
+        box-shadow: 0 0 15px -3px rgba(37, 99, 235, 0.5); 
+    }
+    .sidebar-nav ul li a i.fa-fw {
+        width: 22px; margin-right: 14px; text-align: center; font-size: 1.05rem;
+        color: var(--sidebar-icon-color); transition: color 0.2s ease, font-size 0.25s ease, margin-right 0.25s ease;
+        flex-shrink: 0;
+    }
+    .sidebar-nav ul li a:hover i.fa-fw,
+    .sidebar-nav ul li.active a i.fa-fw { color: var(--sidebar-active-text); }
+
+    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--sidebar-border-color); flex-shrink: 0; }
+    .sidebar-footer .config-section-title {
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--neutral-500); margin-bottom: 10px; font-weight: 600; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-footer ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar-footer ul li a { 
+        display: flex; align-items: center; text-decoration: none; font-size:0.9rem;
+        color: var(--sidebar-text-color); font-weight: 500; transition: color 0.2s ease, background-color 0.2s ease; 
+        white-space: nowrap; overflow: hidden;
+    }
+    .sidebar-footer ul li a:not(.user-profile-link-wrapper) { 
+        border-radius: var(--border-radius-md); padding: 10px 12px; margin: 4px 0;
+    }
+    .sidebar-footer ul li a:not(.user-profile-link-wrapper):hover {
+        background-color: var(--sidebar-hover-bg); color: var(--sidebar-hover-text);
+    }
+    .sidebar-footer ul li a:not(.user-profile-link-wrapper):hover i.fa-fw { color: var(--sidebar-hover-text); }
+    .sidebar-footer ul li .user-profile-link-wrapper {
+        display: block; padding: 8px; margin: 0 -8px; border-radius: var(--border-radius-md);
+    }
+    .sidebar-footer ul li .user-profile-link-wrapper:hover { background-color: var(--sidebar-hover-bg); }
+    .sidebar-footer ul li .user-profile-link-wrapper:hover .user-name-brief span { color: var(--sidebar-hover-text); }
+    .sidebar-footer ul li .user-profile-link-wrapper:hover .user-name-brief small { color: var(--neutral-300); }
+    .sidebar-footer ul li a i.fa-fw {
+        width: 22px; margin-right: 14px; text-align: center; font-size: 1rem;
+        color: var(--sidebar-icon-color); transition: color 0.2s ease, font-size 0.25s ease, margin-right 0.25s ease;
+        flex-shrink: 0;
+    }
+    .user-profile-brief { display: flex; align-items: center; width: 100%; overflow: hidden;}
+    .user-avatar-initial-small {
+        width: 36px; height: 36px; border-radius: 50%; background-color: var(--primary-blue);
+        color: white; display: flex; align-items: center; justify-content: center;
+        font-weight: 600; font-size: 1rem; margin-right: 10px; flex-shrink: 0;
+        transition: margin-right 0.25s ease;
+    }
+    .user-name-brief { display: flex; flex-direction: column; line-height: 1.3; overflow: hidden; }
+    .user-name-brief span { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; color: var(--sidebar-text-color);}
+    .user-name-brief small { font-size: 0.8rem; color: var(--neutral-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .main-content-wrapper {
+        flex-grow: 1; margin-left: 270px; display: flex; flex-direction: column;
+        transition: margin-left 0.25s ease-in-out, width 0.25s ease-in-out;
+        width: calc(100% - 270px); 
+    }
+    .sidebar.collapsed + .main-content-wrapper { 
+        margin-left: 72px; width: calc(100% - 72px);
+    }
+
+    .topbar {
+        background-color: var(--card-bg); padding: 0 28px; height: 72px;
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+        position: sticky; top: 0; z-index: 900; flex-shrink: 0;
+    }
+    .topbar-title { font-size: 1.5rem; font-weight: 600; color: var(--text-main); }
+    .topbar-user-actions span { font-weight: 500; font-size: 0.9rem; color: var(--text-secondary); }
+    .content-area { padding: 28px; flex-grow: 1; overflow-y: auto; }
+
+    .dashboard-greeting { margin-bottom: 28px; padding: 28px; border-radius: var(--border-radius-lg); background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--neutral-50) 100%); border: 1px solid var(--primary-blue-lighter); box-shadow: var(--shadow-sm); }
+    .dashboard-greeting h3 { margin-top: 0; font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    .dashboard-greeting p { font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 0; }
+    .dashboard-greeting #currentDate { font-weight:600; color: var(--primary-blue-dark); }
+    .dashboard-widgets-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 28px; }
+    .widget-card { background-color: var(--card-bg); padding: 24px; border-radius: var(--border-radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; }
+    .widget-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .widget-header { display: flex; align-items: center; margin-bottom: 16px; }
+    .widget-card .widget-icon { font-size: 1.5rem; color: var(--primary-blue); margin-right: 14px; background-color: var(--primary-blue-light); border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .widget-card.patients .widget-icon { color: #10B981; background-color: #D1FAE5; }
+    .widget-title-group h4 { margin-top: 0; margin-bottom: 2px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.025em; }
+    .widget-title-group .widget-value { font-size: 2.25rem; font-weight: 700; color: var(--text-main); line-height: 1.1; }
+    .widget-content { width: 100%; flex-grow: 1; }
+    .widget-link { margin-top: auto; padding-top: 12px; font-size: 0.9rem; color: var(--primary-blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; }
+    .widget-link:hover { color:var(--primary-blue-dark); text-decoration: underline; }
+    .widget-link i { margin-left: 6px; transition: transform 0.2s ease; }
+    .widget-link:hover i { transform: translateX(3px); }
+    .widget-card.quick-actions .widget-header .widget-title-group h4 { font-size: 1.15rem; color: var(--text-main); margin:0; font-weight: 600; text-transform: none; letter-spacing: 0; }
+    .quick-actions-list { list-style: none; padding: 0; margin: 0; width:100%; }
+    .quick-actions-list li { margin-bottom: 12px; }
+    .quick-actions-list li:last-child { margin-bottom: 0; }
+    .quick-actions-list li a { text-decoration: none; color: var(--text-secondary); font-weight: 500; font-size: 1rem; display: flex; align-items: center; padding: 14px 18px; border-radius: var(--border-radius-md); transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; background-color: var(--neutral-50); border: 1px solid var(--neutral-200); }
+    .quick-actions-list li a:hover { background-color: var(--primary-blue-light); color: var(--primary-blue-dark); border-color: var(--primary-blue-lighter); box-shadow: var(--shadow-sm); transform: translateY(-2px) translateX(2px); }
+    .quick-actions-list li a i { margin-right: 12px; color: var(--primary-blue); width: 20px; font-size: 1.1rem; transition: color 0.2s ease; }
+    .quick-actions-list li a:hover i { color: var(--primary-blue-dark); }
+
+    .flash-messages-container { margin-bottom: 20px; }
+    .alert { padding: 14px 20px; margin-bottom: 20px; border: 1px solid transparent; border-radius: var(--border-radius-md); font-weight: 500; display: flex; align-items: center; box-shadow: var(--shadow-sm); font-size: 0.95rem; }
+    .alert::before { font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; font-size: 1.15rem; }
+    .alert-success { color: #055D41; background-color: #E0F2F1; border-color: #A7F3D0;} .alert-success::before { content: "\f058"; }
+    .alert-danger { color: #9B1C1C; background-color: #FEEBEB; border-color: #FECACA;} .alert-danger::before { content: "\f071"; }
+    .alert-warning { color: #92400E; background-color: #FFFBEB; border-color: #FDE68A;} .alert-warning::before { content: "\f06a"; }
+    .alert-info { color: #0B4F6C; background-color: #E0F7FE; border-color: #BAE6FD;} .alert-info::before { content: "\f05a"; }
+
+    @media (max-width: 992px) { 
+        .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
+        .sidebar.open { transform: translateX(0); }
+        /* Anular estilos de .collapsed cuando está .open en móvil para que se vea completo */
+        .sidebar.collapsed.open .sidebar-header .app-name,
+        .sidebar.collapsed.open .sidebar-nav ul li a span,
+        .sidebar.collapsed.open .sidebar-footer .config-section-title,
+        .sidebar.collapsed.open .user-profile-brief .user-name-brief { display: inline-block; }
+        .sidebar.collapsed.open .sidebar-nav ul li a i.fa-fw,
+        .sidebar.collapsed.open .sidebar-footer ul li a i.fa-fw {
+            margin-right: 14px; font-size: 1.05rem; width: auto;
+        }
+        .sidebar.collapsed.open .sidebar-header { padding: 0 24px; justify-content: space-between; }
+        .sidebar.collapsed.open .sidebar-nav ul li a,
+        .sidebar.collapsed.open .sidebar-footer ul li a:not(.user-profile-link-wrapper) { 
+            justify-content: flex-start; padding-left: 24px; padding-right: 24px; 
+        }
+        .sidebar.collapsed.open .user-profile-link-wrapper { padding: 8px !important; justify-content: flex-start; }
+        .sidebar.collapsed.open .user-avatar-initial-small { margin-right: 10px; }
+
+        .main-content-wrapper { margin-left: 0; width: 100%; }
+        .sidebar-toggle { display: none; } 
+        .sidebar-toggle-mobile { display: block; } 
+        .topbar { padding: 0 20px; height: 64px; }
+        .topbar-title { font-size: 1.4rem; }
+        .dashboard-widgets-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 576px) {
+        body { font-size: 14px; }
+        .content-area { padding: 16px; }
+        .topbar { padding: 0 16px; height:60px;}
+        .topbar-title { font-size: 1.2rem; }
+        .dashboard-greeting { padding: 20px; }
+        .dashboard-greeting h3 { font-size: 1.6rem; }
+        .dashboard-greeting p { font-size: 0.95rem; }
+        .widget-card { padding: 20px;}
+        .widget-card .widget-icon { width: 44px; height: 44px; font-size: 1.3rem; }
+        .widget-title-group .widget-value { font-size: 1.85rem; }
+        .quick-actions-list li a { font-size: 0.9rem; padding: 12px 14px;}
+        .quick-actions-list li a i { font-size: 1rem; }
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="app-name">VittaScribe</h1>
+                <button class="sidebar-toggle" id="sidebarToggleDesktop" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i> 
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">
+                        <a href="{{ url_for('dashboard') }}"><i class="fas fa-home fa-fw"></i> <span>Home</span></a>
+                    </li>
+                    <li class="{{ 'active' if request.endpoint == 'grabar_cita' else '' }}">
+                        <a href="{{ url_for('grabar_cita') }}"><i class="fas fa-microphone-alt fa-fw"></i> <span>Record Consultation</span></a>
+                    </li>
+                    <li class="{{ 'active' if request.endpoint == 'resumir_registros_page' else '' }}">
+                        <a href="{{ url_for('resumir_registros_page') }}"><i class="fas fa-file-import fa-fw"></i> <span>Summarize Documents</span></a>
+                    </li>
+                    <li class="{{ 'active' if request.endpoint == 'pacientes_page' else '' }}">
+                        <a href="{{ url_for('pacientes_page') }}"><i class="fas fa-users fa-fw"></i> <span>Patients</span></a>
+                    </li>
+                    <li class="{{ 'active' if request.endpoint == 'historial_visitas' else '' }}">
+                        <a href="{{ url_for('historial_visitas') }}"><i class="fas fa-history fa-fw"></i> <span>Visit History</span></a>
+                    </li>
+                </ul>
+            </nav>
+            
+<div class="sidebar-footer">
+    <div class="config-section-title">Account</div>
+    <ul>
+        <li class="{{ 'active' if request.endpoint == 'configuracion_perfil_profesional' else '' }}">
+            <a href="{{ url_for('configuracion_perfil_profesional') }}" title="My Profile and Settings" class="user-profile-link-wrapper">
+                <div class="user-profile-brief">
+                    <div class="user-avatar-initial-small">
+                        <span>{{ current_user.nombre[0]|upper if current_user and current_user.nombre else 'U' }}</span>
+                    </div>
+                    <div class="user-name-brief">
+                       <span>{{ current_user.nombre if current_user else 'User' }}</span>
+                       <small>{{ current_user.especialidad if current_user and current_user.especialidad else 'Settings' }}</small>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('cambiar_contrasena_route') }}"><i class="fas fa-key fa-fw"></i> <span>Change Password</span></a>
+        </li>
+        <li>
+            <a href="{{ url_for('logout_route') }}"><i class="fas fa-sign-out-alt fa-fw"></i> <span>Logout</span></a>
+        </li>
+    </ul>
+</div>
+
+        </aside>
+
+        <div class="main-content-wrapper">
+            <header class="topbar">
+                <button class="sidebar-toggle-mobile" id="sidebarToggleMobile" aria-label="Toggle sidebar móvil">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topbar-user-actions">
+                     </div>
+            </header>
+            <main class="content-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div class="dashboard-greeting">
+                    <h3>Welcome back, Dr. {{ current_user.nombre.split(' ')[0] if current_user and current_user.nombre else 'Doctor' }}!</h3>
+                    <p>Today is <span id="currentDate"></span>. What would you like to do today?</p>
+                </div>
+
+                <div class="dashboard-widgets-grid">
+                    <div class="widget-card quick-actions">
+                        <div class="widget-header">
+                            <div class="widget-icon"><i class="fas fa-rocket"></i></div>
+                            <div class="widget-title-group">
+                                 <h4>Get Started</h4>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <ul class="quick-actions-list">
+                                <li><a href="{{ url_for('grabar_cita') }}"><i class="fas fa-microphone-alt"></i> Record New Consultation</a></li>
+                                <li><a href="{{ url_for('resumir_registros_page') }}"><i class="fas fa-file-import"></i> Summarize Documents de Paciente</a></li>
+                                <li><a href="{{ url_for('pacientes_page') }}"><i class="fas fa-users"></i> Ver Lista de Patients</a></li>
+                                <li><a href="{{ url_for('historial_visitas') }}"><i class="fas fa-history"></i> Consultar Visit History</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="widget-card patients">
+                        <div class="widget-header">
+                            <div class="widget-icon"><i class="fas fa-users"></i></div>
+                            <div class="widget-title-group">
+                                <h4>Patients Registrados</h4>
+                                <p class="widget-value">{{ total_pacientes if total_pacientes is defined else 'N/A' }}</p>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top:8px;">Keep your patients' information up to date for better tracking.</p>
+                        </div>
+                         <a href="{{ url_for('pacientes_page') }}" class="widget-link">Gestionar Patients <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Botón en sidebar-header
+        const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');   // Botón en topbar
+    
+        const currentDateEl = document.getElementById('currentDate');
+        if (currentDateEl) {
+            currentDateEl.textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+    
+        // Estados para el sidebar de escritorio:
+        // 'pinned-expanded': User lo fijó expandido. No hover. Sin .collapsed. Icono: fa-times.
+        // 'pinned-collapsed': User lo fijó colapsado. No hover. Con .collapsed. Icono: fa-bars.
+        // 'auto': Interactivo con hover. Default con .collapsed, se expande en hover. Icono: fa-bars.
+        let sidebarPinnedState; 
+    
+        function updateDesktopToggleIcon() {
+            if (!sidebarToggleDesktop || window.innerWidth <= 992) return;
+            const iconElement = sidebarToggleDesktop.querySelector('i');
+            if (!iconElement) return;
+    
+            iconElement.classList.remove('fa-bars', 'fa-times', 'fa-xmark'); 
+    
+            if (sidebarPinnedState === 'pinned-expanded') {
+                iconElement.classList.add('fa-xmark'); 
+            } else { 
+                iconElement.classList.add('fa-bars'); 
+            }
+        }
+        
+        function applyDesktopSidebarState(stateToApply, fromClick = false) {
+            if (!sidebar || window.innerWidth <= 992) return;
+    
+            sidebarPinnedState = stateToApply; 
+    
+            if (sidebarPinnedState === 'pinned-expanded') {
+                sidebar.classList.remove('collapsed');
+            } else if (sidebarPinnedState === 'pinned-collapsed') {
+                sidebar.classList.add('collapsed');
+            } else { // 'auto'
+                // Si no es por un clic directo que lo pone en 'auto', y es 'auto',
+                // el estado visual inicial es colapsado. Si es por un clic, y estaba expandido,
+                // el clic a 'auto' podría significar "volver a hover desde expandido", entonces colapsar.
+                // Esta lógica es cubierta por el manejador del clic.
+                // Para carga inicial y resize, 'auto' significa empezar colapsado.
+                if(!fromClick){ // Solo aplicar colapso por defecto si no es un clic directo que activa 'auto'
+                   sidebar.classList.add('collapsed'); 
+                }
+            }
+            updateDesktopToggleIcon();
+            localStorage.setItem('dashboardSidebarPinnedState', sidebarPinnedState);
+        }
+    
+        function initializeSidebar() {
+            if (!sidebar) return;
+            const isMobile = window.innerWidth <= 992;
+    
+            if (isMobile) {
+                sidebar.classList.remove('collapsed'); 
+                sidebar.classList.remove('open');      
+                if (sidebarToggleDesktop) sidebarToggleDesktop.style.display = 'none';
+                if (sidebarToggleMobile) sidebarToggleMobile.style.display = 'block';
+            } else { 
+                let initialState = localStorage.getItem('dashboardSidebarPinnedState');
+                if (initialState !== 'pinned-expanded' && initialState !== 'pinned-collapsed' && initialState !== 'auto') {
+                    initialState = 'auto'; 
+                }
+                applyDesktopSidebarState(initialState);
+    
+                if (sidebarToggleDesktop) sidebarToggleDesktop.style.display = 'flex'; 
+                if (sidebarToggleMobile) sidebarToggleMobile.style.display = 'none';
+            }
+        }
+    
+        if (sidebar) {
+            initializeSidebar();
+    
+            if (sidebarToggleDesktop) {
+                sidebarToggleDesktop.addEventListener('click', () => {
+                    if (window.innerWidth > 992) {
+                        let nextState;
+                        if (sidebarPinnedState === 'pinned-expanded') {
+                            nextState = 'pinned-collapsed';
+                        } else if (sidebarPinnedState === 'pinned-collapsed') {
+                            nextState = 'pinned-expanded';
+                        } else { // sidebarPinnedState === 'auto'
+                            if (!sidebar.classList.contains('collapsed')) { // Estaba expandido por hover
+                                nextState = 'pinned-collapsed'; // Fijar colapsado
+                            } else { // Estaba colapsado (estado base de 'auto')
+                                nextState = 'pinned-expanded'; // Fijar expandido
+                            }
+                        }
+                        applyDesktopSidebarState(nextState, true);
+                    }
+                });
+            }
+    
+            if (sidebarToggleMobile) {
+                sidebarToggleMobile.addEventListener('click', () => {
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.toggle('open');
+                    }
+                });
+            }
+    
+            sidebar.addEventListener('mouseenter', () => {
+                if (window.innerWidth > 992 && sidebarPinnedState === 'auto') {
+                    sidebar.classList.remove('collapsed');
+                }
+            });
+    
+            sidebar.addEventListener('mouseleave', () => {
+                if (window.innerWidth > 992 && sidebarPinnedState === 'auto') {
+                    sidebar.classList.add('collapsed');
+                }
+            });
+    
+            document.querySelectorAll('.sidebar-nav a, .sidebar-footer a').forEach(link => {
+                link.addEventListener('click', () => { 
+                    if (window.innerWidth <= 992 && sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+    
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 992 && sidebar.classList.contains('open')) {
+                    const isClickInsideSidebar = sidebar.contains(event.target);
+                    const isClickOnMobileToggle = sidebarToggleMobile ? sidebarToggleMobile.contains(event.target) : false;
+                    if (!isClickInsideSidebar && !isClickOnMobileToggle) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+    
+            window.addEventListener('resize', () => {
+                const wasOpenMobile = sidebar.classList.contains('open');
+                initializeSidebar(); 
+                if (window.innerWidth > 992 && wasOpenMobile) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
+

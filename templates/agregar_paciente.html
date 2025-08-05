@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* Basic styles for the form (you can move them to a CSS file) */
+  .form-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .form-container h2 {
+    font-size: 22px;
+    color: #111827;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+  }
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box; /* Important */
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+     border-color: #3b82f6;
+     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+     outline: none;
+  }
+  .form-actions {
+    margin-top: 25px;
+    text-align: right;
+  }
+  .action-btn {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 9px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none; /* For the cancel link */
+  }
+  .action-btn:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+  }
+  .action-btn-primary {
+    background-color: #1c64f2;
+    color: white;
+    border-color: #1c64f2;
+  }
+  .action-btn-primary:hover {
+    background-color: #1a56db;
+    border-color: #1a56db;
+  }
+    /* Styles for Flash messages */
+  .flash-messages {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+  }
+  .flash-messages li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .flash-messages .success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
+  .flash-messages .danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
+  .flash-messages .warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
+  .flash-messages .info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
+
+</style>
+
+<div class="form-container">
+    <h2><i class="fas fa-user-plus"></i> Add New Patient</h2>
+
+    {# Show flash messages if they exist #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-messages">
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('agregar_paciente') }}">
+        {# CSRF Token if you are using Flask-WTF, otherwise you can omit it #}
+        {# {{ form.csrf_token }} #}
+
+        <div class="form-group">
+            <label for="patient_name">Full Name *</label>
+            <input type="text" id="patient_name" name="patient_name" required value="{{ nombre_prev or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="patient_email">Email</label>
+            <input type="email" id="patient_email" name="patient_email" value="{{ email_prev or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="patient_phone">Phone</label>
+            <input type="text" id="patient_phone" name="patient_phone" value="{{ telefono_prev or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="treatment_status">Treatment Status</label>
+            <select id="treatment_status" name="treatment_status">
+                <option value="Active" {% if estado_prev == 'Activo' %}selected{% endif %}>Active</option>
+                <option value="On Follow-up" {% if estado_prev == 'En Seguimiento' %}selected{% endif %}>On Follow-up</option>
+                <option value="Inactive" {% if estado_prev == 'Inactivo' %}selected{% endif %}>Inactive</option>
+                <option value="Not specified" {% if not estado_prev or estado_prev == 'No especificado' %}selected{% endif %}>Not specified</option>
+                {# Add more statuses if needed #}
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('pacientes_page') }}" class="action-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="action-btn action-btn-primary">
+                <i class="fas fa-save"></i> Save Patient
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

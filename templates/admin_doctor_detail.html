@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% block title %}Detalle Doctor - {{ doctor.nombre }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Estilos Generales */
+    body {
+        background-color: #f3f4f6;
+        font-family: 'Inter', sans-serif;
+        color: #333;
+    }
+    .main-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 340px; /* Columna principal y sidebar */
+        gap: 30px;
+        align-items: flex-start;
+    }
+    @media (max-width: 960px) {
+        .main-container {
+            grid-template-columns: 1fr; /* Apilar en pantallas pequeñas */
+        }
+    }
+
+    /* Estilos de Tarjetas */
+    .card {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+    .card-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .card-header h2 {
+        font-size: 18px;
+        color: #111827;
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .card-body {
+        padding: 24px;
+    }
+    .card-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+    
+    /* Estilos de Formularios */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 25px;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        color: #344054;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group select {
+        width: 100%; padding: 10px 14px; border: 1px solid #d0d5dd;
+        border-radius: 8px; font-size: 14px; color: #101828;
+        box-sizing: border-box; height: 44px; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:disabled {
+        background-color: #e9ecef; cursor: not-allowed;
+    }
+    .form-group input:focus, .form-group select:focus {
+        border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none;
+    }
+    .phone-input-group { display: flex; }
+    .phone-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none; width: 120px; }
+    .phone-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+    .form-group-checkbox { display: flex; align-items: center; margin-top: 10px; grid-column: 1 / -1; }
+    .form-group-checkbox input { margin-right: 10px; height: 18px; width: 18px; }
+
+    /* Estilos de Botones */
+    .btn {
+        padding: 10px 20px; font-size: 14px; font-weight: 600;
+        border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+        transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary { background-color: #2563eb; color: white; }
+    .btn-primary:hover { background-color: #1d4ed8; }
+    .btn-secondary { background-color: #fff; color: #374151; border-color: #d1d5db; }
+    .btn-secondary:hover { background-color: #f9fafb; }
+    .btn-danger { background-color: #dc2626; color: white; }
+    .btn-danger:hover { background-color: #b91c1c; }
+
+    /* Estilos para Widgets de Estadísticas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .widget-card {
+        background-color: #fff; padding: 20px; border-radius: 12px;
+        border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .widget-header { display: flex; align-items: center; }
+    .widget-icon { font-size: 1.25rem; margin-right: 16px; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .widget-icon.icon-blue { color: #2563EB; background-color: #EFF6FF; }
+    .widget-icon.icon-green { color: #059669; background-color: #D1FAE5; }
+    .widget-icon.icon-purple { color: #7C3AED; background-color: #F5F3FF; }
+    .widget-icon.icon-red { color: #dc2626; background-color: #fee2e2; }
+    .widget-icon.icon-orange { color: #f97316; background-color: #ffedd5; }
+    .widget-title-group h4 { margin: 0; font-size: 0.8rem; color: #6b7280; font-weight: 500; text-transform: uppercase; }
+    .widget-title-group .widget-value { font-size: 1.8rem; font-weight: 700; color: #111827; line-height: 1.2; }
+    
+    /* Estilos para el Feed de Actividad */
+    .activity-feed ul { list-style: none; padding: 0; margin: 0; }
+    .activity-feed li { display: flex; align-items: flex-start; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+    .activity-feed li:last-child { border-bottom: none; }
+    .activity-icon { font-size: 1rem; color: #6b7280; width: 20px; text-align: center; margin-top: 3px;}
+    .activity-details p { margin: 0; font-size: 14px; color: #374151; }
+    .activity-details .time { font-size: 12px; color: #9ca3af; }
+
+    /* Zona de Peligro */
+    .danger-zone { border-color: #fecaca; }
+    .danger-zone .card-header { background-color: #fee2e2; border-bottom-color: #fecaca; }
+    .danger-zone .card-header h2 { color: #991b1b; }
+    .danger-zone .card-body { display: flex; justify-content: space-between; align-items: center; }
+    .danger-zone strong { color: #b91c1c; }
+    .danger-zone p { margin: 0; font-size: 14px; color: #4b5563; }
+</style>
+
+{# --- Lógica para separar prefijo y número de teléfono --- #}
+{% set codigos_pais = [{"codigo": "+506", "nombre": "Costa Rica", "bandera": "🇨🇷"}, {"codigo": "+1", "nombre": "EE. UU.", "bandera": "🇺🇸"}, {"codigo": "+52", "nombre": "México", "bandera": "🇲🇽"}, {"codigo": "+34", "nombre": "España", "bandera": "🇪🇸"}, {"codigo": "+57", "nombre": "Colombia", "bandera": "🇨🇴"}, {"codigo": "+54", "nombre": "Argentina", "bandera": "🇦🇷"}] %}
+{% set prefijo_seleccionado, numero_sin_prefijo = '', doctor.telefono_profesional or '' %}
+{% if doctor.telefono_profesional %}{% for pais in codigos_pais %}{% if doctor.telefono_profesional.startswith(pais.codigo) %}{% set prefijo_seleccionado = pais.codigo %}{% set numero_sin_prefijo = doctor.telefono_profesional[prefijo_seleccionado|length:] %}{% endif %}{% endfor %}{% endif %}
+
+<div class="main-container">
+    <div class="left-column">
+        <div class="stats-grid">
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon icon-blue"><i class="fas fa-users"></i></div>
+                    <div class="widget-title-group">
+                        <h4>Pacientes Creados</h4>
+                        <p class="widget-value">{{ doctor_metrics.patients_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon icon-purple"><i class="fas fa-calendar-check"></i></div>
+                    <div class="widget-title-group">
+                        <h4>Visitas Generadas</h4>
+                        {# CORRECCIÓN 1: El nombre de la variable era incorrecto #}
+                        <p class="widget-value">{{ doctor_metrics.visits_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon icon-orange"><i class="fas fa-microphone-alt"></i></div>
+                    <div class="widget-title-group">
+                        <h4>Minutos Grabados</h4>
+                        <p class="widget-value">{{ doctor_metrics.minutes_recorded }}</p>
+                    </div>
+                </div>
+            </div>
+             <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon icon-red"><i class="fas fa-file-medical"></i></div>
+                    <div class="widget-title-group">
+                        <h4>Documentos Creados</h4>
+                        {# CORRECCIÓN 2: El nombre de la variable era incorrecto #}
+                        <p class="widget-value">{{ doctor_metrics.documents_created_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon icon-green"><i class="fas fa-file-invoice"></i></div>
+                    <div class="widget-title-group">
+                        <h4>Documentos Resumidos</h4>
+                        <p class="widget-value">{{ doctor_metrics.docs_resumidos_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# CORRECCIÓN 3: El nombre de la ruta en el action del form era incorrecto #}
+        <form method="POST" action="{{ url_for('admin_doctor_detail', doctor_id=doctor.id) }}">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-edit"></i> Editar Perfil del Profesional</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="nombre">Nombre completo</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ doctor.nombre }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="identificacion">Nº Identificación (Cédula)</label>
+                            <input type="text" id="identificacion" name="identificacion" value="{{ doctor.identificacion or '' }}" placeholder="Ej: 1-1234-5678">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo electrónico</label>
+                            <input type="email" id="email" name="email" value="{{ doctor.email }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono_numero">Teléfono Profesional</label>
+                            <div class="phone-input-group">
+                                <select id="telefono_prefijo" name="telefono_prefijo">
+                                    <option value="" disabled selected>Prefijo</option>
+                                    {% for pais in codigos_pais %}
+                                        <option value="{{ pais.codigo }}" {% if pais.codigo == prefijo_seleccionado %}selected{% endif %}>{{ pais.bandera }} {{ pais.codigo }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="tel" id="telefono_numero" name="telefono_numero" value="{{ numero_sin_prefijo }}" placeholder="Ej: 88887777">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="licencia">Licencia profesional</label>
+                            <input type="text" id="licencia" name="licencia" value="{{ doctor.licencia_profesional or '' }}" disabled>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="especialidad">Especialidad</label>
+                            <input type="text" id="especialidad" name="especialidad" value="{{ doctor.especialidad or '' }}" disabled>
+                        </div>
+                        <div class="form-group-checkbox">
+                            <input class="form-check-input" type="checkbox" id="is_verified" name="is_verified" {% if doctor.is_verified %}checked{% endif %}>
+                            <label class="form-check-label" for="is_verified">Profesional Verificado</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Volver al Dashboard</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="right-sidebar">
+        <div class="card">
+            <div class="card-body activity-feed">
+                {% if recent_activity %}
+                    <ul>
+                        {% for log in recent_activity %}
+                        <li>
+                            <i class="activity-icon {{ log.icon }}"></i>
+                            <div class="activity-details">
+                                <p>{{ log.description }}</p>
+                                <span class="time">{{ log.time_ago }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="text-align: center; color: #6b7280; font-size: 14px;">No hay actividad reciente para este doctor.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card danger-zone">
+            <div class="card-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h2>
+            </div>
+            <div class="card-body">
+                <div>
+                    <strong>Eliminar profesional</strong>
+                    <p>Esta acción es permanente y no se puede deshacer.</p>
+                </div>
+                <form action="{{ url_for('admin_delete_doctor', doctor_id=doctor.id) }}" method="POST" onsubmit="return confirm('ADVERTENCIA: Esta acción es permanente. ¿Estás seguro de que deseas intentar eliminar a este doctor?');">
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,723 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+<style>
+  /* ... (Your existing CSS) ... */
+  body {
+    background-color: #f0f2f5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .records-summary-page {
+    max-width: 780px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .header-form {
+    text-align: left;
+    margin-bottom: 25px;
+  }
+
+  .header-form h1 {
+    color: #111827;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .header-form p {
+    color: #4b5563;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .summary-card {
+    background-color: #ffffff;
+    padding: 25px 30px 30px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dfe1e5;
+  }
+
+  .form-row {
+    display: flex;
+    flex-wrap: wrap; /* Important for fields to wrap */
+    gap: 20px;
+    margin-bottom: 25px;
+    align-items: flex-end; /* Aligns elements to the end, useful if labels have different heights */
+  }
+
+  .form-input {
+    flex-shrink: 1;
+    /* The following are examples of how to distribute space, they can be adjusted */
+  }
+
+  .form-input-name {
+    flex-grow: 2; /* More space for the name */
+    flex-basis: 250px; /* Base before growing/shrinking */
+    min-width: 220px; /* Minimum width */
+    position: relative; /* For the suggestions dropdown */
+  }
+  .form-input-id {
+    flex-grow: 1;
+    flex-basis: 180px;
+    min-width: 150px;
+  }
+  .form-input-template {
+    flex-grow: 1;
+    flex-basis: 200px;
+    min-width: 180px;
+  }
+
+
+  .form-input label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    color: #344054;
+  }
+
+  .form-input input[type="text"],
+  .form-input select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #101828;
+    height: 42px;
+    box-sizing: border-box;
+  }
+  .form-input input[type="text"]::placeholder {
+    color: #98a2b3;
+  }
+  .form-input input[type="text"]:focus,
+  .form-input select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    outline: none;
+  }
+
+  /* Styles for patient suggestions dropdown (unchanged from the previous version) */
+  .suggestions-dropdown {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    left: 0;
+    top: 100%; /* Positions it below the input */
+  }
+  .suggestion-item { padding: 10px 14px; cursor: pointer; font-size: 14px; color: #101828; }
+  .suggestion-item:hover { background-color: #f0f2f5; }
+  .suggestion-item.active { background-color: #e9f0f8; color: #1c64f2; }
+  .suggestions-dropdown .no-suggestions { padding: 10px 14px; font-size: 14px; color: #6b7280; font-style: italic; }
+
+  /* ... (Rest of your CSS) ... */
+  .form-section-title { font-size: 18px; color: #101828; margin-top: 25px; margin-bottom: 6px; font-weight: 600; }
+  .form-section-subtitle { font-size: 14px; color: #475467; margin-bottom: 18px; }
+  .strong-separator { border: 0; height: 1px; background-color: #eaecf0; margin: 30px 0; }
+  .file-upload-container { margin-top: 10px; padding: 25px; border: 2px dashed #d0d5dd; border-radius: 8px; text-align: center; background-color: #f9fafb; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+  .file-upload-container:hover { background-color: #f0f2f5; border-color: #a0aec0; }
+  .file-upload-container.dragover { background-color: #e9f0f8; border-color: #3b82f6; border-style: solid; }
+  .file-upload-icon { font-size: 32px; color: #3b82f6; margin-bottom: 10px; }
+  .file-upload-text p { margin: 0; color: #344054; font-size: 15px; font-weight: 500; }
+  .file-upload-text p strong { color: #2563eb; }
+  .file-upload-text span { font-size: 13px; color: #475467; display: block; margin-top: 4px; }
+  #file-input { display: none; }
+  #uploaded-files-list { margin-top: 20px; }
+  #uploaded-files-list h3 { font-size: 15px; color: #344054; margin-bottom: 10px; font-weight: 600; }
+  #uploaded-files-list ul { list-style: none; padding: 0; margin:0; }
+  #uploaded-files-list li { background-color: #f9fafb; border: 1px solid #eaecf0; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; transition: background-color 0.2s; }
+  #uploaded-files-list li:hover { background-color: #f0f2f5; }
+  #uploaded-files-list .file-name { color: #101828; font-weight: 500; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 100px); }
+  #uploaded-files-list .file-size { font-size: 0.85em; color: #475467; white-space: nowrap; margin-left: auto; padding-right: 12px; }
+  #uploaded-files-list .btn-remove-file { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1em; padding: 3px; line-height: 1; transition: color 0.2s; }
+  #uploaded-files-list .btn-remove-file:hover { color: #dc2626; }
+  #uploaded-files-list .no-files { text-align: left; color: #6b7280; padding: 10px 0; font-style: italic; font-size: 14px; border: none; background-color: transparent; }
+  .main-action-btn { background-color: #1c64f2; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; height: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .main-action-btn:hover { background-color: #1a56db; transform: translateY(-1px); }
+  .main-action-btn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+  .main-action-btn i { font-size: 1.05em; }
+  #btn-summarize-visit { width: 100%; }
+  .secondary-action-btn { background-color: #4b5563; color: white; padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; margin-top: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .secondary-action-btn:hover { background-color: #374151; transform: translateY(-1px); }
+  .secondary-action-btn i { margin-right: 4px; }
+  .custom-alert { padding: 12px 18px; border-radius: 8px; margin-top: 20px; text-align: left; font-size: 14px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
+  .custom-alert i { font-size: 1.2em; }
+  .custom-alert-info { background-color: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+  .custom-alert-info i { color: #3b82f6; }
+  .custom-alert-error { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+  .custom-alert-error i { color: #ef4444; }
+  .custom-alert-success { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+  .custom-alert-success i { color: #22c55e; }
+  .visit-id-container { margin-top: 10px; text-align: right; font-size: 13px; color: #667085; }
+  .visit-id-container #summary-process-id { font-weight: 600; color: #374151; }
+  #generated-summary-area { background-color: #ffffff; border: 1px solid #dfe1e5; border-radius: 10px; padding: 25px 30px; margin-top: 30px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+  #generated-summary-area .summary-section-title { font-size: 20px; color: #111827; font-weight: 600; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eaecf0; }
+  #generated-summary-content { background-color: #fdfdff; border: 1px solid #e5e7eb; padding: 18px 22px; border-radius: 8px; color: #1f2937; font-size: 14.5px; line-height: 1.7; text-align: left; min-height: 150px; max-height: 600px; overflow-y: auto; }
+  #generated-summary-content.placeholder { color: #6b7280; font-style: italic; display: flex; align-items: center; justify-content: center; text-align: center; background-color: #f9fafb; }
+  #generated-summary-content h1, #generated-summary-content h2, #generated-summary-content h3, #generated-summary-content h4, #generated-summary-content h5, #generated-summary-content h6 { color: #111827; font-weight: 600; margin-top: 1.4em; margin-bottom: 0.7em; line-height: 1.3; }
+  #generated-summary-content h1:first-child, #generated-summary-content h2:first-child, #generated-summary-content h3:first-child, #generated-summary-content h4:first-child, #generated-summary-content h5:first-child, #generated-summary-content h6:first-child, #generated-summary-content p:first-child, #generated-summary-content ul:first-child, #generated-summary-content ol:first-child { margin-top: 0; }
+  #generated-summary-content h1 { font-size: 1.6em; }
+  #generated-summary-content h2 { font-size: 1.4em; }
+  #generated-summary-content h3 { font-size: 1.25em; }
+  #generated-summary-content h4 { font-size: 1.1em; }
+  #generated-summary-content p { margin-bottom: 1em; line-height: 1.75; color: #374151; }
+  #generated-summary-content strong, #generated-summary-content b { font-weight: 600; color: #111827; }
+  #generated-summary-content ul, #generated-summary-content ol { margin-left: 5px; margin-bottom: 1.2em; padding-left: 25px; color: #374151; }
+  #generated-summary-content ul { list-style-type: disc; }
+  #generated-summary-content ol { list-style-type: decimal; }
+  #generated-summary-content li { margin-bottom: 0.6em; line-height: 1.65; }
+  #generated-summary-content li > p { margin-bottom: 0.4em; }
+  #generated-summary-content li > ul, #generated-summary-content li > ol { margin-top: 0.5em; margin-bottom: 0.5em; }
+  #visit-additional-info { margin-top: 20px; font-size: 13.5px; background-color: #f9fafb; padding: 15px 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
+  #visit-additional-info h4 { font-size: 16px; color: #111827; font-weight: 600; margin-top: 0; margin-bottom: 12px; }
+  #visit-additional-info p { margin-bottom: 8px; color: #374151; line-height: 1.5; }
+  #visit-additional-info p strong { color: #111827; font-weight: 500; min-width: 130px; display: inline-block; }
+  .post-summary-actions-container { text-align: center; margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+  .post-summary-actions-container .main-action-btn, .post-summary-actions-container .secondary-action-btn { width: auto; margin-top: 0; margin-bottom: 10px; }
+</style>
+
+<div class="records-summary-page">
+  <div class="header-form">
+    <h1>Smart Records Summary</h1>
+    <p>Optimize your time. Upload a patient's previous documents or records, and Vitta Health will generate a concise summary for your review.</p>
+  </div>
+
+  <div class="summary-card">
+    <div id="summary-input-form">
+      <form id="internal-records-summary-form">
+        <div class="form-row">
+          <div class="form-input form-input-name">
+            <label for="patient_name_summary">Patient's Full Name (First and Last Names)</label>
+            <input type="text" id="patient_name_summary" name="patient_name" placeholder="Type first and last name, or leave blank">
+            <div id="patient-suggestions-container" class="suggestions-dropdown">
+              {# Suggestions will be inserted here by JavaScript #}
+            </div>
+          </div>
+          <input type="hidden" id="selected_patient_id" name="selected_patient_id" value="">
+
+          {# NEW FIELD FOR IDENTIFICATION #}
+          <div class="form-input form-input-id">
+            <label for="patient_identification">Identification (Optional)</label>
+            <input type="text" id="patient_identification" name="patient_identification_document" placeholder="E.g., ID, Passport">
+          </div>
+
+          <div class="form-input form-input-template">
+            <label for="summary_template">Summary Type (Optional)</label>
+            <select id="summary_template" name="template">
+              <option value="Records Summary">General Records Summary</option>
+              {% for summary_template in plantillas %}
+                {% if summary_template != "Records Summary" %}
+                  <option value="{{ summary_template }}">{{ summary_template }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <hr class="strong-separator">
+
+        <div>
+          <h2 class="form-section-title">Upload Patient Documents</h2>
+          <p class="form-section-subtitle">Drag and drop or select files. Supported formats: PDF, images (PNG, JPG), Word (DOC, DOCX), and text (TXT, MD).</p>
+          <div id="file-upload-area" class="file-upload-container">
+            <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt,.md">
+            <div class="file-upload-icon"> <i class="fas fa-cloud-upload-alt"></i> </div>
+            <div class="file-upload-text">
+              <p><strong>Click to upload</strong> or drag and drop files here.</p>
+              <span>Maximum 10MB per file. Up to 5 files.</span>
+            </div>
+          </div>
+          <div id="uploaded-files-list">
+            <h3>Selected Files:</h3>
+            <ul> <li class="no-files">No files have been selected yet.</li> </ul>
+          </div>
+        </div>
+
+        <button type="button" id="btn-summarize-visit" class="main-action-btn">
+          <i class="fas fa-file-invoice"></i> Summarize Records & Start
+        </button>
+      </form>
+    </div>
+
+    <div id="process-status-message" class="custom-alert" style="display: none;"></div>
+    <div class="visit-id-container" style="display: none;"> Processed Visit ID: <span id="summary-process-id">N/A</span></div>
+    <div id="generated-summary-area" style="display: none;">
+      <h2 class="summary-section-title">Generated Summary</h2>
+      <div id="generated-summary-content" class="placeholder"> <p>Waiting for summary content...</p> </div>
+      <div id="visit-additional-info" style="display: none;"> <h4>Created Visit Details</h4> </div>
+      <div class="post-summary-actions-container">
+        <button type="button" id="btn-go-to-patient-profile" class="main-action-btn" style="display: none;">
+            <i class="fas fa-user"></i> Go to Patient Profile
+        </button>
+        <button type="button" id="btn-new-summary" class="secondary-action-btn">
+          <i class="fas fa-plus-circle"></i> Generate New Summary
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("LOG: DOM fully loaded and parsed.");
+
+    const summaryInputFormDiv = document.getElementById('summary-input-form');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileInput = document.getElementById('file-input');
+    const filesListUl = document.querySelector('#uploaded-files-list ul');
+    const btnSummarizeVisit = document.getElementById('btn-summarize-visit');
+
+    const patientNameInput = document.getElementById('patient_name_summary');
+    const selectedPatientIdInput = document.getElementById('selected_patient_id');
+    const patientIdentificationInput = document.getElementById('patient_identification'); // NEW
+    const suggestionsContainer = document.getElementById('patient-suggestions-container');
+    const templateSelect = document.getElementById('summary_template');
+
+    const summaryProcessIdSpan = document.getElementById('summary-process-id');
+    const visitIdContainer = document.querySelector('.visit-id-container');
+    const processStatusMessage = document.getElementById('process-status-message');
+    const generatedSummaryAreaDiv = document.getElementById('generated-summary-area');
+    const generatedSummaryContentDiv = document.getElementById('generated-summary-content');
+    const visitAdditionalInfoDiv = document.getElementById('visit-additional-info');
+    const btnNewSummary = document.getElementById('btn-new-summary');
+    const btnGoToPatientProfile = document.getElementById('btn-go-to-patient-profile');
+
+    if (!btnSummarizeVisit) {
+        console.error("LOG CRITICAL: The 'btnSummarizeVisit' button was not found.");
+        return;
+    }
+    // ... (other element verifications if you wish) ...
+
+    let selectedFiles = [];
+    const MAX_FILES = 5;
+    const MAX_FILE_SIZE_MB = 10;
+    let autocompleteDebounceTimer; // Changed to avoid conflict with another possible debounceTimer
+
+    function debounce(func, delay) {
+        return function(...args) {
+            clearTimeout(autocompleteDebounceTimer); // Use the specific timer
+            autocompleteDebounceTimer = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    async function getPatientSuggestions(query) {
+        if (query.length < 2) {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+        try {
+            // IMPORTANT: Make sure this endpoint exists and returns {id, nombre, identificacion?}
+            const response = await fetch(`/api/search_patients?q=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                console.error("Error searching for patients:", response.statusText);
+                suggestionsContainer.innerHTML = '<div class="no-suggestions">Error searching.</div>';
+                suggestionsContainer.style.display = 'block';
+                return;
+            }
+            const patients = await response.json();
+            showSuggestions(patients);
+        } catch (error) {
+            console.error("Error in suggestions fetch:", error);
+            suggestionsContainer.innerHTML = '<div class="no-suggestions">Connection error.</div>';
+            suggestionsContainer.style.display = 'block';
+        }
+    }
+
+    function showSuggestions(patients) {
+        suggestionsContainer.innerHTML = '';
+        if (patients && patients.length > 0) {
+            patients.forEach(patient => {
+                const item = document.createElement('div');
+                item.classList.add('suggestion-item');
+                // Show name and identification (if it exists)
+                item.textContent = patient.nombre + (patient.identificacion_documento ? ` (ID: ${patient.identificacion_documento})` : '');
+                item.dataset.id = patient.id;
+                item.dataset.name = patient.nombre; // Save original name
+                item.dataset.identification = patient.identificacion_documento || ''; // Save identification
+
+                item.addEventListener('click', () => {
+                    patientNameInput.value = item.dataset.name;
+                    selectedPatientIdInput.value = item.dataset.id;
+                    if(patientIdentificationInput) { // Fill identification field
+                        patientIdentificationInput.value = item.dataset.identification;
+                    }
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                    console.log(`LOG: Patient selected: ${item.dataset.name}, ID: ${item.dataset.id}, Identification: ${item.dataset.identification}`);
+                });
+                suggestionsContainer.appendChild(item);
+            });
+            suggestionsContainer.style.display = 'block';
+        } else {
+            suggestionsContainer.innerHTML = '<div class="no-suggestions">No patients found.</div>';
+            suggestionsContainer.style.display = 'block';
+        }
+    }
+
+    if (patientNameInput && suggestionsContainer && selectedPatientIdInput && patientIdentificationInput) {
+        patientNameInput.addEventListener('input', debounce(async (event) => {
+            const query = event.target.value.trim();
+            selectedPatientIdInput.value = '';
+            // We don't clear the identification here, the user can clear it if needed.
+            if (query) {
+                await getPatientSuggestions(query);
+            } else {
+                suggestionsContainer.innerHTML = '';
+                suggestionsContainer.style.display = 'none';
+            }
+        }, 300));
+
+        document.addEventListener('click', (event) => {
+            if (suggestionsContainer && !patientNameInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+
+        patientNameInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && suggestionsContainer.style.display === 'block') {
+                const activeSuggestion = suggestionsContainer.querySelector('.suggestion-item.active'); // You need to implement the .active class if you use keyboard navigation
+                if (activeSuggestion) {
+                    activeSuggestion.click();
+                    event.preventDefault();
+                } else if (suggestionsContainer.children.length > 0 && suggestionsContainer.querySelector('.no-suggestions') === null) {
+                    // Optional: select the first suggestion if none are active
+                    // suggestionsContainer.children[0].click();
+                    event.preventDefault();
+                }
+            }
+        });
+    } else {
+        console.warn("LOG WARNING: Not all elements for patient suggestions were found (name, id, identification, container).");
+    }
+
+    // --- FILE HANDLING FUNCTIONS (UNCHANGED, MUST BE PRESENT) ---
+    function addFiles(newFiles) {
+      if (newFiles.length === 0) return;
+      let filesAddedThisTurn = 0;
+      for (let i = 0; i < newFiles.length; i++) {
+        const newFile = newFiles[i];
+        if (selectedFiles.length >= MAX_FILES) {
+            showStatusMessage(`You cannot upload more than ${MAX_FILES} files.`, "error", false, 5000);
+            break;
+        }
+        if (newFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+            showStatusMessage(`The file "${newFile.name}" is too large (max. ${MAX_FILE_SIZE_MB}MB).`, "error", false, 5000);
+            continue;
+        }
+        if (!selectedFiles.some(f => f.name === newFile.name && f.size === newFile.size)) {
+            selectedFiles.push(newFile);
+            filesAddedThisTurn++;
+        }
+      }
+      if (filesAddedThisTurn > 0) { updateFilesListUI(); }
+    }
+
+    function updateFilesListUI() {
+      if (!filesListUl) { console.error("LOG CRITICAL: filesListUl is not defined."); return; }
+      filesListUl.innerHTML = '';
+      if (selectedFiles.length === 0) {
+        const noFilesLi = document.createElement('li');
+        noFilesLi.classList.add('no-files');
+        noFilesLi.textContent = 'No files have been selected yet.';
+        filesListUl.appendChild(noFilesLi);
+        if (btnSummarizeVisit) btnSummarizeVisit.disabled = true;
+        return;
+      }
+      selectedFiles.forEach((file, index) => {
+        const li = document.createElement('li');
+        const nameSpan = document.createElement('span');
+        nameSpan.classList.add('file-name');
+        nameSpan.textContent = file.name;
+        const additionalInfoDiv = document.createElement('div');
+        additionalInfoDiv.style.display = 'flex';
+        additionalInfoDiv.style.alignItems = 'center';
+        const sizeSpan = document.createElement('span');
+        sizeSpan.classList.add('file-size');
+        sizeSpan.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('btn-remove-file');
+        removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+        removeBtn.title = 'Remove file';
+        removeBtn.type = 'button';
+        removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(index); };
+        li.appendChild(nameSpan);
+        additionalInfoDiv.appendChild(sizeSpan);
+        additionalInfoDiv.appendChild(removeBtn);
+        li.appendChild(additionalInfoDiv);
+        filesListUl.appendChild(li);
+      });
+      if (btnSummarizeVisit) btnSummarizeVisit.disabled = false;
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      updateFilesListUI();
+    }
+
+    let statusMessageTimeoutId = null;
+    function showStatusMessage(message, type = 'info', alwaysVisible = false, durationMs = 0) {
+        if (!processStatusMessage) { console.error("LOG CRITICAL: processStatusMessage is not defined."); return; }
+        clearTimeout(statusMessageTimeoutId);
+        processStatusMessage.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.classList.add('fas');
+        if (type === 'error') {
+            processStatusMessage.className = 'custom-alert custom-alert-error';
+            icon.classList.add('fa-exclamation-circle');
+        } else if (type === 'success') {
+            processStatusMessage.className = 'custom-alert custom-alert-success';
+            icon.classList.add('fa-check-circle');
+        } else {
+            processStatusMessage.className = 'custom-alert custom-alert-info';
+            icon.classList.add('fa-info-circle');
+            if (message.toLowerCase().includes("processing")) {
+                 icon.classList.remove('fa-info-circle');
+                 icon.classList.add('fa-spinner', 'fa-spin');
+            }
+        }
+        processStatusMessage.appendChild(icon);
+        processStatusMessage.appendChild(document.createTextNode(" " + message));
+        if (message || alwaysVisible) { processStatusMessage.style.display = 'flex'; }
+        else { processStatusMessage.style.display = 'none'; }
+        if (!alwaysVisible && durationMs > 0) {
+            statusMessageTimeoutId = setTimeout(() => { processStatusMessage.style.display = 'none'; }, durationMs);
+        }
+    }
+    // --- END FILE HANDLING FUNCTIONS ---
+
+    function setupViewForNewSummary() {
+        console.log("LOG: Executing setupViewForNewSummary...");
+        if (!summaryInputFormDiv || !generatedSummaryAreaDiv || !patientNameInput ||
+            !templateSelect || !summaryProcessIdSpan || !visitIdContainer ||
+            !generatedSummaryContentDiv || !visitAdditionalInfoDiv || !btnSummarizeVisit ||
+            !patientIdentificationInput || !selectedPatientIdInput || !suggestionsContainer ) {
+            console.error("LOG CRITICAL: One or more DOM elements are not defined in setupViewForNewSummary.");
+            return;
+        }
+
+        summaryInputFormDiv.style.display = 'block';
+        generatedSummaryAreaDiv.style.display = 'none';
+
+        patientNameInput.value = '';
+        patientIdentificationInput.value = ''; // Clear identification field
+        selectedPatientIdInput.value = ''; // Clear selected ID
+        suggestionsContainer.innerHTML = ''; // Clear suggestions
+        suggestionsContainer.style.display = 'none'; // Hide suggestions
+
+        templateSelect.value = 'Records Summary';
+        selectedFiles = [];
+        updateFilesListUI();
+
+        summaryProcessIdSpan.textContent = "N/A";
+        visitIdContainer.style.display = 'none';
+        showStatusMessage("", 'info', false);
+
+        generatedSummaryContentDiv.innerHTML = '<p>Waiting for summary content...</p>';
+        generatedSummaryContentDiv.classList.add('placeholder');
+        visitAdditionalInfoDiv.innerHTML = '';
+        visitAdditionalInfoDiv.style.display = 'none';
+
+        btnSummarizeVisit.disabled = true;
+        btnSummarizeVisit.innerHTML = '<i class="fas fa-file-invoice"></i> Summarize Records & Start';
+
+        if (btnGoToPatientProfile) {
+            btnGoToPatientProfile.style.display = 'none';
+            btnGoToPatientProfile.disabled = true;
+            btnGoToPatientProfile.removeAttribute('title');
+            btnGoToPatientProfile.onclick = null;
+        }
+    }
+
+    if (fileUploadArea && fileInput) {
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (event) => {
+          addFiles(event.target.files);
+          fileInput.value = null; // To allow selecting the same file again
+        });
+        fileUploadArea.addEventListener('dragover', (event) => { event.preventDefault(); fileUploadArea.classList.add('dragover'); });
+        fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('dragover'));
+        fileUploadArea.addEventListener('drop', (event) => { event.preventDefault(); fileUploadArea.classList.remove('dragover'); addFiles(event.dataTransfer.files); });
+    } else {
+        console.error("LOG CRITICAL: fileUploadArea or fileInput not found.");
+    }
+
+    btnSummarizeVisit.addEventListener('click', async () => {
+      console.log("LOG: Click on 'Summarize Records' detected.");
+
+      if (selectedFiles.length === 0) {
+        showStatusMessage("Please select at least one file to summarize.", "error", false, 4000);
+        return;
+      }
+
+      const patientName = patientNameInput.value.trim();
+      const identification = patientIdentificationInput.value.trim(); // Get identification
+      const selectedId = selectedPatientIdInput.value; // This is the 'paciente_id' if selected from the list
+      const template = templateSelect.value;
+
+      const formData = new FormData();
+
+      // The backend must be prepared to receive 'paciente_id' (if it exists)
+      // and 'patient_name' and 'patient_identification' to search/create.
+      if (selectedId) {
+          formData.append('patient_id', selectedId);
+      }
+      // Always send name and identification, the backend will decide whether to use them to create or if the ID takes precedence.
+      formData.append('patient_name', patientName);
+      formData.append('patient_identification_document', identification);
+      formData.append('template', template);
+      selectedFiles.forEach((file) => formData.append('documents', file, file.name));
+
+      showStatusMessage("Processing and summarizing records...", "info", true);
+      btnSummarizeVisit.disabled = true;
+      btnSummarizeVisit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      summaryProcessIdSpan.textContent = "Processing...";
+      visitIdContainer.style.display = 'block';
+      generatedSummaryAreaDiv.style.display = 'none';
+      if (btnGoToPatientProfile) { btnGoToPatientProfile.disabled = true; }
+      generatedSummaryContentDiv.innerHTML = '<p>Generating summary...</p>';
+      generatedSummaryContentDiv.classList.add('placeholder');
+      visitAdditionalInfoDiv.style.display = 'none';
+
+      let response;
+      let responseText = "";
+      let data;
+
+      try {
+        console.log("LOG: Attempting fetch to /api/summarize_documents_and_start_visit");
+        response = await fetch('/api/summarize_documents_and_start_visit', {
+          method: 'POST',
+          body: formData
+        });
+        console.log("LOG: Fetch completed. Status:", response.status, "OK:", response.ok);
+        responseText = await response.text();
+        console.log("LOG: Server response (text):", responseText.substring(0, 500) + (responseText.length > 500 ? "..." : ""));
+
+
+        if (!response.ok) {
+            try { data = JSON.parse(responseText); }
+            catch (e) { data = { error: `Server error: ${response.status}. Response is not JSON.` }; }
+            throw new Error(data.error || `Server error: ${response.status}. Response: ${responseText.substring(0,100)}...`);
+        }
+        try { data = JSON.parse(responseText); }
+        catch (jsonError) {
+            console.error("LOG CRITICAL: OK response but JSON parsing failed:", jsonError, "Received response:", responseText);
+            throw new Error(`OK server response but not valid JSON: ${responseText.substring(0,100)}...`);
+        }
+        console.log("LOG: Response OK and parsed as JSON:", data);
+
+
+        summaryProcessIdSpan.textContent = data.visita_id || "N/A";
+        visitIdContainer.style.display = 'block';
+        summaryInputFormDiv.style.display = 'none';
+
+        if (data.resumen_generado && data.resumen_generado.trim() !== "" && typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+            const rawHtml = marked.parse(data.resumen_generado);
+            generatedSummaryContentDiv.innerHTML = DOMPurify.sanitize(rawHtml, {USE_PROFILES: {html: true}});
+            generatedSummaryContentDiv.classList.remove('placeholder');
+        } else {
+            const fallbackMessage = data.resumen_generado || "The summary could not be generated or there is no content.";
+            if (typeof DOMPurify !== 'undefined') { generatedSummaryContentDiv.innerHTML = DOMPurify.sanitize(`<p>${fallbackMessage}</p>`, {USE_PROFILES: {html: true}}); }
+            else { generatedSummaryContentDiv.textContent = fallbackMessage; }
+            generatedSummaryContentDiv.classList.add('placeholder');
+        }
+
+        if (data.overview) {
+            // Make sure the backend sends the 'patient' and 'patient_identification' in the overview
+            let patientDisplay = data.overview.patient || 'N/A (Anonymous/Default)';
+            if(data.overview.patient_identification_document) {
+            patientDisplay += ` (ID: ${data.overview.patient_identification_document})`;
+             }
+            visitAdditionalInfoDiv.innerHTML = `
+                <h4>Created Visit Details</h4>
+                <p><strong>Patient:</strong> ${DOMPurify.sanitize(patientDisplay)}</p>
+                <p><strong>Template Used:</strong> ${DOMPurify.sanitize(data.overview.template || 'N/A')}</p>
+                <p><strong>Visit Type:</strong> ${data.overview.visit_type ? DOMPurify.sanitize(data.overview.visit_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())) : 'N/A'}</p>
+                ${data.processed_files && data.processed_files.length > 0 ? `<p><strong>Processed Files:</strong> ${DOMPurify.sanitize(data.processed_files.join(', '))}</p>` : ''}
+                ${data.omitted_files && data.omitted_files.length > 0 ? `<p><strong>Omitted/Error Files:</strong> ${DOMPurify.sanitize(data.omitted_files.join(', '))}</p>` : ''}
+            `;
+            visitAdditionalInfoDiv.style.display = 'block';
+        }
+
+        let messageType = "info";
+        if (data.status && data.status.includes("error")) messageType = "error";
+        else if (data.status && data.status.includes("warning")) messageType = "info"; // or "warning" if you have a style for it
+        else if (data.status === "success" || (response.ok && !data.status)) messageType = "success"; // Assume success if OK and no specific status
+
+        showStatusMessage(data.message || "Process completed. Review the summary and details.", messageType, true);
+        generatedSummaryAreaDiv.style.display = 'block';
+
+        // Logic for the "Go to Patient Profile" button
+        console.log("LOG: Setting up 'Go to Patient Profile' button. Received data.patient_id:", data.patient_id);
+        if (btnGoToPatientProfile) {
+            btnGoToPatientProfile.style.display = 'inline-flex';
+            // Use data.patient_id (from the top level of the JSON response) or data.overview.patient_id
+            const idForProfile = data.paciente_id || (data.overview ? data.overview.paciente_id : null);
+
+            if (idForProfile && String(idForProfile).trim() !== "") {
+                console.log("LOG: ID for profile is valid:", idForProfile);
+                btnGoToPatientProfile.disabled = false;
+                btnGoToPatientProfile.removeAttribute('title');
+                btnGoToPatientProfile.onclick = () => {
+                    window.location.href = `/perfil_paciente/${idForProfile}`;
+                };
+            } else {
+                console.warn("LOG: ID for profile is NOT valid or was not provided. Profile button will be disabled.");
+                btnGoToPatientProfile.disabled = true;
+                btnGoToPatientProfile.setAttribute('title', 'There is no patient profile associated with this visit.');
+                btnGoToPatientProfile.onclick = null;
+            }
+        } else {
+            console.warn("LOG WARNING: The 'btnGoToPatientProfile' button was not found in the DOM.");
+        }
+
+      } catch (error) {
+        console.error('LOG: Error in main try/catch block:', error.message, error);
+        showStatusMessage(`Error: ${error.message}`, "error", true);
+        summaryProcessIdSpan.textContent = "Error";
+        visitIdContainer.style.display = 'block';
+        if(btnGoToPatientProfile) {
+            btnGoToPatientProfile.style.display = 'inline-flex';
+            btnGoToPatientProfile.disabled = true;
+            btnGoToPatientProfile.setAttribute('title', 'Failed process, cannot go to profile.');
+            btnGoToPatientProfile.onclick = null;
+        }
+      } finally {
+        console.log("LOG: Finally block executed.");
+        if (btnSummarizeVisit) {
+            btnSummarizeVisit.disabled = false;
+            btnSummarizeVisit.innerHTML = '<i class="fas fa-file-invoice"></i> Summarize Records & Start';
+        }
+      }
+    });
+
+    if (btnNewSummary) {
+        btnNewSummary.addEventListener('click', () => {
+            setupViewForNewSummary();
+        });
+    } else {
+        console.warn("LOG WARNING: 'btnNewSummary' button not found.");
+    }
+
+    setupViewForNewSummary();
+    console.log("LOG: Records summary script fully initialized.");
+  });
+</script>
+
+{% endblock %}

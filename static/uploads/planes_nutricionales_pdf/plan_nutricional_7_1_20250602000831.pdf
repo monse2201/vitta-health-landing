@@ -1,0 +1,37 @@
+PDF Simulado (WeasyPrint no disponible). Contenido HTML:
+
+
+    <html><head><meta charset="UTF-8"><title>Plan Nutricional - Lucia</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; margin: 30px; font-size: 12px; color: #333; }
+        .container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        .header, .footer { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #2c3e50; margin-bottom: 5px; font-size: 24px; }
+        .header p { font-size: 10px; color: #7f8c8d; margin-top: 0;}
+        .info-section { margin-bottom: 15px; padding-bottom:10px; border-bottom: 1px dashed #eee; }
+        .info-section:last-child { border-bottom: none; }
+        .info-section p { margin: 4px 0; }
+        .info-section strong { color: #34495e; }
+        h2 { font-size: 16px; color: #2980b9; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-top: 20px; margin-bottom: 10px;}
+        ul { list-style-type: disc; padding-left: 20px; } li { margin-bottom: 5px; }
+        .plan-dia-titulo { font-weight: bold; margin-top:15px; color: #16a085; }
+        .plan-comida { margin-left:10px; }
+        .plan-comida p { margin:3px 0; }
+        .notas { margin-top:20px; padding:10px; background-color:#f9f9f9; border-left:3px solid #1abc9c; font-size:11px;}
+        .footer { font-size: 9px; color: #95a5a6; margin-top: 30px; border-top: 1px solid #eee; paddingTop:10px;}
+    </style></head><body><div class="container">
+        <div class="header"><h1>Plan Nutricional</h1><p>Emitido por Vitta Health Scribe</p></div>
+        <div class="info-section">
+            <p><strong>Paciente:</strong> Lucia</p>
+            <p><strong>Documento Paciente:</strong> 34435</p>
+            <p><strong>Fecha de Emisión:</strong> 02/06/2025</p>
+        </div>
+        <div class="info-section">
+            <p><strong>Profesional:</strong> Test</p>
+            <p><strong>Especialidad:</strong> Nutrición</p>
+            <p><strong>Licencia Profesional:</strong> med3459</p>
+        </div>
+        <h2>Objetivo Principal</h2><p>Plan</p>
+        <h2>Recomendaciones Generales</h2><ul><li>-</li></ul>
+        <h2>Ejemplo de Plan Diario</h2>
+    <div class='plan-comida'><p class='plan-dia-titulo'>Desayuno:</p><ul><li>4 huevos con una tostada</li></ul></div><div class='plan-comida'><p class='plan-dia-titulo'>Almuerzo:</p><ul><li>Pescado con papas</li></ul></div><div class='plan-comida'><p class='plan-dia-titulo'>Cena:</p><ul><li>Sándwich con dos pasas</li></ul></div><div class='plan-comida'><p class='plan-dia-titulo'>Colaciones:</p><ul><li>Yogurt con fresas</li></ul></div><h2>Notas Adicionales del Plan</h2><div class='notas'><p></p></div><div class='footer'><p>Este plan es una guía y puede requerir ajustes. Consulte a su profesional ante cualquier duda.</p></div></div></body></html>

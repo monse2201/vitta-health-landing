@@ -1,0 +1,635 @@
+/* 🔹 ESTILOS GENERALES */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f6f8;
+    display: flex;
+    height: 100vh;
+}
+
+/* 🔹 SIDEBAR PRINCIPAL (MENÚ LATERAL IZQUIERDO) */
+.sidebar {
+    width: 60px; /* Menú colapsado por defecto */
+    background: #ffffff;
+    height: 100vh;
+    transition: width 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar ul li {
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    position: relative;
+}
+
+.sidebar ul li i {
+    font-size: 24px;
+    color: #808080;
+    transition: color 0.3s ease-in-out;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #808080;
+    font-weight: bold;
+    font-size: 14px;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.sidebar ul li a span {
+    display: none;
+}
+
+.sidebar:hover {
+    width: 240px;
+}
+
+.sidebar:hover ul li a {
+    justify-content: flex-start;
+    padding-left: 20px;
+    gap: 10px;
+}
+
+.sidebar:hover ul li a span {
+    display: inline;
+}
+
+.sidebar ul li.active i,
+.sidebar ul li.active a {
+    color: #004080 !important;
+}
+
+.sidebar ul li:hover {
+    background: #f0f0f0;
+}
+
+/* 🔹 AJUSTE DEL CONTENIDO PRINCIPAL */
+.main-content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.sidebar:hover ~ .main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+}
+
+/* 🔹 DASHBOARD */
+.main-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.date {
+    font-size: 14px;
+    color: #666;
+    font-weight: bold;
+}
+
+/* 🔹 CHIPS */
+.chips-container {
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    border: 2px solid #004080;
+    min-width: 250px;
+    text-align: center;
+}
+
+.chip i {
+    margin-right: 8px;
+    font-size: 18px;
+    color: #004080;
+}
+
+/* 🔹 INTEGRACIONES */
+.integrations {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    width: 100%;
+}
+
+.integration-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+.integration-item i {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.integration-item button {
+    background: none;
+    border: 2px solid #004080;
+    color: #004080;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    min-width: 120px;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.integration-item button:hover {
+    background: #004080;
+    color: white;
+}
+
+/* 🔹 CONVERSACIONES */
+.conversations-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    width: 100%;
+}
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+.conversation-item i {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+/* 🔹 PANEL DE ATRIBUTOS */
+.contact-info {
+    width: 350px;
+    background: white;
+    padding: 15px;
+    border-left: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* 🔹 CHAT */
+.chat-container {
+    display: flex;
+    height: 100vh;
+}
+
+.chat-window {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+    background: #ece5dd;
+    padding: 10px;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    max-width: 60%;
+    font-size: 14px;
+}
+
+.received {
+    background: #dcf8c6;
+    align-self: flex-start;
+}
+
+.sent {
+    background: #daf0ff;
+    align-self: flex-end;
+}
+
+/* 🔹 CHAT FOOTER */
+.chat-footer {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.chat-actions {
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+    gap: 10px;
+}
+
+/* 🔹 BOTÓN DE ENVÍO */
+.send-btn {
+    background: #004080;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    transition: background 0.3s ease-in-out;
+}
+
+.send-btn:hover {
+    background: #003366;
+}
+
+/* 🔹 Ajuste del campo de texto */
+.chat-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    height: 50px;
+    justify-content: space-between;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    border-radius: 5px;
+}
+
+.chat-icons {
+    display: flex;
+    gap: 12px;
+    margin-right: 10px;
+}
+
+.chat-icons i {
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.chat-icons i:hover {
+    color: #004080;
+}
+
+/* 🔹 Ajustar la tabla para mayor legibilidad * PATIENTS/ */
+
+/*patients
+/* 🔹 Estilos de la barra de búsqueda */
+.consulta-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.consulta-search input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 300px;
+}
+
+/* 🔹 Ajustes de la tabla */
+.consulta-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.consulta-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+}
+
+.consulta-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 🔹 Alinear las columnas de texto */
+.consulta-table td:first-child,
+.consulta-table td:nth-child(3) {
+    text-align: left;
+}
+
+/* 🔹 Botones alineados y con buen espaciado */
+.consulta-table td:last-child {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* 🔹 Botones */
+.btn-expediente, .btn-seguimiento {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-expediente {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-seguimiento {
+    background: #f8f9fa;
+    border: 1px solid #ccc;
+    color: black;
+}
+
+/* 🔹 ESTILOS GENERALES */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f6f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+}
+
+/* 🔹 CONTENEDOR PRINCIPAL */
+.consulta-container, .pacientes-container {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px;
+}
+
+/* 🔹 BARRA DE BÚSQUEDA */
+.consulta-search, .pacientes-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.consulta-search input, .pacientes-search input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 300px;
+}
+
+/* 🔹 TABLAS */
+.consulta-table, .pacientes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 🔹 ENCABEZADOS */
+.consulta-table th, .pacientes-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+}
+
+/* 🔹 CELDAS */
+.consulta-table td, .pacientes-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 🔹 ALINEACIÓN ESPECÍFICA */
+.consulta-table td:first-child, 
+.consulta-table td:nth-child(2),
+.consulta-table td:nth-child(3),
+.consulta-table td:nth-child(4),
+.pacientes-table td:first-child, 
+.pacientes-table td:nth-child(2),
+.pacientes-table td:nth-child(3),
+.pacientes-table td:nth-child(4) {
+    text-align: left;
+}
+
+/* 🔹 BOTONES */
+.consulta-table td:last-child, .pacientes-table td:last-child {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* 🔹 ESTILOS DE BOTONES */
+.btn-expediente, .btn-seguimiento, .btn-historial {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    width: 140px; /* Para que todos los botones sean iguales */
+}
+
+.btn-expediente {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-seguimiento, .btn-historial {
+    background: #f8f9fa;
+    border: 1px solid #ccc;
+    color: black;
+}
+
+/* 🔹 RESPONSIVE */
+@media screen and (max-width: 768px) {
+    .consulta-table, .pacientes-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: #555;
+    text-decoration: none;
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px; /* Espacio entre icono y texto */
+    font-size: 18px;
+}
+
+.sidebar-menu li a:hover {
+    color: #007bff;
+}
+
+/* 🔹 MODAL DE MENSAJE PROGRAMADO */
+.scheduled-message-modal {
+    position: absolute;
+    bottom: 60px; /* 📌 Se coloca sobre el área de escritura */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px; /* 📌 Mismo ancho que el input */
+    background: #e6f0ff; /* 📌 Fondo azul claro */
+    border-radius: 10px;
+    border: 1px solid #d0e1ff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #cde1ff;
+    border-bottom: 1px solid #b0cfff;
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-header h2 {
+    font-size: 16px;
+    color: #0056b3;
+    font-weight: bold;
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #888;
+}
+
+.schedule-options {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.schedule-label {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.schedule-label i {
+    margin-right: 8px;
+    color: #0056b3;
+}
+
+.schedule-label input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+}
+
+.modal-body textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    resize: none;
+}
+
+.modal-footer {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.schedule-btn {
+    background: #8a7aff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}

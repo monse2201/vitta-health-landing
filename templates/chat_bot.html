@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+
+{% block title %}Vitta Bot - VittaScribe{% endblock %}
+
+{% block head_extra %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* La clase 'hidden' de Tailwind CSS se encarga del display: none; */
+    
+    /* Estilos para la nueva interfaz de formulario en el chat */
+    .chat-container-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        height: 100%;
+    }
+    .chat-container {
+        width: 100%;
+        max-width: 48rem;
+        height: 100%;
+        max-height: 800px; 
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius-lg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+    }
+    .chat-header {
+        background-color: var(--neutral-50);
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+    .chat-header h2 .fa-robot { color: var(--primary-blue); }
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .message-bubble {
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        max-width: 28rem; 
+    }
+    .user-message {
+        background-color: var(--primary-blue);
+        color: white;
+    }
+    .bot-message {
+        background-color: var(--neutral-200);
+        color: var(--text-main);
+    }
+    .input-area-wrapper {
+        border-top: 1px solid var(--border-color);
+        background-color: var(--neutral-50);
+        flex-shrink: 0;
+    }
+    #loading-indicator {
+        color: var(--text-muted);
+    }
+    #loading-indicator .fa-spinner { color: var(--primary-blue); }
+    
+    .initial-option-btn {
+        background-color: #FFFFFF;
+        border: 1px solid var(--neutral-300);
+        color: var(--primary-blue);
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
+        cursor: pointer;
+    }
+    .initial-option-btn:hover {
+        background-color: var(--primary-blue-light);
+        color: var(--primary-blue-dark);
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .chat-form-container {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+    }
+    .chat-form-container h3 {
+        color: var(--text-main);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .chat-form-container .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+        margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+    }
+
+    .chat-form-container label {
+        color: var(--text-secondary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        margin-bottom: 0.125rem;
+    }
+    .chat-form-container input, .chat-form-container textarea, .chat-form-container select {
+        background-color: var(--neutral-50);
+        border: 1px solid var(--neutral-300);
+        border-radius: 0.375rem;
+        width: 100%;
+        padding: 0.5rem;
+        color: var(--text-main);
+        font-size: 0.9rem;
+    }
+    .chat-form-container input:focus, .chat-form-container textarea:focus, .chat-form-container select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 2px var(--primary-blue-lighter);
+    }
+    .form-submit-btn, .form-action-btn {
+        background-color: var(--primary-blue);
+        color: white;
+        font-weight: 600;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s ease;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+    .form-submit-btn:hover { background-color: var(--primary-blue-dark); }
+    .form-submit-btn:disabled {
+        background-color: var(--neutral-400);
+        cursor: not-allowed;
+    }
+    .form-action-btn {
+        background-color: var(--secondary-action-bg); /* Define this color */
+        color: var(--secondary-action-text); /* Define this color */
+    }
+    .form-action-btn:hover { background-color: var(--secondary-action-hover-bg); }
+
+    .user-summary-bubble {
+        background-color: var(--primary-blue-light);
+        color: var(--text-main);
+        border: 1px solid var(--primary-blue-lighter);
+    }
+    .attach-btn {
+        background: none;
+        border: none;
+        color: var(--primary-blue);
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.75rem;
+        margin-right: 8px; /* Espacio antes del micrófono */
+    }
+    .attach-btn:hover {
+        text-decoration: underline;
+    }
+    
+    /* ESTILOS PARA EL MICRÓFONO */
+    .mic-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--primary-blue);
+        padding: 0 4px;
+        font-size: 1rem;
+    }
+    #main-input-area .mic-btn {
+        color: var(--text-muted);
+    }
+    #main-input-area .mic-btn:hover {
+        color: var(--primary-blue);
+    }
+
+    .mic-btn.is-listening {
+        color: #ef4444; /* red-500 */
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
+{% endblock %}
+
+
+{% block content %}
+<div class="chat-container-wrapper">
+    <div class="chat-container">
+        <div class="chat-header p-4">
+            <h2 class="text-xl font-semibold text-gray-700 text-center">Vitta Bot <i class="fas fa-robot"></i></h2>
+        </div>
+
+        <div id="chat-messages" class="chat-messages p-6 space-y-4">
+            </div>
+
+        <div id="loading-indicator" class="p-4 text-center text-sm hidden">
+            <i class="fas fa-spinner fa-spin mr-2"></i> El asistente está preparando el siguiente paso...
+        </div>
+
+        <div id="main-input-area" class="input-area-wrapper p-4">
+            <div class="flex items-center space-x-3">
+                <div class="relative flex-grow">
+                    <input type="text" id="userInput" class="w-full p-3 pr-10 border rounded-lg" placeholder="Escribe tu pregunta...">
+                    <button type="button" class="mic-btn absolute right-3 top-1/2 -translate-y-1/2 text-lg" data-target="userInput">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <button id="sendButton" class="text-white font-semibold py-3 px-5 rounded-lg shadow flex-shrink-0">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        <input type="file" id="studiesFileInput" class="hidden" multiple>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts_extra %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- ELEMENTOS DEL DOM ---
+    const chatMessages = document.getElementById('chat-messages');
+    const mainInputArea = document.getElementById('main-input-area');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const studiesFileInput = document.getElementById('studiesFileInput');
+    const sendButton = document.getElementById('sendButton');
+    const userInput = document.getElementById('userInput');
+
+    // --- ESTADO DE LA APLICACIÓN ---
+    let newReferenceData = {};
+    let newPrescriptionData = {};
+    let currentChatFlow = null; // 'reference' o 'prescription'
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    // --- FUNCIONES DE LA INTERFAZ ---
+    const getInitialOptionsHTML = (message = "¡Hola! Soy Vitta Bot. Escribe una consulta o usa una de las siguientes opciones:") => `
+        <p class="text-sm">${message}</p>
+        <div class="mt-4 flex flex-col space-y-2">
+            <button class="initial-option-btn text-sm py-2 px-3 rounded-lg w-full text-left flex items-center" data-action="crear_referencia">
+                <i class="fas fa-file-medical-alt w-5 mr-2"></i>Crear una Referencia
+            </button>
+            <button class="initial-option-btn text-sm py-2 px-3 rounded-lg w-full text-left flex items-center" data-action="generar_receta">
+                <i class="fas fa-prescription w-5 mr-2"></i>Generar una Receta Médica
+            </button>
+        </div>`;
+        
+    function addMessage(bubbleContent, sender, isHtml = false) {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+        
+        const bubble = document.createElement('div');
+        const bubbleTypeClass = sender === 'user' ? 'user-summary-bubble' : 'bot-message';
+        bubble.classList.add('message-bubble', 'p-3', 'rounded-lg', bubbleTypeClass);
+
+        if (isHtml) {
+            bubble.innerHTML = bubbleContent;
+        } else {
+            const content = document.createElement('div');
+            content.classList.add('text-sm');
+            content.textContent = bubbleContent;
+            bubble.appendChild(content);
+        }
+        
+        messageWrapper.appendChild(bubble);
+        chatMessages.appendChild(messageWrapper);
+        scrollToBottom();
+    }
+
+    function addBotForm(formHtml) {
+        loadingIndicator.classList.remove('hidden');
+        scrollToBottom();
+        setTimeout(() => {
+            loadingIndicator.classList.add('hidden');
+            addMessage(formHtml, 'bot', true);
+            scrollToBottom();
+        }, 1000);
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function toggleMainInput(show) {
+        if (show) {
+            mainInputArea.classList.remove('hidden');
+        } else {
+            mainInputArea.classList.add('hidden');
+        }
+    }
+
+    // --- LÓGICA DE FORMULARIOS Y VOZ ---
+
+    const createPatientFormHTML = () => `
+        <div class="chat-form-container">
+            <h3 class="font-semibold">Paso 1: Información del Paciente</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="patientName" class="block font-medium">
+                        <span>Nombre completo del paciente *</span>
+                        <button type="button" class="mic-btn" data-target="patientName"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="patientName" id="patientName" class="w-full" required>
+                </div>
+                <div>
+                    <label for="patientId" class="block font-medium">
+                        <span>Número de identificación</span>
+                        <button type="button" class="mic-btn" data-target="patientId"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="patientId" id="patientId" class="w-full" placeholder="Opcional">
+                </div>
+                <div>
+                    <label for="patientEmail" class="block font-medium">
+                        <span>Correo electrónico</span>
+                        <button type="button" class="mic-btn" data-target="patientEmail"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="email" name="patientEmail" id="patientEmail" class="w-full" placeholder="Opcional">
+                </div>
+            </div>
+            <button data-form="patient" class="form-submit-btn">Siguiente <i class="fas fa-arrow-right ml-2"></i></button>
+        </div>`;
+
+    const createDoctorFormHTML = () => {
+        const specialties = ["Cardiología", "Dermatología", "Endocrinología", "Gastroenterología", "Ginecología", "Neurología", "Nutrición", "Oftalmología", "Oncología", "Pediatría", "Psiquiatría", "Traumatología", "Urología"];
+        return `
+        <div class="chat-form-container">
+            <h3 class="font-semibold">Paso 2: Datos de la Referencia</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="specialty" class="block font-medium"><span>Especialidad referida *</span></label>
+                    <select name="specialty" id="specialty" class="w-full" required>
+                        <option value="" disabled selected>Seleccione una especialidad...</option>
+                        ${specialties.map(s => `<option value="${s}">${s}</option>`).join('')}
+                        <option value="otra">Otra...</option>
+                    </select>
+                </div>
+                <div id="other-specialty-container" class="hidden">
+                    <label for="specialty_other" class="block font-medium">
+                        <span>Especifique la especialidad *</span>
+                        <button type="button" class="mic-btn" data-target="specialty_other"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="specialty_other" id="specialty_other" class="w-full">
+                </div>
+                <div>
+                    <label for="doctorName" class="block font-medium">
+                        <span>Nombre del médico referido</span>
+                        <button type="button" class="mic-btn" data-target="doctorName"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="doctorName" id="doctorName" class="w-full" placeholder="Opcional">
+                </div>
+            </div>
+            <button data-form="doctor" class="form-submit-btn">Siguiente <i class="fas fa-arrow-right ml-2"></i></button>
+        </div>`;
+    };
+    
+    const createDetailsFormHTML = () => `
+        <div class="chat-form-container">
+            <h3 class="font-semibold">Paso 3: Detalles Clínicos</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="reason" class="block font-medium">
+                        <span>Motivo de la referencia *</span>
+                         <button type="button" class="mic-btn" data-target="reason"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <textarea name="reason" id="reason" rows="3" class="w-full" required></textarea>
+                </div>
+                <div>
+                    <label for="summary" class="block font-medium">
+                        <span>Resumen clínico relevante *</span>
+                        <button type="button" class="mic-btn" data-target="summary"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <textarea name="summary" id="summary" rows="4" class="w-full" required></textarea>
+                </div>
+                <div>
+                    <label for="studies">
+                        <span class="block font-medium">Estudios adjuntos</span>
+                        <span>
+                            <button type="button" class="attach-btn" data-action="attach-studies">
+                                <i class="fas fa-paperclip mr-1"></i>Adjuntar
+                            </button>
+                            <button type="button" class="mic-btn" data-target="studies"><i class="fas fa-microphone"></i></button>
+                        </span>
+                    </label>
+                    <textarea name="studies" id="studies" rows="2" class="w-full" placeholder="Liste aquí los estudios..."></textarea>
+                </div>
+            </div>
+            <button data-form="details" class="form-submit-btn">Crear Referencia <i class="fas fa-check ml-2"></i></button>
+        </div>`;
+    
+    // --- NUEVAS FUNCIONES PARA EL FORMULARIO DE RECETA ---
+    const createPrescriptionDetailsFormHTML = () => `
+        <div class="chat-form-container">
+            <h3 class="font-semibold">Paso 2: Datos de la Receta</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="diagnostico_relacionado" class="block font-medium">
+                        <span>Diagnóstico relacionado *</span>
+                        <button type="button" class="mic-btn" data-target="diagnostico_relacionado"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="diagnostico_relacionado" id="diagnostico_relacionado" class="w-full" required>
+                </div>
+                <div>
+                    <label for="validez_dias" class="block font-medium">
+                        <span>Validez de la receta (días)</span>
+                    </label>
+                    <input type="number" name="validez_dias" id="validez_dias" class="w-full" placeholder="Ej: 30" value="30">
+                </div>
+                <div>
+                    <label for="notas_adicionales_receta" class="block font-medium">
+                        <span>Notas adicionales</span>
+                        <button type="button" class="mic-btn" data-target="notas_adicionales_receta"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <textarea name="notas_adicionales_receta" id="notas_adicionales_receta" rows="2" class="w-full" placeholder="Opcional"></textarea>
+                </div>
+            </div>
+            <button data-form="prescription-details" class="form-submit-btn">Siguiente: Añadir Medicamentos <i class="fas fa-pills ml-2"></i></button>
+        </div>`;
+
+    const createMedicationFormHTML = (medicationNumber) => `
+        <div class="chat-form-container">
+            <h3 class="font-semibold">Paso 3: Medicamento ${medicationNumber}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="med_nombre" class="block font-medium">
+                        <span>Nombre y concentración *</span>
+                        <button type="button" class="mic-btn" data-target="med_nombre"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="med_nombre" id="med_nombre" class="w-full" required placeholder="Ej: Amoxicilina 500mg">
+                </div>
+                <div>
+                    <label for="med_cantidad" class="block font-medium">
+                        <span>Cantidad a despachar *</span>
+                        <button type="button" class="mic-btn" data-target="med_cantidad"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="med_cantidad" id="med_cantidad" class="w-full" required placeholder="Ej: 1 caja (21 comps)">
+                </div>
+                 <div>
+                    <label for="med_dosis" class="block font-medium">
+                        <span>Dosis *</span>
+                        <button type="button" class="mic-btn" data-target="med_dosis"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="med_dosis" id="med_dosis" class="w-full" required placeholder="Ej: 1 comprimido">
+                </div>
+                 <div>
+                    <label for="med_frecuencia" class="block font-medium">
+                        <span>Frecuencia *</span>
+                        <button type="button" class="mic-btn" data-target="med_frecuencia"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="med_frecuencia" id="med_frecuencia" class="w-full" required placeholder="Ej: Cada 8 horas">
+                </div>
+                 <div>
+                    <label for="med_duracion" class="block font-medium">
+                        <span>Duración *</span>
+                        <button type="button" class="mic-btn" data-target="med_duracion"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <input type="text" name="med_duracion" id="med_duracion" class="w-full" required placeholder="Ej: Por 7 días">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="med_indicaciones" class="block font-medium">
+                        <span>Indicaciones adicionales</span>
+                         <button type="button" class="mic-btn" data-target="med_indicaciones"><i class="fas fa-microphone"></i></button>
+                    </label>
+                    <textarea name="med_indicaciones" id="med_indicaciones" rows="2" class="w-full" placeholder="Ej: Tomar con alimentos"></textarea>
+                </div>
+            </div>
+            <div class="mt-4 flex flex-col md:flex-row gap-2">
+                 <button data-action="add-medication" class="form-action-btn" style="background-color: #e2e8f0; color: #475569;">Añadir Otro Medicamento <i class="fas fa-plus ml-2"></i></button>
+                 <button data-action="finish-prescription" class="form-submit-btn">Finalizar y Crear Receta <i class="fas fa-check ml-2"></i></button>
+            </div>
+        </div>`;
+    
+    // --- MANEJO DE EVENTOS ---
+    chatMessages.addEventListener('click', async (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const formType = button.dataset.form;
+
+        if (['crear_referencia', 'generar_receta'].includes(action)) {
+            const buttonText = button.textContent.trim();
+            addMessage(buttonText, 'user');
+            button.closest('.message-bubble').style.display = 'none';
+            toggleMainInput(false);
+
+            if (action === 'crear_referencia') {
+                currentChatFlow = 'reference';
+                newReferenceData = {};
+                addBotForm(createPatientFormHTML());
+            } else if (action === 'generar_receta') {
+                currentChatFlow = 'prescription';
+                newPrescriptionData = {};
+                addBotForm(createPatientFormHTML());
+            }
+            return;
+        }
+
+        if (action === 'reset-chat') {
+            button.closest('.message-bubble').style.display = 'none';
+            addMessage(getInitialOptionsHTML('¿Cómo más puedo ayudarte?'), 'bot', true);
+            toggleMainInput(true);
+            currentChatFlow = null;
+            return;
+        }
+        
+        if (action === 'attach-studies') {
+            studiesFileInput.click();
+        }
+
+        if (button.matches('.mic-btn')) {
+            handleMicClick(button);
+        } else if (formType) { // Si es un botón de submit de formulario
+            handleFormSubmission(button, formType);
+        } else if (action === 'add-medication' || action === 'finish-prescription') {
+            handleMedicationFormAction(button, action);
+        }
+    });
+    
+    async function handleFormSubmission(button, formType) {
+        const formContainer = button.closest('.chat-form-container');
+        const formData = collectAndValidateForm(formContainer);
+
+        if (!formData.isValid) {
+            addMessage('Por favor, completa los campos obligatorios (*).', 'bot');
+            return;
+        }
+
+        disableForm(formContainer);
+        addMessage(formData.summaryHtml, 'user', true);
+        
+        if (currentChatFlow === 'reference') {
+            Object.assign(newReferenceData, formData.data);
+            if (formType === 'patient') addBotForm(createDoctorFormHTML());
+            else if (formType === 'doctor') addBotForm(createDetailsFormHTML());
+            else if (formType === 'details') await saveReference();
+        } else if (currentChatFlow === 'prescription') {
+            Object.assign(newPrescriptionData, formData.data);
+            if (formType === 'patient') {
+                 addBotForm(createPrescriptionDetailsFormHTML());
+            } else if (formType === 'prescription-details') {
+                 newPrescriptionData.medicamentos = [];
+                 addBotForm(createMedicationFormHTML(1));
+            }
+        }
+    }
+
+    function handleMedicationFormAction(button, action) {
+        const formContainer = button.closest('.chat-form-container');
+        const formData = collectMedicationForm(formContainer);
+        
+        if (!formData.isValid) {
+            addMessage('Por favor, completa los campos obligatorios (*) para este medicamento.', 'bot');
+            return;
+        }
+
+        disableForm(formContainer);
+        addMessage(formData.summaryHtml, 'user', true);
+        newPrescriptionData.medicamentos.push(formData.data);
+        
+        if (action === 'add-medication') {
+            addBotForm(createMedicationFormHTML(newPrescriptionData.medicamentos.length + 1));
+        } else if (action === 'finish-prescription') {
+            savePrescription();
+        }
+    }
+
+    studiesFileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const studiesTextarea = document.querySelector('textarea[name="studies"]:not([disabled])');
+            if (studiesTextarea) {
+                const existingText = studiesTextarea.value;
+                const fileNames = Array.from(files).map(file => file.name).join('\n');
+                studiesTextarea.value = existingText ? `${existingText}\n${fileNames}` : fileNames;
+            }
+        }
+        studiesFileInput.value = '';
+    });
+
+    chatMessages.addEventListener('change', (event) => {
+        if (event.target.matches('select[name="specialty"]')) {
+            const select = event.target;
+            const formContainer = select.closest('.chat-form-container');
+            const otherContainer = formContainer.querySelector('#other-specialty-container');
+            const otherInput = otherContainer?.querySelector('input[name="specialty_other"]');
+            
+            if(!otherContainer || !otherInput) return;
+
+            if (select.value === 'otra') {
+                otherContainer.classList.remove('hidden');
+                otherInput.required = true;
+            } else {
+                otherContainer.classList.add('hidden');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+    });
+
+    function handleMicClick(micButton) {
+        if (!SpeechRecognition) {
+            alert("Lo sentimos, tu navegador no soporta el reconocimiento de voz.");
+            return;
+        }
+        if (recognition && recognition.isListening) {
+            recognition.stop();
+            return;
+        }
+
+        const targetInputId = micButton.dataset.target;
+        const targetInput = document.getElementById(targetInputId);
+        if (!targetInput) return;
+
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-CR';
+        recognition.interimResults = false;
+        recognition.isListening = true;
+
+        micButton.classList.add('is-listening');
+        const icon = micButton.querySelector('i');
+        icon.classList.remove('fa-microphone');
+        icon.classList.add('fa-stop-circle');
+
+        recognition.start();
+
+        recognition.onresult = (event) => {
+            const speechResult = event.results[0][0].transcript;
+            targetInput.value += (targetInput.value.length > 0 ? ' ' : '') + speechResult;
+        };
+
+        const stopListening = () => {
+            if(recognition) recognition.isListening = false;
+            micButton.classList.remove('is-listening');
+            icon.classList.add('fa-microphone');
+            icon.classList.remove('fa-stop-circle');
+        };
+
+        recognition.onspeechend = () => recognition.stop();
+        recognition.onerror = (event) => addMessage(`Error de voz: ${event.error}`, 'bot');
+        recognition.onend = stopListening;
+    }
+    
+    function collectAndValidateForm(formContainer) {
+        const inputs = formContainer.querySelectorAll('input, textarea, select');
+        let isValid = true;
+        let summaryHtml = '<div class="text-sm space-y-1">';
+        const data = {};
+
+        inputs.forEach(input => {
+            if (input.closest('.hidden')) return;
+            if (input.required && !input.value.trim()) {
+                input.style.borderColor = 'red';
+                isValid = false;
+            } else {
+                input.style.borderColor = '';
+                const label = formContainer.querySelector(`label[for="${input.id}"]`);
+                if (input.value.trim()) {
+                    let value = input.value.trim();
+                    let fieldName = input.name;
+
+                    if (input.name === 'specialty' && value === 'otra') {
+                        const otherInput = formContainer.querySelector('input[name="specialty_other"]');
+                        if (!otherInput.value.trim()){
+                            otherInput.style.borderColor = 'red';
+                            isValid = false;
+                        } else {
+                            value = otherInput.value.trim();
+                        }
+                    }
+                    if(fieldName === 'specialty_other') return;
+
+                    data[fieldName] = value;
+                    const labelText = label?.firstElementChild?.textContent.replace('*', '').trim() ?? fieldName;
+                    summaryHtml += `<div><strong>${labelText}:</strong> ${value.replace(/\n/g, '<br>')}</div>`;
+                }
+            }
+        });
+        summaryHtml += '</div>';
+        return { isValid, data, summaryHtml };
+    }
+    
+    function collectMedicationForm(formContainer) {
+        const inputs = formContainer.querySelectorAll('input, textarea');
+        let isValid = true;
+        let summaryHtml = `<div class="text-sm space-y-1"><strong>Medicamento ${newPrescriptionData.medicamentos.length + 1}:</strong>`;
+        const data = {};
+
+        const fields = {
+            nombre: 'med_nombre', cantidad: 'med_cantidad', dosis: 'med_dosis',
+            frecuencia: 'med_frecuencia', duracion: 'med_duracion', indicaciones: 'med_indicaciones'
+        };
+
+        for (const [key, id] of Object.entries(fields)) {
+            const input = formContainer.querySelector(`#${id}`);
+            if (input.required && !input.value.trim()) {
+                input.style.borderColor = 'red';
+                isValid = false;
+            } else {
+                input.style.borderColor = '';
+                if(input.value.trim()){
+                    data[key] = input.value.trim();
+                    const label = formContainer.querySelector(`label[for="${id}"]`);
+                    const labelText = label?.firstElementChild?.textContent.replace('*', '').trim() ?? key;
+                    summaryHtml += `<div><strong>${labelText}:</strong> ${data[key].replace(/\n/g, '<br>')}</div>`;
+                }
+            }
+        }
+        summaryHtml += '</div>';
+        return { isValid, data, summaryHtml };
+    }
+
+
+    function disableForm(formContainer) {
+         formContainer.querySelectorAll('input, textarea, select, button').forEach(el => el.disabled = true);
+    }
+
+    async function saveReference() {
+        loadingIndicator.classList.remove('hidden');
+        scrollToBottom();
+
+        try {
+            const response = await fetch(`/api/crear_referencia_desde_chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newReferenceData)
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || `Error del servidor: ${response.status}`);
+            
+            const referencia = result.referencia;
+            const successMessage = `<strong>¡Documento de referencia creado!</strong><br>
+                                    <a href="${referencia.url_ver}" target="_blank" class="template-link" style="color: var(--primary-blue); text-decoration: underline;">
+                                        <i class="fas fa-eye"></i> Ver el documento final
+                                    </a>
+                                    <p class="text-xs mt-2">Lo encontrarás también en el perfil del paciente.</p>`;
+            
+            const resetOptionsMessage = `<button class="initial-option-btn text-sm py-2 px-3 rounded-lg w-full text-left flex items-center" data-action="reset-chat">
+                                            <i class="fas fa-plus-circle mr-2"></i>Crear Otro Documento
+                                         </button>`;
+
+            addMessage(successMessage, 'bot', true);
+            setTimeout(() => addMessage(resetOptionsMessage, 'bot', true), 800);
+
+        } catch (error) {
+            console.error("Error al crear la referencia:", error);
+            addMessage(`Hubo un error al crear el documento: <strong>${error.message}</strong>. Por favor, refresca la página para intentarlo de nuevo.`, 'bot', true);
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            toggleMainInput(true);
+            currentChatFlow = null;
+        }
+    }
+    
+    // --- NUEVA FUNCIÓN PARA GUARDAR LA RECETA ---
+    async function savePrescription() {
+        loadingIndicator.classList.remove('hidden');
+        scrollToBottom();
+
+        try {
+            const response = await fetch('/api/crear_receta_desde_chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPrescriptionData)
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || `Error del servidor: ${response.status}`);
+            
+            const receta = result.receta;
+            const successMessage = `<strong>¡Receta Médica creada!</strong><br>
+                                    <a href="${receta.url_ver}" target="_blank" class="template-link" style="color: var(--primary-blue); text-decoration: underline;">
+                                        <i class="fas fa-eye"></i> Ver la receta final
+                                    </a>
+                                    <p class="text-xs mt-2">La encontrarás también en el perfil del paciente.</p>`;
+            
+            const resetOptionsMessage = `<button class="initial-option-btn text-sm py-2 px-3 rounded-lg w-full text-left flex items-center" data-action="reset-chat">
+                                            <i class="fas fa-plus-circle mr-2"></i>Crear Otro Documento
+                                         </button>`;
+
+            addMessage(successMessage, 'bot', true);
+            setTimeout(() => addMessage(resetOptionsMessage, 'bot', true), 800);
+
+        } catch (error) {
+            console.error("Error al crear la receta:", error);
+            addMessage(`Hubo un error al crear la receta: <strong>${error.message}</strong>. Por favor, refresca la página para intentarlo de nuevo.`, 'bot', true);
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            toggleMainInput(true);
+            currentChatFlow = null;
+        }
+    }
+
+    function handleSend() {
+        const text = userInput.value.trim();
+        if (text) {
+            addMessage(text, 'user');
+            userInput.value = '';
+            loadingIndicator.classList.remove('hidden');
+            setTimeout(() => {
+                loadingIndicator.classList.add('hidden');
+                addMessage(`Recibí tu mensaje: "${text}". Aún estoy aprendiendo a mantener conversaciones generales.`, 'bot');
+            }, 1000);
+        }
+    }
+
+    // --- INICIALIZACIÓN ---
+    sendButton.addEventListener('click', handleSend);
+    userInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') handleSend();
+    });
+    
+    addMessage(getInitialOptionsHTML(), 'bot', true);
+});
+</script>
+{% endblock %}

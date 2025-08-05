@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido(a) a Vitta Health Scribe</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+        .email-wrapper {
+            max-width: 650px;
+            margin: 25px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            border: 1px solid #e8e8e8;
+        }
+        .content {
+            padding: 40px 40px 30px; /* Se ajustó el padding superior */
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1c3a;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .credentials-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 5px solid #5D5FEF;
+        }
+        .credentials-box p {
+            margin: 8px 0;
+            font-size: 16px;
+            text-align: left;
+            color: #333;
+        }
+        .credentials-box strong {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #eaf0f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 15px;
+            color: #33475b;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        a.button {
+            display: inline-block;
+            background-color: #5D5FEF;
+            color: #ffffff;
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 17px;
+        }
+        .security-tip {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8e8e8;
+            text-align: center;
+        }
+        .security-tip p {
+            font-size: 14px;
+            color: #8c9caf;
+            line-height: 1.6;
+        }
+        .benefits-section {
+            margin-top: 35px;
+            border-top: 1px solid #e8e8e8;
+            padding-top: 30px;
+        }
+        .benefits-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #5D5FEF;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .benefit {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .benefit-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 20px;
+        }
+        .benefit-text h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #1a1c3a;
+        }
+        .benefit-text p {
+            font-size: 14px;
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 13px;
+            color: #999;
+            background-color: #f7f7f7;
+        }
+        @media screen and (max-width: 600px) {
+            .content { padding: 30px 20px; }
+            h1 { font-size: 22px; }
+            .benefit { flex-direction: column; text-align: center; }
+            .benefit-icon { margin-bottom: 15px; }
+            .benefit-text p { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        
+        <div class="content">
+            <h1>¡Bienvenido(a) a bordo, Dr(a). {{ nombre_doctor }}!</h1>
+            <p class="subtitle">Estamos encantados de que te unas a nuestra comunidad. Tu cuenta ha sido creada para que puedas empezar a transformar y optimizar tu flujo de trabajo clínico.</p>
+
+            <div class="credentials-box">
+                <p>Aquí tienes tus credenciales de acceso:</p>
+                <p>Usuario: <strong>{{ email_doctor }}</strong></p>
+                <p>Contraseña Temporal: <strong>{{ temp_password }}</strong></p>
+            </div>
+
+            <div class="button-container">
+                <a href="{{ login_url }}" class="button">Iniciar Sesión Ahora</a>
+            </div>
+
+            <div class="security-tip">
+                <p>Por tu seguridad, te recomendamos cambiar tu contraseña temporal después de iniciar sesión por primera vez.</p>
+            </div>
+
+            <div class="benefits-section">
+                <h2>La nueva era de la documentación clínica</h2>
+                
+                <div class="benefit">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3233/3233478.png" alt="Icono IA" class="benefit-icon">
+                    <div class="benefit-text">
+                        <h3>Optimiza tu Tiempo con IA</h3>
+                        <p>Genera transcripciones, resúmenes y notas clínicas al instante. Dedica más tiempo a tus pacientes y menos al papeleo.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <img src="https://cdn-icons-png.flaticon.com/512/9449/9449830.png" alt="Icono Documento" class="benefit-icon">
+                    <div class="benefit-text">
+                        <h3>Documentación Inteligente y Automática</h3>
+                        <p>Crea recetas, referencias y planes nutricionales complejos con la ayuda de nuestros asistentes inteligentes, reduciendo errores y agilizando procesos.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2953/2953359.png" alt="Icono Seguridad" class="benefit-icon">
+                    <div class="benefit-text">
+                        <h3>Seguridad y Centralización</h3>
+                        <p>Toda la información de tus pacientes, desde audios hasta PDFs, se almacena de forma segura y cifrada en un único lugar, accesible cuando lo necesites.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; {{ year }} Vitta Health Scribe. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

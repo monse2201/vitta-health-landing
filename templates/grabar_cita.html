@@ -1,0 +1,723 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/grabar_cita.css') }}">
+{# It's recommended that common styles like .sugerencias-dropdown, .form-row, etc. are in a global CSS file #}
+{# Otherwise, make sure all necessary styles are in record_consultation.css or defined below #}
+
+<div class="pagina-scribe">
+  <div class="header-form">
+    <h1>Record</h1>
+    <p>Vitta Health listens to your consultation and automatically generates a transcript and clinical notes you can use for your records.</p>
+  </div>
+
+  <form id="formulario-grabacion" class="scribe-card">
+    <div class="form-row">
+      <div class="form-input form-input-nombre" style="position: relative;">
+        <label for="paciente_nombre_grabar">Patient's Full Name</label>
+        <input type="text" id="paciente_nombre_grabar" name="paciente_nombre" placeholder="Enter full name or leave blank" autocomplete="off">
+        <div id="sugerencias-paciente-container-grabar" class="sugerencias-dropdown">
+          {# Las sugerencias se insertarán aquí por JavaScript #}
+        </div>
+      </div>
+      <input type="hidden" id="paciente_id_seleccionado_grabar" name="paciente_id_seleccionado" value="">
+
+      {# NEW FIELD FOR PATIENT IDENTIFICATION #}
+      <div class="form-input form-input-identificacion">
+        <label for="paciente_identificacion_grabar">Identification (Optional)</label>
+        <input type="text" id="paciente_identificacion_grabar" name="paciente_identificacion" placeholder="E.g. ID, Passport" autocomplete="off">
+      </div>
+
+      <div class="form-input form-input-plantilla"> {# Class added for style consistency if needed #}
+        <label for="plantilla_grabar">Template (Optional)</label>
+        <select id="plantilla_grabar" name="plantilla">
+          <option value="">Seleccionar Template (Optional)</option>
+           {% for p in plantillas %}
+              <option value="{{ p }}">{{ p }}</option>
+           {% else %}
+              <option value="Consulta General">Consulta General</option>
+              <option value="Seguimiento">Seguimiento</option>
+           {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-input" style="flex-basis: 150px; min-width: 120px;">
+        <label for="num_hablantes_grabar">Participants</label>
+        <select id="num_hablantes_grabar" name="num_hablantes" class="form-input" style="width:100%; height: 42px; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px;">
+          <option value="2">2 (Doctor + Patient)</option>
+          <option value="1">1 (Monologue/Dictation)</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
+      <button type="button" id="btn-visita" class="btn-iniciar-visita">
+        <i class="fas fa-plus"></i> Start Visit
+      </button>
+    </div>
+    <hr class="separador">
+    <div id="bloqueGrabacion" class="grabacion-contenedor" style="display: none;">
+      <h2 style="text-align: center;">Capture Recording</h2>
+
+      <div class="microphone-selection" style="margin-top: 20px;">
+        <label for="microphoneList">Select Microphone:</label>
+        <select id="microphoneList">
+          <option value="">Loading microphones...</option>
+        </select>
+        <p class="nota-microfono">Make sure your microphone is connected and allowed by your browser.</p>
+        <button type="button" id="refreshMicrophones" style="margin-top: 5px;">Refresh microphone list</button>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-top: 24px;">
+        <button type="button" id="btn-grabacion" class="boton-circular inactivo">
+          <div id="estadoTexto">Start Recording</div>
+          <div id="cronometro" style="font-size: 16px; font-weight: 500; margin-top: 4px;">00:00</div>
+          <div id="iconoGrabacion" style="font-size: 24px; margin-top: 6px;">
+            <i class="fas fa-microphone"></i>
+          </div>
+        </button>
+      </div>
+
+      <div id="estadoGrabacion" class="alerta-info" style="margin-top: 24px; text-align: center;">Waiting for action...</div>
+      <audio id="audio-reproducir" controls hidden class="reproductor-audio" style="display: none; margin-top:15px; width:100%;"></audio>
+      <progress id="barraProgreso" value="0" max="100" style="width: 100%; display: none; margin-top: 16px;"></progress>
+      <button type="button" id="btn-subir" class="btn-subir" style="margin-top: 16px; display: none;">Upload Recording</button>
+    </div>
+  </form>
+</div>
+
+<div id="modal-consentimiento" class="modal-consentimiento">
+  <div class="modal-contenido">
+    <div class="modal-izquierda">
+      <div class="modal-icono"><i class="fas fa-exclamation-triangle"></i></div>
+      <h2>Consent Required</h2>
+      <p>
+        This recording requires verbal consent. Make sure all participants are informed.
+        <strong>(Confirmation will be recorded)</strong>
+      </p>
+      <div class="modal-botones">
+        <button id="btn-cancelar" class="btn-cancelar">Cancel</button>
+        <button id="btn-aceptar" class="btn-confirmar">Accept and Continue</button>
+      </div>
+    </div>
+    {# SE HA ELIMINADO COMPLETAMENTE EL DIV 'modal-derecha' #}
+  </div>
+</div>
+
+<style>
+  /* Estilos del archivo grabar_cita.css o estilos en línea */
+  /* Asegúrate que todos los estilos necesarios estén aquí o en el archivo CSS vinculado */
+  .pagina-scribe {
+    max-width: 800px; /* Ajustado para más espacio si es necesario */
+    margin: 30px auto;
+    padding: 20px;
+  }
+
+  .header-form {
+    text-align: left;
+    margin-bottom: 25px;
+  }
+
+  .header-form h1 {
+    font-size: 28px;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .header-form p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+  .scribe-card {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+  }
+
+  .form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .form-input {
+    flex-shrink: 1; /* Permitir encogerse si no hay espacio */
+  }
+  /* Estilos específicos para distribuir el espacio */
+  .form-input-nombre {
+    flex-grow: 2; /* Más espacio para el nombre */
+    flex-basis: 220px; /* Base antes de crecer/encogerse */
+    min-width: 200px; /* Ancho mínimo */
+    position: relative; /* Para el dropdown */
+  }
+  .form-input-identificacion {
+    flex-grow: 1;
+    flex-basis: 180px;
+    min-width: 160px;
+  }
+  .form-input-plantilla {
+    flex-grow: 1;
+    flex-basis: 180px; /* Ajustado para que quepa mejor con el botón */
+    min-width: 160px;
+  }
+
+
+  .form-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .form-input input[type="text"],
+  .form-input select {
+    width: 100%;
+    padding: 10px 14px; /* Ajustado para consistencia */
+    border: 1px solid #ccc; /* Ajustado para consistencia */
+    border-radius: 6px;
+    font-size: 14px; /* Ajustado para consistencia */
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 42px; /* Altura consistente */
+  }
+
+  .form-input input[type="text"]:focus,
+  .form-input select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+  }
+  .form-input input[type="text"]::placeholder {
+    color: #98a2b3; /* Placeholder color */
+  }
+
+  /* === CSS PARA SUGERENCIAS DE PACIENTES === */
+  .sugerencias-dropdown {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    left: 0;
+    top: 100%;
+  }
+
+  .sugerencia-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #101828;
+  }
+  .sugerencia-item:hover { background-color: #f0f2f5; }
+  .sugerencia-item.active { background-color: #e9f0f8; color: #1c64f2; }
+  .sugerencias-dropdown .no-sugerencias { padding: 10px 14px; font-size: 14px; color: #6b7280; font-style: italic; }
+  /* === FIN CSS SUGERENCIAS === */
+
+  .btn-iniciar-visita {
+    padding: 0px 20px; /* Padding horizontal */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    height: 42px; /* Misma altura que los inputs */
+    align-self: flex-end;
+    white-space: nowrap;
+    display: inline-flex; /* Para alinear ícono y texto */
+    align-items: center; /* Centrar ícono y texto verticalmente */
+    justify-content: center; /* Centrar ícono y texto horizontalmente */
+  }
+
+  .btn-iniciar-visita:hover { background-color: #0056b3; }
+  .btn-iniciar-visita i { margin-right: 8px; }
+
+  .separador { border: 0; height: 1px; background-color: #e0e0e0; margin: 30px 0; }
+  .grabacion-contenedor h2 { font-size: 22px; color: #333; margin-bottom: 20px; }
+  .microphone-selection { text-align: left; max-width: 400px; margin-left:auto; margin-right:auto; margin-bottom: 20px; }
+  .microphone-selection label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+  .microphone-selection select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 15px; margin-bottom:5px;}
+  .nota-microfono { font-size: 0.9em; color: #777; margin-top: 5px; }
+  #refreshMicrophones { padding: 8px 12px; font-size: 0.9em; cursor: pointer; border-radius:5px; border:1px solid #ccc; background-color:#f8f8f8; }
+  #refreshMicrophones:hover { background-color:#eee; }
+
+  .boton-circular { width: 160px; height: 160px; border-radius: 50%; border: 4px solid #007bff; background-color: #fff; color: #007bff; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  .boton-circular.inactivo:hover { background-color: #e7f3ff; transform: translateY(-2px); }
+  .boton-circular.activo { background-color: #dc3545; border-color: #dc3545; color: white; }
+  .boton-circular.activo:hover { background-color: #c82333; }
+  #estadoTexto { font-size: 14px; font-weight: 500; margin-bottom: 5px;}
+  #cronometro { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+  #iconoGrabacion { font-size: 30px; }
+
+  .alerta-info { background-color: #e7f3ff; color: #004085; padding: 12px 15px; border: 1px solid #b8daff; border-radius: 5px; font-size: 14px; }
+  .btn-subir { background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: background-color 0.2s; }
+  .btn-subir:hover { background-color: #218838; }
+  .btn-subir:disabled { background-color: #ccc; cursor: not-allowed;}
+
+  /* --- INICIO DE ESTILOS MODALES CORREGIDOS --- */
+  .modal-consentimiento { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+  .modal-contenido { 
+    background-color: #fff; 
+    margin: auto; 
+    padding: 30px; 
+    border-radius: 8px; 
+    width: 90%; 
+    max-width: 500px; /* Ancho reducido para un modal de una sola columna */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+    /* display: flex; ya no es necesario */
+  }
+  .modal-izquierda { 
+    /* Ya no necesita flex ni padding-right */
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+  }
+  
+  /* Se eliminaron las reglas para .modal-derecha y .modal-derecha img */
+
+  .modal-icono { font-size: 28px; color: #ffc107; margin-bottom: 15px; text-align: center;}
+  .modal-izquierda h2 { font-size: 22px; color: #333; margin-top:0; margin-bottom: 10px; text-align: center;}
+  .modal-izquierda p { font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 25px; text-align: center;}
+  .modal-botones { display: flex; justify-content: center; gap: 10px; } /* Botones centrados */
+  .btn-cancelar, .btn-confirmar { padding: 10px 20px; border-radius: 5px; font-size: 14px; cursor: pointer; border: 1px solid transparent; font-weight: 500;}
+  .btn-cancelar { background-color: #6c757d; color: white; }
+  .btn-cancelar:hover { background-color: #5a6268; }
+  .btn-confirmar { background-color: #007bff; color: white; }
+  .btn-confirmar:hover { background-color: #0056b3; }
+  /* --- FIN DE ESTILOS MODALES --- */
+</style>
+
+<script>
+  // ===============================================
+  // INICIO: SCRIPT DE GRABACIÓN DE CITA CORREGIDO
+  // ===============================================
+
+  // Variables globales
+  let mediaRecorder, audioChunks = [];
+  let isRecording = false;
+  let cronometroInterval, tiempoGrabado = 0;
+  let selectedDeviceId = localStorage.getItem('lastMicrophoneId');
+  let detectedDevices = JSON.parse(localStorage.getItem('detectedMicrophones')) || [];
+  let visitaActivaId = null;
+  let debounceTimerGrabarCita;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Selectores de elementos
+    const modal = document.getElementById('modal-consentimiento');
+    const btnVisita = document.getElementById('btn-visita');
+    const btnCancel = document.getElementById('btn-cancelar');
+    const btnAceptar = document.getElementById('btn-aceptar');
+    const bloqueGrabacion = document.getElementById('bloqueGrabacion');
+    const microphoneList = document.getElementById('microphoneList');
+    const btnGrabacion = document.getElementById('btn-grabacion');
+    const estadoGrabacion = document.getElementById('estadoGrabacion');
+    const audioReproducir = document.getElementById('audio-reproducir');
+    const btnSubir = document.getElementById('btn-subir');
+    const cronometroElement = document.getElementById('cronometro');
+    const estadoTextoElement = document.getElementById('estadoTexto');
+    const iconoGrabacionElement = document.getElementById('iconoGrabacion');
+    const barraProgresoElement = document.getElementById('barraProgreso');
+    const refreshMicrophonesButton = document.getElementById('refreshMicrophones');
+    const plantillaSelect = document.getElementById('plantilla_grabar');
+
+    // ELEMENTOS PARA AUTOCOMPLETAR PACIENTE
+    const pacienteNombreInputGrabar = document.getElementById('paciente_nombre_grabar');
+    const pacienteIdSeleccionadoInputGrabar = document.getElementById('paciente_id_seleccionado_grabar');
+    const sugerenciasPacienteContainerGrabar = document.getElementById('sugerencias-paciente-container-grabar');
+    const pacienteIdentificacionInputGrabar = document.getElementById('paciente_identificacion_grabar');
+
+    // Lógica para iniciar visita
+    btnVisita.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+    btnCancel.onclick = () => modal.style.display = 'none';
+
+    btnAceptar.onclick = async () => {
+      modal.style.display = 'none';
+      const pacienteNombre = pacienteNombreInputGrabar.value.trim();
+      const pacienteId = pacienteIdSeleccionadoInputGrabar.value;
+      const pacienteIdentificacion = pacienteIdentificacionInputGrabar.value.trim();
+      const plantilla = plantillaSelect.value;
+      
+      // --- LÍNEA AÑADIDA ---
+      const numHablantes = document.getElementById('num_hablantes_grabar').value;
+
+      // --- OBJETO MODIFICADO ---
+      const datosVisita = {
+         paciente_nombre: pacienteNombre,
+         plantilla: plantilla,
+         paciente_identificacion_documento: pacienteIdentificacion,
+         num_hablantes: numHablantes
+      };
+      if (pacienteId) {
+          datosVisita.paciente_id_seleccionado = pacienteId;
+      }
+
+      try {
+          const response = await fetch('/api/iniciar_visita', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(datosVisita)
+          });
+          const data = await response.json();
+
+          if (!response.ok) {
+              console.error("Error al iniciar visita:", data.error || response.statusText);
+              alert(`Error al iniciar la visita: ${data.error || 'Error desconocido del servidor'}`);
+              return;
+          }
+
+          console.log("Visita iniciada exitosamente:", data);
+          visitaActivaId = data.visita_id;
+          bloqueGrabacion.style.display = 'block';
+          // Deshabilitar campos para evitar cambios durante la grabación
+          pacienteNombreInputGrabar.disabled = true;
+          pacienteIdentificacionInputGrabar.disabled = true;
+          plantillaSelect.disabled = true;
+          btnVisita.disabled = true;
+          getAvailableMicrophones();
+      } catch (error) {
+          console.error('Error de red al iniciar visita:', error);
+          alert('Error de red al intentar iniciar la visita. Verifica que el servidor Flask esté corriendo.');
+      }
+    };
+
+    // Lógica de grabación
+    refreshMicrophonesButton.addEventListener('click', getAvailableMicrophones);
+    microphoneList.addEventListener('change', function() {
+        selectedDeviceId = this.value;
+        localStorage.setItem('lastMicrophoneId', selectedDeviceId);
+    });
+
+    async function getAvailableMicrophones() {
+        try {
+            await navigator.mediaDevices.getUserMedia({ audio: true }); // Solicitar permiso
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputDevices = devices.filter(device => device.kind === 'audioinput');
+            microphoneList.innerHTML = '';
+
+            if (audioInputDevices.length === 0) {
+                microphoneList.innerHTML = '<option value="">No microphones found.</option>';
+                btnGrabacion.disabled = true;
+                estadoGrabacion.innerText = "⚠️ No microphones detected. Please connect one and check browser permissions.";
+                return;
+            }
+
+            audioInputDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.textContent = device.label || `Micrófono ${microphoneList.options.length + 1}`;
+                microphoneList.appendChild(option);
+            });
+            btnGrabacion.disabled = false;
+            estadoGrabacion.innerText = "🎤 Microphones loaded. Select one and press record.";
+
+            if (selectedDeviceId && microphoneList.querySelector(`option[value="${selectedDeviceId}"]`)) {
+                microphoneList.value = selectedDeviceId;
+            } else {
+                microphoneList.value = audioInputDevices[0].deviceId;
+                selectedDeviceId = microphoneList.value;
+                localStorage.setItem('lastMicrophoneId', selectedDeviceId);
+            }
+        } catch (err) {
+            console.error('Error enumerando dispositivos de audio:', err);
+            microphoneList.innerHTML = '<option value="">Error al cargar micrófonos.</option>';
+            btnGrabacion.disabled = true;
+            estadoGrabacion.innerText = `❌ Error accessing microphones: ${err.name}. Revisa los permisos del navegador.`;
+        }
+    }
+
+    async function iniciarGrabacion() {
+        if (!selectedDeviceId && microphoneList.value) {
+            selectedDeviceId = microphoneList.value;
+        }
+        if (!selectedDeviceId) {
+            alert('Please select a microphone.');
+            return;
+        }
+        const constraints = { audio: { deviceId: { exact: selectedDeviceId } }, video: false };
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+            audioChunks = [];
+            tiempoGrabado = 0;
+            cronometroElement.innerText = "00:00";
+
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioReproducir.src = URL.createObjectURL(audioBlob);
+                audioReproducir.hidden = false;
+                audioReproducir.style.display = 'block';
+                btnSubir.disabled = false;
+                btnSubir.style.display = 'inline-block';
+                estadoGrabacion.innerText = "✅ Recording completed. You can play it or upload it.";
+                clearInterval(cronometroInterval);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            cronometroInterval = setInterval(() => {
+                tiempoGrabado++;
+                cronometroElement.innerText = formatearTiempo(tiempoGrabado);
+            }, 1000);
+
+            isRecording = true;
+            btnGrabacion.classList.remove("inactivo");
+            btnGrabacion.classList.add("activo");
+            estadoTextoElement.innerText = "Finalizar Grabación";
+            iconoGrabacionElement.innerHTML = '<i class="fas fa-stop"></i>';
+            estadoGrabacion.innerText = "🔴 Recording...";
+            audioReproducir.style.display = 'none';
+            btnSubir.style.display = 'none';
+            btnSubir.disabled = true;
+            microphoneList.disabled = true;
+            refreshMicrophonesButton.disabled = true;
+
+        } catch (err) {
+            console.error("Error starting recording:", err);
+            estadoGrabacion.innerText = `❌ Error al acceder al micrófono: ${err.message}.`;
+        }
+    }
+
+    function detenerGrabacion() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            isRecording = false;
+            estadoTextoElement.innerText = "Iniciar Grabación";
+            iconoGrabacionElement.innerHTML = '<i class="fas fa-microphone"></i>';
+            btnGrabacion.classList.remove("activo");
+            btnGrabacion.classList.add("inactivo");
+            microphoneList.disabled = false;
+            refreshMicrophonesButton.disabled = false;
+        }
+    }
+
+    btnGrabacion.addEventListener("click", function() {
+        if (!isRecording) {
+            iniciarGrabacion();
+        } else {
+            detenerGrabacion();
+        }
+    });
+
+    function formatearTiempo(totalSegundos) {
+        const minutos = String(Math.floor(totalSegundos / 60)).padStart(2, '0');
+        const segundos = String(totalSegundos % 60).padStart(2, '0');
+        return `${minutos}:${segundos}`;
+    }
+
+    // --- CORRECCIÓN CLAVE: FLUJO DE SUBIDA Y TRANSCRIPCIÓN ---
+    btnSubir.addEventListener("click", async () => {
+        if (audioChunks.length === 0) {
+            alert("No recorded audio to upload.");
+            return;
+        }
+        if (!visitaActivaId) {
+            alert("No active visit found to associate the audio. Please start a new visit first.");
+            return;
+        }
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formDataAudio = new FormData();
+        const filename = `visita_${visitaActivaId}_grabacion.webm`;
+        formDataAudio.append("audio", audioBlob, filename);
+
+        estadoGrabacion.innerText = "⏳ Uploading recording...";
+        barraProgresoElement.style.display = 'block';
+        barraProgresoElement.value = 50;
+        btnSubir.disabled = true;
+
+        try {
+            const response = await fetch("/api/subir_audio", { method: "POST", body: formDataAudio });
+            const dataAudio = await response.json();
+
+            if (!response.ok || !dataAudio.ruta_audio_procesable) { // Verificación añadida
+                console.error(`Error al subir audio: ${response.status}`, dataAudio.error);
+                estadoGrabacion.innerText = `❌ Upload error: ${dataAudio.error || 'No se recibió la ruta del archivo del servidor.'}`;
+                barraProgresoElement.style.display = 'none';
+                btnSubir.disabled = false;
+                return;
+            }
+
+            console.log("Audio subido exitosamente:", dataAudio);
+            estadoGrabacion.innerText = "✅ Recording uploaded. Starting transcription...";
+            barraProgresoElement.value = 100;
+
+            // ---- INICIO DE LA CORRECCIÓN ----
+            // Ahora pasamos la ruta del audio a la función de transcribir.
+            setTimeout(async () => {
+                await transcribirAudio(visitaActivaId, dataAudio.ruta_audio_procesable);
+            }, 500);
+            // ---- FIN DE LA CORRECCIÓN ----
+
+        } catch (error) {
+            console.error("Network error uploading audio:", error);
+            estadoGrabacion.innerText = "❌ Network error uploading the recording.";
+            barraProgresoElement.style.display = 'none';
+            btnSubir.disabled = false;
+        }
+    });
+
+    // ---- INICIO DE LA CORRECCIÓN ----
+    async function transcribirAudio(idDeVisita, rutaDelAudio) { 
+    // ---- FIN DE LA CORRECCIÓN ----
+        if (!idDeVisita || !rutaDelAudio) {
+            alert("Error: Missing data (visit ID or audio path) for transcription.");
+            estadoGrabacion.innerText = "❌ Error: Missing internal data.";
+            return;
+        }
+
+        estadoGrabacion.innerText = "⏳ Transcribing audio, please wait...";
+        barraProgresoElement.value = 0;
+        barraProgresoElement.style.display = 'block';
+
+        let progresoTranscripcion = 0;
+        const intervalProgresoTranscripcion = setInterval(() => {
+            progresoTranscripcion += 5;
+            barraProgresoElement.value = Math.min(progresoTranscripcion, 95);
+            if (progresoTranscripcion >= 95) clearInterval(intervalProgresoTranscripcion);
+        }, 500);
+
+        try {
+            // ---- INICIO DE LA CORRECCIÓN ----
+            // Ahora enviamos tanto el ID de la visita como la ruta del audio.
+            const response = await fetch('/api/transcribir_diarizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    visita_id: idDeVisita,
+                    ruta_audio_procesable: rutaDelAudio 
+                })
+            });
+            // ---- FIN DE LA CORRECCIÓN ----
+            
+            clearInterval(intervalProgresoTranscripcion);
+            const dataTranscripcion = await response.json();
+
+            if (!response.ok) {
+                console.error(`Error al transcribir: ${response.status}`, dataTranscripcion.error);
+                estadoGrabacion.innerText = `❌ Transcription error: ${dataTranscripcion.error || response.statusText}`;
+                barraProgresoElement.style.display = 'none';
+                return;
+            }
+
+            console.log("Audio transcrito exitosamente:", dataTranscripcion);
+            estadoGrabacion.innerText = "✅ Transcription completed. Redirecting to history...";
+            barraProgresoElement.value = 100;
+            
+            alert("Recording and transcription process completed successfully!");
+            // Redirigir a la página de historial para ver los resultados
+            window.location.href = `/historial_visitas?visita_reciente=${idDeVisita}`;
+
+        } catch (error) {
+            clearInterval(intervalProgresoTranscripcion);
+            console.error("Error de red al transcribir audio:", error);
+            estadoGrabacion.innerText = "❌ Network error during transcription.";
+            barraProgresoElement.style.display = 'none';
+        }
+    }
+
+    // --- Lógica de autocompletar pacientes ---
+    function debounce_Grabar(func, delay) {
+        return function(...args) {
+            clearTimeout(debounceTimerGrabarCita);
+            debounceTimerGrabarCita = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    async function obtenerSugerenciasPacientes_Grabar(query) {
+        if (query.length < 2) {
+            sugerenciasPacienteContainerGrabar.style.display = 'none';
+            return;
+        }
+        try {
+            const response = await fetch(`/api/buscar_pacientes?q=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                console.error("Error al buscar pacientes:", response.statusText);
+                return;
+            }
+            const pacientes = await response.json();
+            mostrarSugerencias_Grabar(pacientes);
+        } catch (error) {
+            console.error("Error en fetch de sugerencias:", error);
+        }
+    }
+
+    function mostrarSugerencias_Grabar(pacientes) {
+        sugerenciasPacienteContainerGrabar.innerHTML = '';
+        if (pacientes && pacientes.length > 0) {
+            pacientes.forEach(paciente => {
+                const item = document.createElement('div');
+                item.classList.add('sugerencia-item');
+                item.textContent = paciente.nombre + (paciente.identificacion_documento ? ` (ID: ${paciente.identificacion_documento})` : '');
+                item.dataset.id = paciente.id;
+                item.dataset.nombre = paciente.nombre;
+                item.dataset.identificacion = paciente.identificacion_documento || '';
+                item.addEventListener('click', () => {
+                    pacienteNombreInputGrabar.value = item.dataset.nombre;
+                    pacienteIdSeleccionadoInputGrabar.value = item.dataset.id;
+                    pacienteIdentificacionInputGrabar.value = item.dataset.identificacion;
+                    sugerenciasPacienteContainerGrabar.style.display = 'none';
+                });
+                sugerenciasPacienteContainerGrabar.appendChild(item);
+            });
+            sugerenciasPacienteContainerGrabar.style.display = 'block';
+        } else {
+            sugerenciasPacienteContainerGrabar.innerHTML = '<div class="no-sugerencias">No patients found.</div>';
+            sugerenciasPacienteContainerGrabar.style.display = 'block';
+        }
+    }
+
+    if (pacienteNombreInputGrabar) {
+        pacienteNombreInputGrabar.addEventListener('input', debounce_Grabar((event) => {
+            const query = event.target.value.trim();
+            pacienteIdSeleccionadoInputGrabar.value = ''; // Limpiar ID si se escribe de nuevo
+            obtenerSugerenciasPacientes_Grabar(query);
+        }, 300));
+
+        document.addEventListener('click', (event) => {
+            if (!pacienteNombreInputGrabar.contains(event.target) && !sugerenciasPacienteContainerGrabar.contains(event.target)) {
+                sugerenciasPacienteContainerGrabar.style.display = 'none';
+            }
+        });
+    }
+
+    // Listeners para actualizar micrófonos
+    window.addEventListener('focus', () => {
+        if (document.visibilityState === 'visible' && window.getComputedStyle(bloqueGrabacion).display === 'block') {
+            getAvailableMicrophones();
+        }
+    });
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+        navigator.mediaDevices.addEventListener('devicechange', () => {
+            if (window.getComputedStyle(bloqueGrabacion).display === 'block') {
+                getAvailableMicrophones();
+            }
+        });
+    }
+  });
+</script>
+
+{% endblock %}
+
+
+

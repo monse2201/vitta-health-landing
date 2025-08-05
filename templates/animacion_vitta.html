@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animación Rápida - Vitta Health</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --vitta-blue: #007bff;
+            --background-light: #f8f9fa;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eef2f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #animation-container {
+            width: 1280px;
+            height: 720px;
+            background-color: var(--background-light);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: var(--background-light);
+        }
+        #cursor {
+            position: absolute; width: 30px; height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 5.333-6.667 2.667L8 18.667z"/></svg>');
+            background-size: contain; z-index: 9999; pointer-events: none; opacity: 0; transform-origin: top left;
+        }
+        .overlay-text {
+            position: absolute; bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(17, 24, 39, 0.85);
+            color: white; padding: 10px 22px; border-radius: 8px;
+            font-size: 18px; font-weight: 500; z-index: 9000;
+            opacity: 0; white-space: nowrap;
+        }
+        
+        /* --- ESTILOS COMPILADOS DE TUS ARCHIVOS --- */
+        .pagina-scribe { max-width: 800px; padding: 20px; }
+        .header-form h1 { font-size: 28px; color: #2c3e50; font-weight: 600; margin-bottom: 8px; }
+        .scribe-card { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #e0e0e0; }
+        .form-row { display: flex; align-items: flex-end; gap: 20px; }
+        .form-input { flex-shrink: 1; flex-grow:1; }
+        .form-input label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px; }
+        .form-input input, .form-input select { width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; height: 42px; }
+        .btn-iniciar-visita { padding: 0 20px; background-color: var(--vitta-blue); color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 500; height: 42px; display: inline-flex; align-items: center; justify-content: center; }
+        .grabacion-contenedor h2 { font-size: 22px; text-align:center; }
+        .boton-circular { width: 150px; height: 150px; border-radius: 50%; border: 4px solid var(--vitta-blue); background-color: #fff; color: var(--vitta-blue); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .boton-circular.activo { background-color: #dc3545; border-color: #dc3545; color: white; }
+        #cronometro { font-size: 20px; font-weight: bold; margin: 4px 0; }
+        progress { width: 100%; margin-top: 16px; display: none;}
+        
+        .contenedor-principal { display: flex; height: 100%; width: 100%; }
+        .panel-lateral { width: 320px; background-color: #ffffff; border-right: 1px solid #e0e0e0; }
+        .panel-lateral .header h1 { font-size: 18px; font-weight: 600; padding: 20px; border-bottom: 1px solid #e5e7eb; }
+        #listaVisitas { padding: 20px; }
+        .card-visita { background-color: #ffffff; border-left: 4px solid transparent; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #e0e0e0;}
+        .card-visita.seleccionada { border-left: 4px solid var(--vitta-blue); background-color: #e7f3ff; }
+        .card-visita .avatar { width: 40px; height: 40px; background-color: var(--vitta-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .card-visita .nombre-paciente { font-weight: 600; }
+        .panel-detalle { flex: 1; padding: 25px 30px; background-color: #f8f9fa; }
+        .tabs-container { display: flex; border-bottom: 2px solid #dee2e6; margin-bottom: 25px; }
+        .tab { padding: 12px 20px; border-bottom: 3px solid transparent; }
+        .tab.active { color: var(--vitta-blue); border-bottom-color: var(--vitta-blue); font-weight: 600; }
+        .action-buttons { display: flex; gap: 10px; margin-bottom: 25px; }
+        .btn-accion { padding: 9px 14px; background-color: var(--vitta-blue); color: white; border: 1px solid var(--vitta-blue); border-radius: 6px; display: flex; align-items: center; gap: 7px; font-weight: 500; font-size: 13px; }
+        .panel-tab { display: none; }
+        .panel-tab.active { display: block; }
+        .transcription-area { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 18px 22px; min-height: 250px; white-space: pre-wrap; font-family: 'Menlo', monospace; font-size: 13px; }
+        .no-speech { padding: 40px; text-align: center; color: #6c757d; font-style: italic; }
+
+        .document-container-scribe { width:100%; max-width: 900px; background-color: #ffffff; padding: 40px 50px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.07); }
+        .header-document { margin-bottom: 30px; padding-bottom: 25px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header-document h1 { font-size: 28px; font-weight: 700; }
+        .section-title { font-size: 1.5rem; font-weight: 600; margin: 2.5rem 0 1.5rem 0; padding-bottom: 0.75rem; border-bottom: 2px solid var(--vitta-blue); }
+        .comidas-grid { display: flex; gap: 1rem; }
+        .comida-section { flex: 1; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .comida-section h4 { font-size: 1.15rem; font-weight: 600; color: var(--vitta-blue); margin: 0 0 1rem 0; }
+        .comida-section ul { padding-left: 20px; margin: 0; }
+        .footer-actions { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0; display: flex; justify-content: flex-end; gap: 12px; }
+        .btn { padding: 10px 18px; font-size: 14px; border-radius: 6px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { color: white; background-color: var(--vitta-blue); }
+        .modal-scribe { display: none; position: absolute; top:0; left:0; right:0; bottom:0; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-scribe-content { background-color: white; padding: 25px; border-radius: 8px; width: 400px; }
+        .final-logo { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity:0; }
+        .final-logo h2 { font-size: 48px; font-weight: 700; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+    <div id="animation-container">
+        <div id="cursor"></div>
+
+        <div id="text1" class="overlay-text">Tu consultorio, simplificado.</div>
+        <div id="text2" class="overlay-text">Captura. Transcribe. Resume.</div>
+        <div id="text3" class="overlay-text">Toda la información, en un solo lugar.</div>
+        <div id="text4" class="overlay-text">Crea documentos profesionales al instante.</div>
+        <div id="text5" class="overlay-text">Comparte de forma segura.</div>
+        
+        <div class="final-logo"><h2>Vitta Health</h2></div>
+
+        <div id="screen-grabar-cita" class="screen">
+            <div class="pagina-scribe">
+                <div class="scribe-card">
+                    <div class="form-row">
+                        <div class="form-input">
+                            <label>Nombre del Paciente</label>
+                            <input type="text" id="paciente_nombre_grabar">
+                        </div>
+                        <button type="button" class="btn-iniciar-visita">Iniciar Visita</button>
+                    </div>
+                    <div id="bloqueGrabacion" style="opacity:0; visibility:hidden; text-align:center;">
+                        <h2>Capturar Grabación</h2>
+                        <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                            <button type="button" id="btn-grabacion" class="boton-circular">
+                                <div id="cronometro">00:00</div>
+                            </button>
+                        </div>
+                        <progress id="barraProgreso" value="0" max="100"></progress>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-historial" class="screen">
+            <div class="contenedor-principal">
+                <div class="panel-lateral">
+                    <div class="header"><h1>Visitas</h1></div>
+                    <div id="listaVisitas">
+                        <div class="card-visita" id="visita-ana-torres">
+                            <div class="avatar">A</div>
+                            <div class="card-visita-info">
+                                <div class="nombre-paciente">Ana Torres</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-detalle">
+                    <div class="tabs-container">
+                        <div id="tab-transcripcion" class="tab">Transcripción</div>
+                        <div id="tab-notas" class="tab">Notas y Resumen IA</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-accion" id="btn-accion-especialidad">📝 Generar Plan Nutricional</button>
+                    </div>
+                    <div id="panel-transcripcion" class="panel-tab">
+                        <div class="transcription-area">**Doctor:** Hola Ana, cuéntame qué te trae por aquí...</div>
+                    </div>
+                    <div id="panel-notas" class="panel-tab">
+                         <div class="transcription-area">### Resumen IA...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="screen-ver-plan" class="screen">
+            <div class="document-container-scribe">
+                <div class="header-document"><h1><i class="fas fa-utensils"></i> Plan Nutricional</h1></div>
+                <div class="section-title">Información del Paciente</div>
+                <div class="info-grid"><div class="info-item"><strong>Nombre:</strong> <span>Ana Torres</span></div></div>
+                <div class="section-title">Plan Diario Tipo</div>
+                <div class="comidas-grid">
+                    <div class="comida-section"><h4>Desayuno</h4><ul><li>Avena cocida con fresas</li></ul></div>
+                    <div class="comida-section"><h4>Almuerzo</h4><ul><li>Pechuga de pollo a la plancha</li></ul></div>
+                </div>
+                <div class="footer-actions">
+                     <button class="btn btn-primary" id="btn-compartir"><i class="fas fa-envelope"></i> Compartir</button>
+                </div>
+                 <div id="sharePlanModal" class="modal-scribe">
+                    <div class="modal-scribe-content">
+                        <h5>Compartir Plan</h5>
+                        <input type="email" placeholder="ana.torres@email.com" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const masterTL = gsap.timeline({ delay: 0.5 });
+        const cursor = document.getElementById('cursor');
+        gsap.set(cursor, { xPercent: -10, yPercent: -10 });
+
+        // --- Escena 1: Iniciar y Grabar ---
+        masterTL.add(animateScreen("#screen-grabar-cita"))
+            .add(animateOverlayText("#text1", 2))
+            .to(cursor, { opacity: 1, duration: 0.3 })
+            .to(cursor, { duration: 0.7, x: 340, y: 310 })
+            .set('#paciente_nombre_grabar', { value: "Ana Torres" })
+            .to(cursor, { duration: 0.7, x: 650, y: 325 })
+            .add(click(cursor))
+            
+            // --- Grabación ---
+            .to('#bloqueGrabacion', { opacity: 1, visibility: 'visible', duration: 0.4 })
+            .add(animateOverlayText("#text2", 2.5))
+            .to(cursor, { duration: 0.7, x: 640, y: 440 })
+            .add(click(cursor))
+            .add(() => {
+                const btn = document.getElementById('btn-grabacion');
+                btn.classList.add('activo');
+                let time = { s: 0 };
+                gsap.to(time, { s: 2, duration: 2, ease: "none", onUpdate: () => {
+                    document.getElementById('cronometro').textContent = `00:0${Math.floor(time.s)}`;
+                }});
+            }, "-=0.2")
+            .to(cursor, { duration: 0.5, delay: 1.8 }) // Espera
+            .add(click(cursor))
+            .add(() => {
+                document.getElementById('btn-grabacion').classList.remove('activo');
+                gsap.set('#barraProgreso', { display: 'block' });
+                gsap.to('#barraProgreso', { value: 100, duration: 1, ease: 'none' });
+            }, "-=0.2");
+        
+        // --- Escena 2: Historial ---
+        masterTL.add(animateScreen("#screen-historial", "#screen-grabar-cita"))
+            .add(animateOverlayText("#text3", 2.5))
+            .to('#visita-ana-torres', { className: "+=seleccionada", duration: 0.3 })
+            .from('.panel-detalle', { opacity: 0, x: 30, duration: 0.4 })
+            .to(cursor, { duration: 0.7, delay: 0.5, x: 700, y: 160 })
+            .add(click(cursor))
+            .add(switchTab('#tab-transcripcion', '#panel-transcripcion'), "-=0.2")
+            .to(cursor, { duration: 0.7, x: 850, y: 160 })
+            .add(click(cursor))
+            .add(switchTab('#tab-notas', '#panel-notas'), "-=0.2");
+
+        // --- Escena 3: Documento Final ---
+        masterTL.add(animateOverlayText("#text4", 2.5))
+            .to(cursor, { duration: 0.7, delay: 0.5, x: 800, y: 220 })
+            .add(click(cursor));
+
+        // --- Transición a Plan ---
+        masterTL.add(animateScreen("#screen-ver-plan", "#screen-historial"))
+            .from('.document-container-scribe', { opacity: 0, scale: 0.95, duration: 0.5 })
+            .add(animateOverlayText("#text5", 2.5))
+            .to(cursor, { duration: 0.7, delay: 0.5, x: 880, y: 625 })
+            .add(click(cursor))
+            .to('#sharePlanModal', { display: 'flex', opacity: 1, duration: 0.3 }, "-=0.2")
+            .to(cursor, { opacity: 0, duration: 0.3, delay: 1 });
+
+        // --- Cierre ---
+        masterTL.to('#animation-container', { scale: 0.85, duration: 1, ease: 'power1.inOut' })
+            .to('.screen', { opacity: 0, duration: 0.5 }, "<")
+            .to('.final-logo', { opacity: 1, duration: 0.7 });
+
+        // --- Funciones de Animación ---
+        function click(element) {
+            const tl = gsap.timeline();
+            tl.to(element, { scale: 0.8, duration: 0.1 }).to(element, { scale: 1, duration: 0.2 });
+            return tl;
+        }
+
+        function animateOverlayText(target, duration) {
+            const tl = gsap.timeline();
+            tl.fromTo(target, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 })
+              .to(target, { opacity: 0, y: -10, duration: 0.4, delay: duration });
+            return tl;
+        }
+        
+        function animateScreen(screenIn, screenOut = null) {
+            const tl = gsap.timeline();
+            if (screenOut) {
+                tl.to(screenOut, { opacity: 0, duration: 0.3, ease: 'power1.in' })
+                  .set(screenOut, { visibility: 'hidden' });
+            }
+            tl.set(screenIn, { visibility: 'visible' })
+              .to(screenIn, { opacity: 1, duration: 0.3, ease: 'power1.out' });
+            return tl;
+        }
+
+        function switchTab(newTabSelector, newPanelSelector) {
+            const tl = gsap.timeline();
+            tl.add(() => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel-tab').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+                document.querySelector(newTabSelector).classList.add('active');
+                document.querySelector(newPanelSelector).style.display = 'block';
+                document.querySelector(newPanelSelector).classList.add('active');
+            }).from(newPanelSelector, { opacity: 0, duration: 0.3 });
+            return tl;
+        }
+    });
+</script>
+
+</body>
+</html>

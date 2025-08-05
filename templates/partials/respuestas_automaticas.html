@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📩 Configurar Respuestas Automáticas</h2>
+    
+    <label for="mensaje">Mensaje Automático:</label>
+    <textarea id="mensaje" placeholder="Escribe aquí tu mensaje..."></textarea>
+
+    <button id="guardar-mensaje" class="btn-primary">Guardar Mensaje</button>
+
+    <p id="mensaje-confirmacion" class="hidden">✅ Mensaje guardado correctamente.</p>
+</div>
+
+<script>
+    document.getElementById("guardar-mensaje").addEventListener("click", function () {
+        const mensaje = document.getElementById("mensaje").value;
+
+        fetch('/respuestas_automaticas', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ mensaje: mensaje })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("mensaje-confirmacion").classList.remove("hidden");
+        })
+        .catch(error => console.error("Error al guardar mensaje:", error));
+    });
+</script>
+{% endblock %}
