@@ -4477,6 +4477,6 @@ def admin_delete_prospect(prospect_id):
 def pitch_deck_route():
     return render_template("vitta-health-pitch.html")
 
-@app.route("/vitta-health-pitch-investors.html")
+@app.route("/deck.html")
 def investors_pitch_deck_route():
-    return render_template("vitta-health-pitch-investors.html")
+    return render_template("deck.html")
