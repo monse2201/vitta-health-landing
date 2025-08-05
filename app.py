@@ -4460,7 +4460,6 @@ def admin_delete_prospect(prospect_id):
 
         prospect_name = prospect.nombre
         
-        # Elimina el registro del prospecto
         db.session.delete(prospect)
         db.session.commit()
 
@@ -4472,7 +4471,6 @@ def admin_delete_prospect(prospect_id):
         logging.error(f"Error al eliminar el prospecto ID {prospect_id}: {e}", exc_info=True)
         flash("Ocurrió un error al eliminar el prospecto.", "danger")
 
-    # Redirige al panel principal de administración
     return redirect(url_for('admin_dashboard'))
 
 @app.route("/vitta-health-pitch.html")
@@ -4480,5 +4478,5 @@ def pitch_deck_route():
     return render_template("vitta-health-pitch.html")
 
 @app.route("/vitta-health-pitch-investors.html")
-def pitch_deck_route():
+def investors_pitch_deck_route():
     return render_template("vitta-health-pitch-investors.html")
