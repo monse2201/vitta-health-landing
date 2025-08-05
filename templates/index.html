@@ -1,84 +1,248 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitta Health Chat</title>
-    
-    <!-- Enlaces a estilos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Vitta Health :: Investor Portal</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dpuptoe0o/image/upload/v1722837330/VITTA_ICON_TRANSPARENT_qz30oh.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --primary-darker: #2563EB;
+            --primary-light: #EFF6FF;
+            --heading-color: #111827;
+            --text-color: #374151;
+            --text-muted: #6B7280;
+            --white-color: #FFFFFF;
+            --border-color: #E5E7EB;
+            --font-family-body: 'Inter', sans-serif;
+            --spacing-md: 1.25rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --border-radius-pill: 9999px;
+            --shadow-primary: 0px 6px 15px rgba(59, 130, 246, 0.2);
+            --shadow-primary-hover: 0px 10px 22px rgba(59, 130, 246, 0.3);
+            --transition-speed: 0.35s;
+            --transition-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family-body);
+            margin: 0;
+            background-color: var(--white-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        /* NEW HEADER SECTION */
+        .main-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 0;
+            z-index: 10;
+        }
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--heading-color);
+            text-decoration: none;
+        }
+        .header-logo span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* HERO SECTION - All content above the fold */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 0;
+            text-align: center;
+            background: radial-gradient(circle at 50% 0%, var(--primary-light) 0%, transparent 50%);
+        }
+        .hero-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 80px; /* Space for header */
+        }
+        .hero-section h1 {
+            font-family: var(--font-family-body);
+            color: var(--heading-color);
+            font-weight: 800;
+            line-height: 1.2;
+            font-size: 3.5rem;
+            letter-spacing: -1.5px;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        .hero-section .subtitle {
+            font-size: 1.2rem;
+            margin-top: var(--spacing-md);
+            color: var(--text-muted);
+            font-weight: 400;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1.2rem;
+            margin-top: var(--spacing-xl);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--white-color);
+            background: var(--primary-color);
+            border: 2px solid transparent;
+            padding: 0.8rem 2rem;
+            font-size: 0.95rem;
+            border-radius: var(--border-radius-pill);
+            transition: all var(--transition-speed) var(--transition-ease);
+            box-shadow: var(--shadow-primary);
+            cursor: pointer;
+            text-decoration: none;
+            gap: 0.6rem;
+        }
+        .btn:hover {
+            background: var(--primary-darker);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-primary-hover);
+        }
+        .btn.secondary {
+            background: var(--white-color);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: none;
+        }
+        .btn.secondary:hover {
+            background: var(--primary-light);
+            box-shadow: none;
+        }
+        .btn.nav-contact { /* Specific style for header button */
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* LOGO TICKER - Integrated into hero */
+        .logo-ticker-container {
+            width: 100%;
+            margin-top: auto;
+            padding-top: 40px;
+        }
+        .logo-ticker-title {
+            text-align: center; font-size: 0.9rem;
+            font-weight: 500; color: var(--text-muted);
+            margin-bottom: var(--spacing-lg);
+            text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .logo-scroll-container {
+            overflow: hidden; position: relative; width: 100%;
+        }
+        .logo-scroll-container::before, .logo-scroll-container::after {
+            content: ''; position: absolute; top: 0;
+            width: 100px; height: 100%; z-index: 2;
+        }
+        .logo-scroll-container::before { left: 0; background: linear-gradient(to right, var(--white-color) 0%, rgba(255, 255, 255, 0) 100%); }
+        .logo-scroll-container::after { right: 0; background: linear-gradient(to left, var(--white-color) 0%, rgba(255, 255, 255, 0) 100%); }
+        .logo-scroll {
+            display: flex; align-items: center; width: fit-content;
+            animation: scroll 45s linear infinite;
+        }
+        .logo-scroll img {
+            height: 45px;
+            margin: 0 var(--spacing-xl);
+            filter: grayscale(100%); opacity: 0.6;
+            transition: all var(--transition-speed) var(--transition-ease);
+        }
+        .logo-scroll img:hover { filter: grayscale(0%); opacity: 1; transform: scale(1.1); }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-header { padding: 1rem 0; }
+            .hero-section h1 { font-size: 2.5rem; letter-spacing: -1px; }
+            .hero-section .subtitle { font-size: 1.1rem; }
+            .logo-scroll img { height: 35px; margin: 0 var(--spacing-lg); }
+        }
+    </style>
 </head>
 <body>
 
-    <div class="chat-container">
-        <!-- Sidebar (Lista de chats) -->
-        <div class="sidebar">
-            <div class="search-bar">
-                <input type="text" placeholder="Buscar..." />
-            </div>
-            <ul class="chat-list">
-                <li>
-                    <img src="{{ url_for('static', filename='images/avatar1.png') }}" alt="Avatar">
-                    <span>Abue ❤️</span>
-                </li>
-                <li>
-                    <img src="{{ url_for('static', filename='images/avatar2.png') }}" alt="Avatar">
-                    <span>Anrea 😍❤️</span>
-                </li>
-                <li>
-                    <img src="{{ url_for('static', filename='images/avatar3.png') }}" alt="Avatar">
-                    <span>Lukas</span>
-                </li>
-                <li>
-                    <img src="{{ url_for('static', filename='images/avatar4.png') }}" alt="Avatar">
-                    <span>Will</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Ventana del chat -->
-        <div class="chat-window">
-            <div class="chat-header">
-                <h2>Abue ❤️</h2>
-            </div>
-
-            <div class="chat-messages">
-                <div class="message received">
-                    Ok
-                    <br>
-                    <small>6:24 PM | 01 Feb 2025</small>
-                </div>
-
-                <div class="message sent">
-                    Gracias, abue ❤️
-                    <br>
-                    <small>6:25 PM | 01 Feb 2025</small>
-                </div>
-            </div>
-
-            <div class="chat-input">
-                <input type="text" placeholder="Escribe un mensaje...">
-                <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-
-        <!-- Panel de atributos -->
-        <div class="chat-sidebar">
-            <h3>Atributos</h3>
-            <p><strong>Nombre:</strong> Abue ❤️</p>
-            <p><strong>Teléfono:</strong> 50683097495</p>
-
-            <h4>Notas</h4>
-            <textarea placeholder="Escribe una nota..."></textarea>
-            <button class="save-btn">Guardar</button>
-        </div>
+<header class="main-header">
+    <div class="container">
+        <a href="#" class="header-logo">Vitta<span>Health</span></a>
+        <a href="mailto:info@vitta.health" class="btn nav-contact">Contact</a>
     </div>
+</header>
 
-    <!-- Scripts -->
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<main>
+    <section class="hero-section">
+        <div class="container hero-content">
+            <h1>For Every Hour of Care, Two Hours of Paperwork. This Ends Now.</h1>
+            <p class="subtitle">Vitta Health's ambient AI automates clinical documentation, freeing doctors from administrative burnout. We are the first-mover in a massive, underserved Latin American market—backed by the region's top institutions.</p>
+            <div class="button-group">
+                <a class="btn" href="vitta-health-pitch-investors.html" target="_blank">
+                    <i class="fas fa-rocket"></i> View Investor Deck
+                </a>
+                <a class="btn secondary" href="/dashboard">
+                    <i class="fas fa-play-circle"></i> Live Demo
+                </a>
+            </div>
+        </div>
+
+        <div class="logo-ticker-container">
+            <div class="container">
+                 <p class="logo-ticker-title">Supported By & In Alliance With</p>
+                <div class="logo-scroll-container">
+                    <div class="logo-scroll">
+                        <img alt="Emprelatam Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/1_h9gx9f"/>
+                        <img alt="Clinica Biblica Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/3_hr0mnt"/>
+                        <img alt="Avant Lab Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/2_os3rqg"/>
+                        <img alt="DMNTS Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/Disen%CC%83o_sin_ti%CC%81tulo_qwegik"/>
+                        <img alt="HULIIO Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/Disen%CC%83o_sin_ti%CC%81tulo_1_gzlxjc"/>
+                        <img alt="Emprelatam Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/1_h9gx9f"/>
+                        <img alt="Clinica Biblica Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/3_hr0mnt"/>
+                        <img alt="Avant Lab Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/2_os3rqg"/>
+                        <img alt="HULIIO Logo" src="https://res.cloudinary.com/dpuptoe0o/image/upload/Disen%CC%83o_sin_ti%CC%81tulo_1_gzlxjc"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
 </body>
 </html>
-
-
