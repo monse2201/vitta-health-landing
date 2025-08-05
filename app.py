@@ -971,13 +971,8 @@ def obtener_datos_overview(visita_id_param=None):
     if visita_id_a_buscar:
         try:
             visita_query = db.session.query(Visita).filter_by(id=int(visita_id_a_buscar))
-            # The rest of the function remains the same
-            # ...
-            # A good practice would be to use current_user.id directly after the initial check
             visita_query = visita_query.filter_by(medico_id=current_user.id)
             visita = visita_query.first()
-            # ...
-            # The code inside the if block can stay as it is because we already checked for authentication.
         except Exception as e:
             logging.error(f"Error obteniendo datos overview para Visita ID {visita_id_a_buscar}: {e}", exc_info=True)
             overview.update({'resumen':"Error cargando datos de la visita.", 'paciente':"Error", 'staff':"Error"})
@@ -985,11 +980,38 @@ def obtener_datos_overview(visita_id_param=None):
         overview['resumen']="No se ha especificado ninguna visita activa."
         logging.info("No se proporcionó ID de visita para obtener datos overview.")
 
-    # This part of the code is now safe because the function will return early if no user is authenticated.
-    if visita and visita.paciente:
-        #... existing code
-    return overview
-
+    # The code here needs to be properly indented to be part of the function
+    # Check if a visita was found and has a patient
+    if 'visita' in locals() and visita and visita.paciente:
+        overview.update({
+            'staff': visita.medico_asignado_usuario.nombre,
+            'paciente': visita.paciente.nombre,
+            'paciente_id': visita.paciente.id,
+            'paciente_identificacion_documento': visita.paciente.identificacion_documento,
+            'paciente_telefono': visita.paciente.telefono,
+            'paciente_email': visita.paciente.email,
+            'paciente_estado_tratamiento': visita.paciente.estado_tratamiento,
+            'resumen': visita.resumen_ai or overview['resumen'],
+            'visita_id': visita.id,
+            'idioma_detectado': visita.idioma_detectado,
+            'notas_ai': visita.notas_ai,
+            'plantilla': visita.plantilla,
+            'tipo_visita': visita.tipo_visita,
+            'resumen_ai': visita.resumen_ai,
+            'fecha': visita.fecha.strftime('%Y-%m-%dT%H:%M:%S.%fZ') if visita.fecha else None,
+            'duracion_grabacion_segundos': visita.duracion_grabacion_segundos
+        })
+        try:
+            log_entries = db.session.query(RegistroActividad).filter_by(visita_id=visita.id).order_by(RegistroActividad.fecha.desc()).limit(10).all()
+            overview['activity_logs'] = [
+                {'accion': log.accion, 'descripcion': log.descripcion, 'fecha': calcular_tiempo_transcurrido(log.fecha), 'icono': obtener_icono_para_accion(log.accion)}
+                for log in log_entries
+            ]
+        except Exception as e_logs:
+            logging.error(f"Error obteniendo logs de actividad para visita {visita.id}: {e_logs}")
+            overview['activity_logs'] = [{'accion':'error', 'descripcion':'Error al cargar logs de actividad.', 'fecha':'N/A', 'icono':'fas fa-exclamation-triangle'}]
+            
+    return overview # This return statement must be at the same indentation level as the overview = { ... } line
 # --- Funciones de IA y Texto (Sin cambios directos aquí para la privacidad) ---
 def normalize_language_code(code):
     if not code: return None
