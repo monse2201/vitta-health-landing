@@ -1713,19 +1713,33 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
 
 @app.route('/dashboard')
 def dashboard():
-    total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=current_user.id).count()
-    today_utc = datetime.now(timezone.utc).date()
-    today_start_utc = datetime.combine(today_utc, datetime.min.time(), tzinfo=timezone.utc)
-    today_end_utc = datetime.combine(today_utc, datetime.max.time(), tzinfo=timezone.utc)
-    visitas_hoy_count = db.session.query(Visita.id).filter(
-        Visita.medico_id == current_user.id,
-        Visita.fecha >= today_start_utc,
-        Visita.fecha <= today_end_utc
-    ).count()
-    tareas_pendientes_count = db.session.query(Tarea.id).filter(
-        Tarea.usuario_id == current_user.id,
-        Tarea.status != "Completada"
-    ).count()
+    # Initialize variables to a default value for unauthenticated users
+    total_pacientes = 0
+    visitas_hoy_count = 0
+    tareas_pendientes_count = 0
+
+    # Check if a user is authenticated
+    if current_user.is_authenticated:
+        # If authenticated, get the user's ID
+        user_id = current_user.id
+        
+        # Now, perform the database queries using the user's ID
+        total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=user_id).count()
+        
+        today_utc = datetime.now(timezone.utc).date()
+        today_start_utc = datetime.combine(today_utc, datetime.min.time(), tzinfo=timezone.utc)
+        today_end_utc = datetime.combine(today_utc, datetime.max.time(), tzinfo=timezone.utc)
+        
+        visitas_hoy_count = db.session.query(Visita.id).filter(
+            Visita.medico_id == user_id,
+            Visita.fecha >= today_start_utc,
+            Visita.fecha <= today_end_utc
+        ).count()
+        
+        tareas_pendientes_count = db.session.query(Tarea.id).filter(
+            Tarea.usuario_id == user_id,
+            Tarea.status != "Completada"
+        ).count()
 
     return render_template('dashboard.html',
                            total_pacientes=total_pacientes,
