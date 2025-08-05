@@ -1712,16 +1712,7 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
         return None
 
 @app.route('/dashboard')
-# No @admin_required decorator here, as this is the general user dashboard
 def dashboard():
-    # Asegúrate de que los admins no lleguen aquí por error si acceden directamente
-    if current_user.role == 'admin_super':
-        flash('Acceso no autorizado al dashboard de médico general para Super Administradores.', 'danger')
-        return redirect(url_for('super_admin_dashboard'))
-    elif current_user.role == 'admin_nutricion':
-        flash('Acceso no autorizado al dashboard de médico general para Administradores de Nutrición.', 'danger')
-        return redirect(url_for('nutricion_admin_dashboard'))
-    
     total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=current_user.id).count()
     today_utc = datetime.now(timezone.utc).date()
     today_start_utc = datetime.combine(today_utc, datetime.min.time(), tzinfo=timezone.utc)
