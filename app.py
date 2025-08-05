@@ -1879,7 +1879,7 @@ def register_route():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_route():
-    # ALL the code inside this function needs to be indented
+    # The whole block for the login_route function is indented
     if current_user.is_authenticated:
         if not current_user.is_verified:
             flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
@@ -1897,6 +1897,7 @@ def login_route():
     email_from_form = request.form.get('email', '') if request.method == 'POST' else request.args.get('email', '')
 
     if request.method == 'POST':
+        # The code inside this `if` block must be indented
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
@@ -1907,8 +1908,8 @@ def login_route():
 
         user = User.query.filter_by(email=email).first()
 
-        # This 'if' block also needs to be indented correctly under the previous 'if request.method == 'POST':'
         if user and user.check_password(password):
+            # The code inside this `if` block must also be indented
             if not user.is_verified:
                 flash('Su perfil aún no ha sido verificado.', 'warning')
                 return redirect(url_for('login_route'))
@@ -4139,7 +4140,7 @@ def admin_dashboard():
         status_filter = request.args.get('status_filter', '')
 
         contactos_unificados = []
-        
+
         # Añadir doctores a la lista
         doctors_query = User.query.filter_by(role='medico')
         for doctor in doctors_query.all():
@@ -4152,7 +4153,7 @@ def admin_dashboard():
 
         # Ordenar la lista combinada por fecha de creación (los más nuevos primero)
         contactos_unificados.sort(key=lambda x: x['date'], reverse=True)
-        
+
         # Aplicar filtros de estado
         if status_filter == 'verified':
             contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and c['data'].is_verified]
@@ -4164,10 +4165,10 @@ def admin_dashboard():
         # Aplicar búsqueda por nombre
         if search_query:
             contactos_unificados = [
-                c for c in contactos_unificados 
+                c for c in contactos_unificados
                 if search_query.lower() in f"{c['data'].nombre or ''} {getattr(c['data'], 'apellidos', '')}".lower()
             ]
-        
+
         # --- 3. Paginación ---
         pagination = ListPagination(items_list=contactos_unificados, page=page, per_page=10)
 
