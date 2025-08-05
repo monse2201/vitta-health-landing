@@ -4265,8 +4265,8 @@ def admin_test_emails():
     # Para el método GET, simplemente renderiza la página
     return render_template('admin/admin_test_emails.html')
 @app.route("/")
-def landing_page():
-    return render_template("landing_page.html")
+def index():
+    return render_template("index.html")
 
 @app.route("/admin/prospect/<int:prospect_id>")
 @admin_required(allowed_roles=['admin']) # Asegúrate de especificar el rol correcto
@@ -4487,3 +4487,5 @@ def admin_delete_prospect(prospect_id):
 @app.route("/vitta-health-pitch.html")
 def pitch_deck_route():
     return render_template("vitta-health-pitch.html")
+
+
