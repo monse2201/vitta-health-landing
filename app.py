@@ -4460,6 +4460,7 @@ def admin_delete_prospect(prospect_id):
 
         prospect_name = prospect.nombre
         
+        # Elimina el registro del prospecto
         db.session.delete(prospect)
         db.session.commit()
 
@@ -4477,6 +4478,6 @@ def admin_delete_prospect(prospect_id):
 def pitch_deck_route():
     return render_template("vitta-health-pitch.html")
 
-@app.route("/deck.html")
+@app.route("/vitta-health-pitch-investors.html")
 def investors_pitch_deck_route():
-    return render_template("deck.html")
+    return render_template("vitta-health-pitch-investors.html")
