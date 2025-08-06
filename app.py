@@ -2020,7 +2020,7 @@ def historial_visitas():
 
 @app.route('/visita/<int:visita_id>/generar_documento_especializado/<string:doc_type>')
 def generar_documento_especializado(visita_id, doc_type):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         flash("Visita no encontrada o no tiene permiso para accederla.", "danger")
         return redirect(url_for('historial_visitas'))
@@ -2499,7 +2499,7 @@ def cambiar_contrasena_route():
     
 @app.route('/visita/<int:visita_id>/receta/nueva', methods=['GET', 'POST'])
 def nueva_receta_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2611,7 +2611,7 @@ def ver_receta(receta_id):
 
 @app.route('/visita/<int:visita_id>/referencia/nueva', methods=['GET', 'POST'])
 def nueva_referencia_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2732,7 +2732,7 @@ def configuracion_documentos():
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
 def nuevo_plan_nutricional_para_visita_page(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -3100,45 +3100,90 @@ def chat_bot():
 
 @app.route('/api/subir_audio', methods=['POST'])
 def subir_audio():
-    # 1. Intenta obtener los datos de la visita desde la sesión (la "nota adhesiva").
-    visita_demo_data = session.get('demo_visita_data')
-    visita_id = session.get('visita_actual_id')
+    if 'visita_actual_id' not in session:
+        return jsonify({"error": "No hay visita activa. Por favor, inicie una nueva visita primero."}), 400
 
-    if not visita_demo_data:
-        return jsonify({"error": "No hay una visita en curso. Por favor, inicia una."}), 404
+    visita_id = session['visita_actual_id']
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    if not visita:
+        session.pop('visita_actual_id', None)
+        return jsonify({"error": f"La visita activa (ID: {visita_id}) no fue encontrada o no le pertenece."}), 404
 
-    # 2. Verifica si se subió un archivo de audio.
     if 'audio' not in request.files:
-        return jsonify({"error": "No se encontró el archivo de audio."}), 400
+        return jsonify({"error": "No se envió ningún archivo de audio."}), 400
 
-    audio_file = request.files['audio']
-    if audio_file.filename == '':
-        return jsonify({"error": "No se seleccionó ningún archivo."}), 400
+    file = request.files['audio']
 
-    try:
-        # 3. Simula el procesamiento del audio.
-        # En una aplicación real, aquí usarías una API para transcribir el audio.
-        transcripcion_simulada = "Este es un ejemplo de una transcripción generada por IA."
-        resumen_ai_simulado = "El paciente presentó síntomas de resfriado común. Se recomienda descanso y líquidos."
+    if file.filename == '':
+        return jsonify({"error": "El nombre del archivo de audio está vacío."}), 400
 
-        # 4. Actualiza la "nota adhesiva" (la sesión) con los nuevos datos.
-        visita_demo_data['transcripcion'] = transcripcion_simulada
-        visita_demo_data['resumen_ai'] = resumen_ai_simulado
-        
-        # Opcional: Si quieres mantener el ID del paciente, puedes hacerlo:
-        # paciente_id = visita_demo_data['paciente_id']
+    if file:
+        original_filename = secure_filename(file.filename)
+        file_ext = os.path.splitext(original_filename)[1].lower()
 
-        # 5. Devuelve una respuesta exitosa con los datos actualizados.
-        overview = obtener_datos_overview_demo(visita_id)
-        
+        if file_ext not in ALLOWED_OPENAI_AUDIO_EXTENSIONS:
+            logging.warning(f"Usuario {current_user.id} intentó subir un archivo con formato no soportado: {original_filename}")
+            return jsonify({ "error": f"Formato de archivo no soportado ('{file_ext}')."}), 400
+
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+        nuevo_nombre = f"visita_{visita.id}_grabacion_{timestamp}{file_ext}"
+
+        # Guardar archivo físicamente
+        # Usamos la función consolidada que también maneja el cifrado
+        ruta_relativa_para_db = guardar_archivo_subido(file, 'AUDIO_FOLDER')
+
+        if not ruta_relativa_para_db:
+             logging.error(f"Fallo al guardar el archivo de audio '{nuevo_nombre}' para la visita ID {visita.id}")
+             return jsonify({"error": "Error interno al guardar el archivo de audio."}), 500
+
+        # Obtener duración del archivo ya guardado (y posiblemente cifrado)
+        # Nota: Si el archivo está cifrado, necesitamos leerlo y desencriptarlo en memoria para obtener su duración.
+        audio_bytes = leer_y_desencriptar_archivo(ruta_relativa_para_db)
+        duracion_seg = None
+        if audio_bytes:
+            # Para obtener la duración, necesitamos escribir los bytes en un archivo temporal
+            temp_file_path_for_duration = ""
+            try:
+                # Usar la extensión original para que pydub la reconozca
+                temp_fd, temp_file_path_for_duration = tempfile.mkstemp(suffix=file_ext)
+                with os.fdopen(temp_fd, 'wb') as tmp:
+                    tmp.write(audio_bytes)
+
+                # Ahora obtenemos la duración desde el archivo temporal desencriptado
+                duracion_seg = obtener_duracion_audio_segundos(temp_file_path_for_duration)
+
+            except Exception as e_dur:
+                logging.error(f"Error obteniendo duración desde archivo temporal: {e_dur}")
+            finally:
+                if temp_file_path_for_duration and os.path.exists(temp_file_path_for_duration):
+                    os.remove(temp_file_path_for_duration) # Limpiar archivo temporal
+
+        if duracion_seg is None:
+            logging.warning(f"No se pudo obtener la duración para el audio de la visita {visita.id}")
+            # El message flash no es muy útil en una API, pero lo mantenemos por si acaso
+            flash("❌ Error: No se pudo procesar la duración del audio.", "danger")
+
+        # --- CORRECCIÓN CRÍTICA EN LA BASE DE DATOS ---
+        # Guardar la ruta relativa en el campo correcto 'archivos_adjuntos'
+        visita.archivos_adjuntos = ruta_relativa_para_db
+        visita.duracion_grabacion_segundos = duracion_seg
+        db.session.commit()
+
+        # Registrar actividad
+        desc_log_subida = f"Grabación de audio '{original_filename}' ({duracion_seg or 'N/A'}s) subida para la visita."
+        reg_act = RegistroActividad(visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre, accion="grabacion_subida", descripcion=desc_log_subida)
+        db.session.add(reg_act)
+        db.session.commit()
+
+        logging.info(f"Audio subido y procesado para Visita ID: {visita.id} por Usuario ID: {current_user.id}. Ruta en DB: {ruta_relativa_para_db}")
+
+        # --- CORRECCIÓN CRÍTICA EN LA RESPUESTA JSON ---
+        # Devolver la clave 'ruta_audio_procesable' que el JavaScript espera.
         return jsonify({
-            "message": "Audio procesado con éxito.",
-            "overview": overview
-        }), 200
-    
-    except Exception as e:
-        # En caso de error, devuelve un mensaje claro.
-        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+            "success": True, 
+            "filename": nuevo_nombre, 
+            "ruta_audio_procesable": ruta_relativa_para_db
+        })
 @app.route('/api/actualizar_notas_resumen_ai', methods=['POST'])
 def api_actualizar_notas_resumen_ai():
     """
@@ -3153,7 +3198,7 @@ def api_actualizar_notas_resumen_ai():
     if not visita_id:
         return jsonify({"error": "ID de visita es requerido."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
 
     if not visita:
         return jsonify({"error": "Visita no encontrada o no tiene permiso para actualizarla."}), 404
@@ -3372,7 +3417,7 @@ def transcribir_diarizar_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa para transcribir."}), 400
     visita_id = session['visita_actual_id']
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         session.pop('visita_actual_id', None)
         return jsonify({"error": f"Visita con ID {visita_id} no encontrada o no le pertenece."}), 404
@@ -3447,7 +3492,7 @@ def api_generar_resumen_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita: return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar el resumen."}), 400
@@ -3476,7 +3521,7 @@ def api_generar_notas_ai():
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita: return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
     
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
@@ -3538,7 +3583,7 @@ def api_generar_plan_alimenticio():
     if not visita_id:
         return jsonify({"error": "Falta el ID de la visita."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
 
@@ -3635,7 +3680,7 @@ def compartir_visita_email():
     if not visita_id or not email_dest:
         return jsonify({"error": "Falta ID de visita o email del destinatario."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita: return jsonify({"error": "Visita no encontrada o no tiene permiso para compartirla."}), 404
 
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
