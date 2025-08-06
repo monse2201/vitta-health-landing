@@ -2643,7 +2643,8 @@ def nueva_referencia_para_visita(visita_id):
         especialidad = request.form.get('especialidad_referida','').strip()
         if not especialidad:
             flash('La especialidad referida es obligatoria.', 'danger')
-            return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+            # --- CORRECCIÓN AQUÍ ---
+            return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
         try:
             nueva_referencia_db = ReferenciaMedica(
                 visita_id=visita.id,
@@ -2652,8 +2653,8 @@ def nueva_referencia_para_visita(visita_id):
                 especialidad_referida=especialidad,
                 medico_referido_nombre=request.form.get('medico_referido_nombre', '').strip() or None,
                 institucion_referida=request.form.get('institucion_referida', '').strip() or None,
-                resumen_clinico_relevante=request.form.get('resumen_clinico_relevante', '').strip() or None, # Considerar cifrar
-                estudios_adjuntos_info=request.form.get('estudios_adjuntos_info', '').strip() or None, # Considerar cifrar
+                resumen_clinico_relevante=request.form.get('resumen_clinico_relevante', '').strip() or None, 
+                estudios_adjuntos_info=request.form.get('estudios_adjuntos_info', '').strip() or None, 
                 estado=request.form.get('estado', 'pendiente')
             )
             db.session.add(nueva_referencia_db)
@@ -2671,8 +2672,11 @@ def nueva_referencia_para_visita(visita_id):
             db.session.rollback()
             logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
             flash('Error al crear la referencia médica.', 'danger')
-            return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
-    return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+            # --- Y CORRECCIÓN AQUÍ ---
+            return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+    
+    # --- Y CORRECCIÓN FINAL AQUÍ ---
+    return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
 
 @app.route('/referencia/<int:referencia_id>')
 @login_required
