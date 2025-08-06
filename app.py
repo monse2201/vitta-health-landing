@@ -15,7 +15,6 @@ import string
 import click
 import base64 
 
-
 # --- MAIN IMPORTS ---
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, current_app, get_flashed_messages, session, send_from_directory, send_file
 from flask_socketio import SocketIO
@@ -204,21 +203,20 @@ app = Flask(__name__)
 # === ENVIRONMENT-BASED CONFIGURATION ===
 import os
 
+# Set a fallback secret key for development
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///dev.db')
+app.secret_key = app.config['SECRET_KEY']
+
+# --- CONFIGURACIÓN DE LA BASE DE DATOS (SQLite para demo) ---
+# Usamos SQLite para un entorno de demostración simple sin necesidad de un servidor de DB externo.
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///demo.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+logging.info("✅ Configured SQLite for local file-based storage: sqlite:///demo.db")
+
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
 app.config['SESSION_PERMANENT'] = False
 app.config['MAIL_SUPPRESS_SEND'] = os.getenv('FLASK_ENV', 'development') == 'development'
-
-
-# --- CONFIGURACIÓN DE VARIABLES DE ENTORNO (o valores por defecto para desarrollo) ---
-# Environment Type
-FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
-
-# API Keys and Security
-app.secret_key = os.environ.get('SECRET_KEY', '1cc211a1a2357f80fb028885caa21d0e3983a27dfb2ea7ac')
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY') 
 # Hugging Face Token (para modelos de traducción)
@@ -242,12 +240,7 @@ else:
     logging.warning("⚠️ Biblioteca 'cryptography' no disponible. El cifrado de archivos a nivel de aplicación está DESHABILITADO.")
 
 
-# Database Configuration
-DATABASE_URL_LOCAL = os.environ.get('DATABASE_URL_LOCAL', 'postgresql+psycopg2://whatsapp_user:securepassword@postgres-db:5432/whatsapp_project')
-# Para producción, se recomienda enfáticamente que la base de datos (PostgreSQL en este caso)
-# esté configurada para cifrado en reposo a nivel de proveedor (ej. DigitalOcean Managed DB).
-# La cadena de conexión ya incluye `?sslmode=require` para cifrado en tránsito (TLS).
-DATABASE_URL_PROD = os.environ.get('DATABASE_URL', 'postgresql+psycopg2://doadmin:AVNS_zRk7-87CB8FurBYkWFN@vitta-db-cluster-do-user-22731081-0.k.db.ondigitalocean.com:25060/vitta_db?sslmode=require')
+
 
 # Configuración de correo electrónico
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -266,18 +259,6 @@ REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
 REDIS_USE_SSL = os.environ.get('REDIS_USE_SSL', 'false').lower() == 'true' # Para conexiones TLS a Redis
 redis_url_for_socketio = os.environ.get("REDIS_URL_SOCKETIO")
 
-
-# --- CONFIGURACIÓN DE LA APLICACIÓN (app.config) ---
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-if FLASK_ENV == 'development':
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL_LOCAL
-    logging.info(f"Configured PostgreSQL for development: {DATABASE_URL_LOCAL}")
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL_PROD
-    logging.info(f"Configured PostgreSQL for production: {DATABASE_URL_PROD}")
-    # En producción, se asume que un proxy inverso (Nginx, Caddy) maneja TLS 1.3 para HTTPS.
-    # La aplicación Flask en sí no necesita manejar certificados SSL directamente en este caso.
 
 client_openai = None
 if OPENAI_API_KEY and OpenAI:
@@ -556,9 +537,9 @@ class Nota(db.Model):
 
 class Visita(db.Model):
     __tablename__='visita'
-    id=db.Column(db.Integer, primary_key=True)  # This line was the problem
+    id=db.Column(db.Integer, primary_key=True)
     paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id', ondelete='CASCADE'), nullable=False, index=True)
-    medico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    medico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # CORREGIDO
     plantilla=db.Column(db.String(100), nullable=True)
     transcripcion=db.Column(db.Text, nullable=True)
     resumen_ai=db.Column(db.Text, nullable=True)
@@ -948,7 +929,6 @@ def obtener_icono_para_accion(accion):
     return iconos.get(accion, 'fas fa-cog text-gray-500')
 
 def obtener_datos_overview(visita_id_param=None):
-    # Add the authentication check at the start
     if not current_user.is_authenticated:
         logging.warning("Intento de obtener overview sin usuario autenticado.")
         return {
@@ -980,8 +960,6 @@ def obtener_datos_overview(visita_id_param=None):
         overview['resumen']="No se ha especificado ninguna visita activa."
         logging.info("No se proporcionó ID de visita para obtener datos overview.")
 
-    # The code here needs to be properly indented to be part of the function
-    # Check if a visita was found and has a patient
     if 'visita' in locals() and visita and visita.paciente:
         overview.update({
             'staff': visita.medico_asignado_usuario.nombre,
@@ -1011,7 +989,7 @@ def obtener_datos_overview(visita_id_param=None):
             logging.error(f"Error obteniendo logs de actividad para visita {visita.id}: {e_logs}")
             overview['activity_logs'] = [{'accion':'error', 'descripcion':'Error al cargar logs de actividad.', 'fecha':'N/A', 'icono':'fas fa-exclamation-triangle'}]
             
-    return overview # This return statement must be at the same indentation level as the overview = { ... } line
+    return overview
 # --- Funciones de IA y Texto (Sin cambios directos aquí para la privacidad) ---
 def normalize_language_code(code):
     if not code: return None
@@ -2117,7 +2095,7 @@ def grabar_cita():
     ]
     pacientes_activos = []
     
-    # Check if the user is authenticated before performing the query
+    # Check if a user is authenticated before performing the query
     if current_user.is_authenticated:
         try:
             pacientes_activos = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
@@ -2990,7 +2968,6 @@ def iniciar_visita():
         db.session.rollback()
         logging.error(f"Error crítico al iniciar visita (paciente: {paciente_obj.nombre if paciente_obj else 'N/A'}, usuario anónimo): {e}", exc_info=True)
         return jsonify({"error": f"No se pudo iniciar la visita: {str(e)}"}), 500
-
 @app.route('/api/resumir_documentos_e_iniciar_visita', methods=['POST'])
 def api_resumir_documentos_e_iniciar_visita():
     logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr} por Usuario ID: {current_user.id}")
@@ -3302,7 +3279,7 @@ def api_crear_referencia_desde_chat():
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            Paciente.creado_por_id == current_user.id
+            creado_por_id=current_user.id
         ).first()
 
     # Si el paciente no existe, crearlo
@@ -3386,7 +3363,7 @@ def api_crear_receta_desde_chat():
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            Paciente.creado_por_id == current_user.id
+            creado_por_id=current_user.id
         ).first()
 
     # Si el paciente no existe, crearlo
@@ -3659,7 +3636,7 @@ def api_traducir_texto():
 def api_visita_overview(visita_id):
     overview_data = obtener_datos_overview(visita_id_param=visita_id)
     if "Error" in overview_data.get('paciente', '') or "Error" in overview_data.get('resumen', '') or "acceso denegado" in overview_data.get('resumen', '').lower():
-        error_msg = overview_data.get('resumen', "Error al cargar datos de la visita o acceso denegado.")
+        error_msg = overview_data.get('resumen', "Error al cargar datos de la visita o acceso denegado
         return jsonify({"error": error_msg}), 404
     return jsonify(overview_data)
 
