@@ -1993,7 +1993,7 @@ def historial_visitas():
                     'notas_ai': v_db.notas_ai or "",
                     'idioma_detectado': v_db.idioma_detectado or "N/D",
                     'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
-                    # 'ruta_notas_ai_pdf': v_db.ruta_notas_ai_pdf if hasattr(v_db, 'ruta_notas_ai_pdf') else None, # Removed for client-side PDF
+                    'ruta_notas_ai_pdf': getattr(v_db, 'ruta_notas_ai_pdf', None), # <-- LÍNEA CORREGIDA
                     'paciente': {
                         'id': paciente_actual.id,
                         'nombre': paciente_actual.nombre,
@@ -2003,7 +2003,7 @@ def historial_visitas():
                         'estado_tratamiento': paciente_actual.estado_tratamiento,
                         'url_avatar': getattr(paciente_actual, 'url_avatar', None)
                     },
-                    'paciente_nombre': paciente_actual.nombre 
+                    'paciente_nombre': paciente_actual.nombre
                 })
             else:
                 # Handle cases where patient might be None (shouldn't happen with proper foreign keys)
