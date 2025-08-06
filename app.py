@@ -1980,10 +1980,10 @@ def historial_visitas():
             .order_by(Visita.fecha.desc())
             .all()
         )
-for v_db in visitas_db:
+        logging.info(f"DEBUG: Se encontraron {len(visitas_db)} visitas para el usuario ID {current_user.id} en la base de datos.")
+
+        for v_db in visitas_db:
             paciente_actual = v_db.paciente
-            # La condición 'if paciente_actual:' ha sido eliminada para asegurar que todas las visitas se procesen.
-            # Ahora manejamos la posibilidad de un paciente nulo de forma segura dentro del diccionario.
             visitas_data_list.append({
                 'id': v_db.id,
                 'fecha_formateada': v_db.fecha.strftime('%d/%m/%Y %H:%M') if v_db.fecha else 'Fecha No Disponible',
@@ -4138,12 +4138,8 @@ def admin_dashboard():
     """
     error = None
     try:
-        # --- 1. Carga de Métricas para Widgets (Modo Demo) ---
+        # 1. Carga de Métricas para Widgets
         stats = db.session.query(EstadisticasDemo).filter_by(id=1).first()
-
-        # --- CORRECCIÓN DE INDENTACIÓN AQUÍ ---
-        # El siguiente bloque 'if/else' fue movido para estar correctamente
-        # dentro del bloque 'try'.
         if stats:
             total_minutes_recorded = stats.minutos_grabados
             total_visitas_generadas = stats.visitas_generadas
@@ -4151,36 +4147,29 @@ def admin_dashboard():
             total_docs_created = stats.documentos_creados
             total_docs_resumidos = stats.documentos_resumidos
         else:
-            # Valores por defecto si la tabla está vacía
             total_minutes_recorded, total_visitas_generadas, total_pacientes_creados, total_docs_created, total_docs_resumidos = 0, 0, 0, 0, 0
-        # --- FIN DE LA CORRECCIÓN DE INDENTACIÓN ---
 
-        # Los conteos de doctores y prospectos se pueden mantener igual
         verified_doctors_count = User.query.filter_by(role='medico', is_verified=True).count()
         unverified_doctors_count = User.query.filter_by(role='medico', is_verified=False).count()
         prospects_count = ProspectoInteres.query.count()
 
-        # --- 2. Lógica de Búsqueda, Filtro y Unificación ---
+        # 2. Lógica de Búsqueda, Filtro y Unificación
         page = request.args.get('page', 1, type=int)
         search_query = request.args.get('search', '').strip()
         status_filter = request.args.get('status_filter', '')
 
         contactos_unificados = []
         
-        # Añadir doctores a la lista
         doctors_query = User.query.filter_by(role='medico')
         for doctor in doctors_query.all():
             contactos_unificados.append({'type': 'doctor', 'data': doctor, 'date': doctor.created_at})
 
-        # Añadir prospectos a la lista
         prospects_list = ProspectoInteres.query.all()
         for prospecto in prospects_list:
             contactos_unificados.append({'type': 'prospecto', 'data': prospecto, 'date': prospecto.fecha_registro})
 
-        # Ordenar la lista combinada por fecha de creación (los más nuevos primero)
         contactos_unificados.sort(key=lambda x: x['date'], reverse=True)
         
-        # Aplicar filtros de estado
         if status_filter == 'verified':
             contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and c['data'].is_verified]
         elif status_filter == 'not_verified':
@@ -4188,25 +4177,22 @@ def admin_dashboard():
         elif status_filter == 'prospecto':
             contactos_unificados = [c for c in contactos_unificados if c['type'] == 'prospecto']
 
-        # Aplicar búsqueda por nombre
         if search_query:
             contactos_unificados = [
                 c for c in contactos_unificados 
                 if search_query.lower() in f"{c['data'].nombre or ''} {getattr(c['data'], 'apellidos', '')}".lower()
             ]
         
-        # --- 3. Paginación ---
+        # 3. Paginación
         pagination = ListPagination(items_list=contactos_unificados, page=page, per_page=10)
 
     except Exception as e:
         error = f"Ocurrió un error al cargar los datos: {str(e)}"
         logging.error(f"Error en admin_dashboard: {e}", exc_info=True)
-        # Inicializar variables para que la plantilla no falle
         verified_doctors_count, unverified_doctors_count, prospects_count = 0, 0, 0
         total_minutes_recorded, total_docs_created, total_pacientes_creados, total_visitas_generadas, total_docs_resumidos = 0, 0, 0, 0, 0
         pagination = None
-
-    # --- 4. Renderizar Plantilla con Todos los Datos ---
+        
     return render_template('admin_dashboard.html',
                            verified_doctors_count=verified_doctors_count,
                            unverified_doctors_count=unverified_doctors_count,
