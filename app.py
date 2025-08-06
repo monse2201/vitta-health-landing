@@ -3636,7 +3636,7 @@ def api_traducir_texto():
 def api_visita_overview(visita_id):
     overview_data = obtener_datos_overview(visita_id_param=visita_id)
     if "Error" in overview_data.get('paciente', '') or "Error" in overview_data.get('resumen', '') or "acceso denegado" in overview_data.get('resumen', '').lower():
-        error_msg = overview_data.get('resumen', "Error al cargar datos de la visita o acceso denegado
+        error_msg = overview_data.get('resumen', "Error al cargar datos de la visita o acceso denegado")
         return jsonify({"error": error_msg}), 404
     return jsonify(overview_data)
 
