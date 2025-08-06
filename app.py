@@ -1919,7 +1919,7 @@ def descargar_pdf_notas_ia(visita_id):
         download_name=f"notas_visita_{visita.id}.pdf",
         mimetype="application/pdf"
     )
-@app.route('/grabar_cita')
+@@app.route('/grabar_cita')
 def grabar_cita():
     plantillas = [
         "Consulta General", "Seguimiento", "Examen Físico", "SOAP", "SOAP simple",
@@ -1937,12 +1937,12 @@ def grabar_cita():
     if 'visita_actual_id' in session:
         session.pop('visita_actual_id', None)
         logging.info("ID de visita actual eliminado de la sesión al entrar a /grabar_cita.")
-
+    usuario_simulado = MockUser(is_authenticated=True, role='medico')
     return render_template('grabar_cita.html',
                            css_file="css/grabar_cita.css",
                            plantillas=plantillas,
-                           pacientes=pacientes_activos)
-
+                           pacientes=pacientes_activos,
+                           current_user=usuario_simulado) # <-- Se añade aquí
 @app.route('/resumir_registros')
 def resumir_registros_page():
     plantillas_resumen = ["Resumen de Registros", "Resumen General", "Puntos Clave"]
