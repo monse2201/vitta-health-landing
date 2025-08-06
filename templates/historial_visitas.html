@@ -4,7 +4,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    /* --- Basic Reset & Global Styles --- */
+    /* --- Basic Reset and Global Styles --- */
     * {
         box-sizing: border-box;
         margin: 0;
@@ -27,8 +27,8 @@
         flex-direction: row; /* Default for desktop */
     }
 
-    /* --- Sidebar Panel --- */
-    .sidebar-panel {
+    /* --- Side Panel --- */
+    .side-panel {
         width: 320px;
         background-color: #ffffff;
         border-right: 1px solid #e0e0e0;
@@ -39,12 +39,12 @@
         flex-shrink: 0; /* Ensures it doesn't shrink more than necessary */
     }
 
-    .sidebar-panel .header {
+    .side-panel .header {
         padding: 20px;
         border-bottom: 1px solid #e5e7eb;
     }
 
-    .sidebar-panel .header h1 {
+    .side-panel .header h1 {
         font-size: 18px;
         font-weight: 600;
         color: #111827;
@@ -285,8 +285,8 @@
         border-bottom: 2px solid #dee2e6;
         margin-bottom: 25px;
         background-color: transparent;
-        overflow-x: auto; /* Allows horizontal scrolling if there are many tabs */
-        -webkit-overflow-scrolling: touch; /* Improves scrolling on iOS */
+        overflow-x: auto; /* Allows horizontal scroll if there are many tabs */
+        -webkit-overflow-scrolling: touch; /* Improves scroll on iOS */
         white-space: nowrap; /* Prevents tabs from wrapping */
     }
 
@@ -331,7 +331,7 @@
         justify-content: flex-start; /* Aligns buttons to the start */
     }
 
-    .action-btn {
+    .btn-action {
         padding: 9px 14px;
         background-color: #007bff;
         color: white;
@@ -347,39 +347,39 @@
         flex-shrink: 0; /* Prevents buttons from shrinking */
     }
 
-    .action-btn:hover {
+    .btn-action:hover {
         background-color: #0056b3;
         border-color: #0056b3;
     }
 
-    .action-btn.secondary {
+    .btn-action.secondary {
         background-color: #ffffff;
         color: #007bff;
         border: 1px solid #007bff;
     }
 
-    .action-btn.secondary:hover {
+    .btn-action.secondary:hover {
         background-color: #e7f3ff;
         border-color: #0056b3;
         color: #0056b3;
     }
 
-    .action-btn.danger {
+    .btn-action.danger {
         background-color: #dc3545;
         border-color: #dc3545;
         color: white;
     }
 
-    .action-btn.danger:hover {
+    .btn-action.danger:hover {
         background-color: #c82333;
         border-color: #bd2130;
     }
 
-    .action-btn.menu {
+    .btn-action.menu {
         padding: 9px 10px;
     }
 
-    .action-btn:disabled {
+    .btn-action:disabled {
         background-color: #e9ecef;
         color: #6c757d;
         border-color: #ced4da;
@@ -452,7 +452,7 @@
         background-color: white;
         color: #007bff;
         height: 36px;
-        min-width: 100px; /* Minimum width for language select */
+        min-width: 100px; /* Minimum width for the language select */
     }
 
     .generic-translate-select:disabled {
@@ -479,11 +479,11 @@
         color: #343a40;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         margin-bottom: 15px;
-        overflow-x: auto; /* Ensures text doesn't overflow the area */
+        overflow-x: auto; /* To ensure text doesn't overflow */
     }
 
     /* Ensure textarea takes up full width and appropriate height */
-    #notes-ai-summary-unified-textarea {
+    #notes-summary-ai-unified-textarea {
         width: 100%; /* Important: Make it take full width of its container */
         min-height: 250px; /* Match the display div's min-height */
         box-sizing: border-box; /* Include padding and border in the element's total width and height */
@@ -586,7 +586,7 @@
 
     .overview-summary-item,
     .overview-activity-item {
-        grid-column: 1 / -1; /* Takes up full width at any size */
+        grid-column: 1 / -1; /* Takes full width at any size */
     }
 
     @media (min-width: 768px) {
@@ -603,7 +603,7 @@
         margin-top: 10px;
         max-height: 300px;
         overflow-y: auto;
-        padding-right: 10px; /* Space for scrollbar */
+        padding-right: 10px; /* Space for the scrollbar */
     }
 
     .activity-log-timeline li {
@@ -698,8 +698,8 @@
     }
 
     #btn-save-manual-notes,
-    #btn-generate-ai-summary,
-    #btn-generate-ai-notes {
+    #btn-generate-summary-ia,
+    #btn-generate-notes-ia {
         margin-top: 15px;
     }
 
@@ -813,8 +813,8 @@
         position: relative;
         transform: scale(0.9);
         transition: transform 0.3s ease;
-        max-height: 90vh; /* To prevent the popup from being taller than the screen */
-        overflow-y: auto; /* Allows scrolling within the popup */
+        max-height: 90vh; /* To prevent popup from being taller than the screen */
+        overflow-y: auto; /* Allows scroll inside the popup */
     }
 
     .popup-overlay.visible .popup-content {
@@ -931,7 +931,7 @@
         display: block;
     }
 
-    .feedback-message.in-progress {
+    .feedback-message.processing {
         background-color: #e7f3ff;
         color: #004085;
         border: 1px solid #b8daff;
@@ -943,16 +943,16 @@
     /* Tablets and up (768px and more) */
     @media (min-width: 768px) {
         .main-container {
-            flex-direction: row; /* Returns to two-column layout on tablets and desktops */
+            flex-direction: row; /* Back to two-column layout on tablets and desktops */
         }
 
-        .sidebar-panel {
-            width: 320px; /* Fixed width for the sidebar panel on larger screens */
-            height: 100vh; /* Full height for the sidebar panel */
+        .side-panel {
+            width: 320px; /* Fixed width for the side panel on larger screens */
+            height: 100vh; /* Full height for the side panel */
         }
 
         .detail-panel {
-            flex: 1; /* Takes up remaining space */
+            flex: 1; /* Takes up the remaining space */
             padding: 25px 30px; /* Original padding for the detail panel */
         }
 
@@ -969,7 +969,7 @@
             gap: 10px; /* Spacing between elements */
         }
 
-        .translation-controls .action-btn.secondary {
+        .translation-controls .btn-action.secondary {
             margin-left: 10px; /* Add some spacing for the edit button */
         }
 
@@ -990,53 +990,53 @@
             min-height: 100vh; /* Ensures it at least takes up the full viewport height */
         }
 
-        .sidebar-panel {
-            width: 100%; /* Sidebar panel takes up full width */
+        .side-panel {
+            width: 100%; /* Side panel takes full width */
             height: auto; /* Auto height, not 100vh */
             border-right: none;
             border-bottom: 1px solid #e0e0e0; /* Bottom border to separate from detail panel */
         }
 
         .detail-panel {
-            width: 100%; /* Detail panel takes up full width */
-            padding: 15px 20px; /* Reduce padding on mobile */
-            flex-grow: 1; /* Ensures the detail panel takes up remaining space */
+            width: 100%; /* Detail panel takes full width */
+            padding: 15px 20px; /* Reduces padding on mobile */
+            flex-grow: 1; /* Ensures detail panel takes up remaining space */
         }
 
         .schedule-button {
             width: calc(100% - 30px); /* Adjusts width for better padding on mobile */
-            margin: 15px; /* Reduce margin */
-            padding: 10px 15px; /* Reduce padding */
-            font-size: 13px; /* Reduce font size */
+            margin: 15px; /* Reduces margin */
+            padding: 10px 15px; /* Reduces padding */
+            font-size: 13px; /* Reduces font size */
         }
 
         .date-controls,
         .filter-controls {
-            padding: 10px 15px; /* Reduce padding */
-            gap: 8px; /* Reduce space between elements */
+            padding: 10px 15px; /* Reduces padding */
+            gap: 8px; /* Reduces space between elements */
         }
 
         .arrow-btn,
         .date-display {
-            height: 32px; /* Reduce height of date controls */
-            font-size: 13px; /* Reduce font size */
+            height: 32px; /* Reduces height of date controls */
+            font-size: 13px; /* Reduces font size */
         }
 
         .search-input {
             width: calc(100% - 30px);
-            margin: 0 15px 15px 15px; /* Reduce margin */
-            padding: 8px 12px; /* Reduce font size */
+            margin: 0 15px 15px 15px; /* Reduces margin */
+            padding: 8px 12px; /* Reduces font size */
             height: 34px;
         }
 
         #visitList {
-            padding: 0 10px 0 15px; /* Adjust side padding */
+            padding: 0 10px 0 15px; /* Adjusts side padding */
         }
 
         .visit-card {
-            padding: 12px; /* Reduce card padding */
-            margin-bottom: 10px; /* Reduce bottom margin */
-            gap: 10px; /* Reduce space between avatar and info */
+            padding: 12px; /* Reduces card padding */
+            margin-bottom: 10px; /* Reduces bottom margin */
+            gap: 10px; /* Reduces space between avatar and info */
         }
 
         .visit-card .avatar {
@@ -1082,10 +1082,10 @@
         .action-buttons {
             margin-bottom: 20px;
             gap: 8px;
-            justify-content: center; /* Center buttons on small screens */
+            justify-content: center; /* Centers buttons on small screens */
         }
 
-        .action-btn {
+        .btn-action {
             padding: 8px 12px;
             font-size: 12px;
         }
@@ -1093,8 +1093,8 @@
         .section-header {
             margin-bottom: 15px;
             padding-bottom: 10px;
-            flex-direction: column; /* Stack title and translation controls */
-            align-items: flex-start; /* Left-align stacked elements */
+            flex-direction: column; /* Stacks title and translation controls */
+            align-items: flex-start; /* Aligns stacked elements to the left */
             gap: 10px;
         }
 
@@ -1103,38 +1103,38 @@
         }
 
         .translation-controls {
-            flex-direction: column; /* Stack translation controls */
-            align-items: flex-start; /* Left-align */
+            flex-direction: column; /* Stacks translation controls */
+            align-items: flex-start; /* Aligns to the left */
             gap: 8px;
-            width: 100%; /* Take up full available width */
+            width: 100%; /* Takes up all available width */
         }
 
         .translation-controls > span {
-            width: 100%; /* So that the text takes up its own line */
+            width: 100%; /* So the text takes its own line */
         }
 
         .generic-translate-select {
-            width: 100%; /* Takes up full available width */
+            width: 100%; /* Takes up all available width */
             height: 34px;
             font-size: 12px;
         }
 
         .generic-show-original-btn {
-            width: 100%; /* Takes up full available width */
+            width: 100%; /* Takes up all available width */
             height: 34px;
             font-size: 12px;
         }
 
         /* NEW: Adjust for edit button in mobile translation controls */
-        .translation-controls .action-btn.secondary {
+        .translation-controls .btn-action.secondary {
             margin-left: 0; /* Remove left margin in mobile view */
             width: 100%; /* Make it full width */
         }
 
         .transcription-area,
         .ai-notes-section {
-            padding: 15px 18px; /* Reduce padding */
-            font-size: 12px; /* Reduce font size */
+            padding: 15px 18px; /* Reduces padding */
+            font-size: 12px; /* Reduces font size */
         }
 
         #full-transcription {
@@ -1153,13 +1153,14 @@
 
         /* --- END: Added styles for diet plan table (mobile) --- */
 
+
         .overview-grid {
-            grid-template-columns: 1fr; /* A single column for all grid elements */
-            gap: 15px; /* Reduce space between elements */
+            grid-template-columns: 1fr; /* Single column for all grid elements */
+            gap: 15px; /* Reduces space between elements */
         }
 
         .overview-detail-item {
-            padding: 15px; /* Reduce padding */
+            padding: 15px; /* Reduces padding */
         }
 
         .overview-label {
@@ -1177,12 +1178,12 @@
         }
 
         .activity-log-timeline {
-            max-height: 250px; /* Adjust max height */
+            max-height: 250px; /* Adjusts max height */
         }
 
         .activity-log-timeline li {
             font-size: 12px;
-            padding: 6px 0 12px 25px; /* Adjust padding */
+            padding: 6px 0 12px 25px; /* Adjusts padding */
         }
 
         .activity-log-timeline li .activity-icon {
@@ -1200,12 +1201,12 @@
 
         #patient .patient-info-item {
             font-size: 13px;
-            flex-direction: column; /* Stack label and value */
+            flex-direction: column; /* Stacks label and value */
             margin-bottom: 10px;
         }
 
         #patient .patient-info-label {
-            width: auto; /* Deactivate fixed width */
+            width: auto; /* Disables fixed width */
             margin-bottom: 5px; /* Space between label and value */
         }
 
@@ -1218,7 +1219,7 @@
         }
 
         .popup-content {
-            padding: 20px 25px; /* Reduce popup padding */
+            padding: 20px 25px; /* Reduces popup padding */
         }
 
         .popup-content h3 {
@@ -1250,26 +1251,26 @@
             flex-wrap: wrap; /* Ensures buttons wrap */
         }
 
-        .popup-actions .action-btn {
-            width: 100%; /* Popup buttons take up full width */
-            justify-content: center; /* Center the button text */
+        .popup-actions .btn-action {
+            width: 100%; /* Popup buttons take full width */
+            justify-content: center; /* Centers button text */
         }
     }
 </style>
 
 <div class="main-container">
-    <div class="sidebar-panel">
+    <div class="side-panel">
         <div class="header">
             <h1>Visits</h1>
         </div>
         <button class="schedule-button" onclick="window.location.href='{{ url_for('grabar_cita') }}'"><i class="fas fa-plus"></i> New Visit</button>
         <div class="date-controls">
-            <button class="arrow-btn" onclick="changeDate(-1)" title="Previous Day"><i class="fas fa-chevron-left"></i></button>
+            <button class="arrow-btn" onclick="changeDate(-1)" title="Previous day"><i class="fas fa-chevron-left"></i></button>
             <div class="date-display" onclick="openDatePicker()">
-                <input type="date" id="date-input" value="{{ current_date }}" onchange="updateDateDisplay()">
+                <input type="date" id="date" value="{{ current_date }}" onchange="updateDateDisplay()">
                 <span id="date-text">{{ current_date_display }}</span>
             </div>
-            <button class="arrow-btn" onclick="changeDate(1)" title="Next Day"><i class="fas fa-chevron-right"></i></button>
+            <button class="arrow-btn" onclick="changeDate(1)" title="Next day"><i class="fas fa-chevron-right"></i></button>
         </div>
         <div class="filter-controls">
             <select id="statusFilter" onchange="filterVisits()" title="Filter by status">
@@ -1277,16 +1278,16 @@
                 <option value="completed">Completed</option>
                 <option value="pending">Pending</option>
             </select>
-            <select id="orderFilter" onchange="filterVisits()" title="Order by date">
+            <select id="orderFilter" onchange="filterVisits()" title="Sort by date">
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
             </select>
         </div>
         <input type="text" id="searchInput" class="search-input" placeholder="Search patient..." onkeyup="filterVisits()">
         <div id="visitList">
-            {% for visit in visits %}
-            <div class="visit-card {% if recent_visit and visit.id == recent_visit.id %}selected{% endif %}" onclick="showVisitDetails('{{ visit.id }}')">
-                <div class="avatar">{{ (visit.paciente_nombre[0] if visit.paciente_nombre and visit.paciente_nombre != 'Default Patient' else '?')|upper }}</div>
+            {% for visit in visitas %}
+            <div class="visit-card {% if visita_reciente and visit.id == visita_reciente.id %}selected{% endif %}" onclick="viewVisitDetails('{{ visit.id }}')">
+                <div class="avatar">{{ (visit.paciente_nombre[0] if visit.paciente_nombre and visit.paciente_nombre != 'Paciente por Defecto' else '?')|upper }}</div>
                 <div class="visit-card-info">
                     <div class="patient-name">{{ visit.paciente_nombre }}</div>
                     <div class="visit-date">{{ visit.fecha_formateada }}</div>
@@ -1299,58 +1300,58 @@
     </div>
 
     <div class="detail-panel">
-        {% if recent_visit %}
+        {% if visita_reciente %}
         <div class="notification">
             <i class="fas fa-check-circle"></i>
-            <p>Visit for <strong id="patientNameNotification">{{ recent_visit.paciente_nombre }}</strong> processed. Details below.</p>
+            <p>Visit for <strong id="notificationPatientName">{{ visita_reciente.paciente_nombre }}</strong> processed. Details below.</p>
         </div>
         {% endif %}
 
         <div class="tabs-container">
-            <div class="tab active" onclick="changeTab(event, 'overview')"><i class="fas fa-eye"></i> Overview</div>
-            <div class="tab" onclick="changeTab(event, 'transcription')"><i class="fas fa-file-alt"></i> Transcription</div>
-            <div class="tab" onclick="changeTab(event, 'notes')"><i class="fas fa-sticky-note"></i> Notes & AI Summary</div>
-            <div class="tab" onclick="changeTab(event, 'patient')"><i class="fas fa-user"></i> Patient</div>
+            <div class="tab active" onclick="switchTab(event, 'overview')"><i class="fas fa-eye"></i> Overview</div>
+            <div class="tab" onclick="switchTab(event, 'transcription')"><i class="fas fa-file-alt"></i> Transcription</div>
+            <div class="tab" onclick="switchTab(event, 'notes')"><i class="fas fa-sticky-note"></i> AI Notes & Summary</div>
+            <div class="tab" onclick="switchTab(event, 'patient')"><i class="fas fa-user"></i> Patient</div>
         </div>
 
         <div class="action-buttons">
-            <button class="action-btn" id="btn-create-prescription-visit" disabled title="Create prescription for this visit">
+            <button class="btn-action" id="btn-create-prescription-visit" disabled title="Create prescription for this visit">
                 <i class="fas fa-file-prescription"></i> Prescription
             </button>
-            <button class="action-btn" id="btn-create-referral-visit" disabled title="Create referral for this visit">
+            <button class="btn-action" id="btn-create-referral-visit" disabled title="Create referral for this visit">
                 <i class="fas fa-directions"></i> Referral
             </button>
 
             {% if action_for_specialty %}
-            <button class="action-btn" id="btn-specialty-action"
+            <button class="btn-action" id="btn-specialty-action"
                 data-route-name="{{ action_for_specialty.route_name }}"
                 data-doc-type="{{ action_for_specialty.doc_type }}"
                 disabled title="{{ action_for_specialty.text }}">
                 {{ action_for_specialty.text | safe if action_for_specialty.text else 'Specialty Action' }}
             </button>
             {% endif %}
-            <button class="action-btn secondary" id="btn-share-visit" disabled><i class="fas fa-share-alt"></i> Share</button>
-            <button class="action-btn menu secondary"><i class="fas fa-ellipsis-h"></i></button>
+            <button class="btn-action secondary" id="btn-share-visit" disabled><i class="fas fa-share-alt"></i> Share</button>
+            <button class="btn-action menu secondary"><i class="fas fa-ellipsis-h"></i></button>
         </div>
 
         <div id="overview" class="tab-panel active">
             <div class="overview-grid">
                 <div class="overview-detail-item">
                     <label class="overview-label">Assigned Staff</label>
-                    <span id="overview-staff-name" class="overview-value">Select visit...</span>
+                    <span id="overview-staff-name" class="overview-value">Select a visit...</span>
                 </div>
                 <div class="overview-detail-item">
                     <label class="overview-label">Patient</label>
-                    <span id="overview-patient-name" class="overview-value">Select visit...</span>
+                    <span id="overview-patient-name" class="overview-value">Select a visit...</span>
                 </div>
                 <div class="overview-detail-item overview-summary-item">
                     <label class="overview-label">Quick Summary (AI)</label>
                     <div id="overview-summary-text" class="overview-value">
-                        <div class="no-speech">Select visit...</div>
+                        <div class="no-speech">Select a visit...</div>
                     </div>
                 </div>
                 <div class="overview-detail-item">
-                    <label class="overview-label">Applied Template</label>
+                    <label class="overview-label">Template Applied</label>
                     <a href="#" class="template-link" id="template-link">
                         <i class="fas fa-file-medical-alt"></i>
                         <span id="template-name" class="overview-value">N/A</span>
@@ -1365,14 +1366,14 @@
                     </ul>
                 </div>
             </div>
-            <span class="visit-id-display" id="visit-id-overview">Visit ID: N/A</span>
+            <span class="visit-id-display" id="visit-id-general">Visit ID: N/A</span>
         </div>
 
         <div id="transcription" class="tab-panel">
             <div class="section-header">
                 <h3>Transcription</h3>
                 <div class="translation-controls">
-                    <span id="transcription-original-lang-display">Original Language: <strong id="transcription-original-lang-text">N/A</strong></span>
+                    <span id="transcription-original-language-display">Original Language: <strong id="transcription-original-language-text">N/A</strong></span>
                     <span>Translate to:</span>
                     <select id="transcription-translate-select" class="generic-translate-select" disabled>
                         <option value="" disabled selected>Select...</option>
@@ -1382,7 +1383,7 @@
                         <option value="de">German</option>
                         <option value="it">Italian</option>
                     </select>
-                    <button class="action-btn secondary generic-show-original-btn" id="btn-show-transcription-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
+                    <button class="btn-action secondary generic-show-original-btn" id="btn-show-transcription-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
                 </div>
             </div>
             <div class="transcription-area" id="full-transcription">
@@ -1401,9 +1402,9 @@
             <div class="ai-notes-section">
                 <h4><i class="fas fa-robot"></i> AI Content (Notes & Summary)</h4>
                 <div class="translation-controls" style="margin-bottom:15px;">
-                    <span id="notes-ai-original-lang-display">Original Language: <strong id="notes-ai-original-lang-text">N/A</strong></span>
+                    <span id="ai-notes-original-language-display">Original Language: <strong id="ai-notes-original-language-text">N/A</strong></span>
                     <span>Translate to:</span>
-                    <select id="notes-ai-translate-select" class="generic-translate-select" disabled>
+                    <select id="ai-notes-translate-select" class="generic-translate-select" disabled>
                         <option value="" disabled selected>Select...</option>
                         <option value="es">Spanish</option>
                         <option value="en">English</option>
@@ -1411,37 +1412,37 @@
                         <option value="de">German</option>
                         <option value="it">Italian</option>
                     </select>
-                    <button class="action-btn secondary generic-show-original-btn" id="btn-show-notes-ai-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
+                    <button class="btn-action secondary generic-show-original-btn" id="btn-show-ai-notes-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
 
                     {# MOVED EDIT BUTTON HERE #}
-                    <button class="action-btn secondary" id="btn-edit-ai-notes-summary" title="Edit AI Notes and Summary content">
+                    <button class="btn-action secondary" id="btn-edit-notes-summary-ia" title="Edit AI Notes & Summary content">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                     {# END MOVED EDIT BUTTON #}
 
-                    <button class="action-btn secondary" id="btn-download-ai-notes-pdf" style="margin-left: 10px; display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
+                    <button class="btn-action secondary" id="btn-download-ai-notes-pdf" style="margin-left: 10px; display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
                 </div>
 
                 {# This is the wrapper for the display div and the textarea #}
-                <div id="notes-ai-summary-content-wrapper">
-                    <div id="notes-ai-summary-unified-content" class="transcription-area" style="min-height: 250px;">
+                <div id="notes-summary-ai-content-wrapper">
+                    <div id="notes-summary-ai-unified-content" class="transcription-area" style="min-height: 250px;">
                         <div class="no-speech">AI notes or summary have not been generated yet.</div>
                     </div>
                     {# The textarea for editing. Hidden by default. #}
                     {# Applied transcription-area styling directly here for robustness #}
-                    <textarea id="notes-ai-summary-unified-textarea" class="transcription-area" style="display:none;"></textarea>
+                    <textarea id="notes-summary-ai-unified-textarea" class="transcription-area" style="display:none;"></textarea>
                 </div>
 
                 <div class="edit-actions"> {# This div now only contains Save/Cancel #}
-                    <button class="action-btn" id="btn-save-ai-notes-summary" style="display: none;" title="Save changes to AI Notes and Summary">
+                    <button class="btn-action" id="btn-save-notes-summary-ia" style="display: none;" title="Save changes to AI Notes & Summary">
                         <i class="fas fa-save"></i> Save
                     </button>
-                    <button class="action-btn secondary" id="btn-cancel-ai-notes-summary-edit" style="display: none;" title="Cancel editing">
+                    <button class="btn-action secondary" id="btn-cancel-edit-notes-summary-ia" style="display: none;" title="Cancel edit">
                         <i class="fas fa-times"></i> Cancel
                     </button>
                 </div>
 
-                <button class="action-btn secondary" id="btn-generate-ai-notes-summary" style="margin-top: 15px;" disabled>
+                <button class="btn-action secondary" id="btn-generate-notes-summary-ia" style="margin-top: 15px;" disabled>
                     <i class="fas fa-lightbulb"></i> Generate/Update AI Notes & Summary
                 </button>
             </div>
@@ -1454,11 +1455,11 @@
             <div>
                 <div class="patient-info-item">
                     <div class="patient-info-label">Name:</div>
-                    <div id="patient-info-name" class="patient-info-value">-</div>
+                    <div id="info-patient-name" class="patient-info-value">-</div>
                 </div>
                 <div class="patient-info-item">
                     <div class="patient-info-label">Patient ID:</div>
-                    <div id="patient-info-id" class="patient-info-value">-</div>
+                    <div id="info-patient-id" class="patient-info-value">-</div>
                 </div>
                 <a href="#" id="patient-history-link">View full patient history</a>
             </div>
@@ -1466,29 +1467,29 @@
         </div>
     </div>
 
-    <div id="popup-share-email" class="popup-overlay">
+    <div id="share-email-popup" class="popup-overlay">
         <div class="popup-content">
             <button class="popup-close" onclick="closeSharePopup()">&times;</button>
             <h3>Share Visit Details</h3>
-            <p>The information for the current visit for patient: <strong id="popup-patient-name">N/A</strong> will be shared.</p>
-            <form id="form-share-email" onsubmit="sendShareEmail(event)">
+            <p>Information for the current visit for patient: <strong id="popup-patient-name">N/A</strong> will be shared.</p>
+            <form id="share-email-form" onsubmit="sendShareEmail(event)">
                 <div id="share-feedback" class="feedback-message"></div>
                 <div class="form-group">
-                    <label for="recipient-email">Recipient's Email Address:</label>
-                    <input type="email" id="recipient-email" name="recipient_email" required>
+                    <label for="recipient-email">Recipient's Email:</label>
+                    <input type="email" id="recipient-email" name="email_destinatario" required>
                 </div>
                 <div class="form-group">
                     <label for="optional-subject">Subject (Optional):</label>
-                    <input type="text" id="optional-subject" name="optional_subject" placeholder="Medical Visit Details">
+                    <input type="text" id="optional-subject" name="asunto_opcional" placeholder="Medical Visit Details">
                 </div>
                 <div class="form-group">
                     <label for="additional-message">Additional Message (Optional):</label>
-                    <textarea id="additional-message" name="additional_message" rows="3" placeholder="Hello, I am sharing the visit details with you..."></textarea>
+                    <textarea id="additional-message" name="mensaje_adicional" rows="3" placeholder="Hi, I'm sharing the visit details with you..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="email-language">Email Content Language:</label>
-                    <select id="email-language" name="email_language" class="generic-translate-select" style="width:100%;">
-                        <option value="" selected>Visit's Original Language</option>
+                    <select id="email-language" name="email_idioma" class="generic-translate-select" style="width:100%;">
+                        <option value="" selected>Original Visit Language</option>
                         <option value="es">Spanish</option>
                         <option value="en">English</option>
                         <option value="fr">French</option>
@@ -1497,8 +1498,8 @@
                     </select>
                 </div>
                 <div class="popup-actions">
-                    <button type="button" class="action-btn secondary" onclick="closeSharePopup()">Cancel</button>
-                    <button type="submit" class="action-btn" id="btn-send-email-popup">
+                    <button type="button" class="btn-action secondary" onclick="closeSharePopup()">Cancel</button>
+                    <button type="submit" class="btn-action" id="btn-send-email-popup">
                         <i class="fas fa-paper-plane"></i> Send Email
                     </button>
                 </div>
@@ -1513,24 +1514,24 @@
 
     const visitDetails = {};
 
-    let originalAiSummaryText = '';
-    let originalAiNotesText = '';
+    let originalSummaryAiText = '';
+    let originalNotesAiText = '';
     let unifiedAiContentMarkdown = ''; // Stores the combined markdown for current display/editing
     let originalUnifiedAiContentMarkdown = ''; // To store the state before editing for cancel
 
 
-    {% for visit in visits %}
+    {% for visit in visitas %}
     visitDetails['{{ visit.id }}'] = {
-        patient_name: {{ visit.paciente.nombre|tojson }},
-        template: {{ visit.plantilla | default('null') | tojson }},
-        date: {{ visit.fecha_formateada | default('null') | tojson }},
+        paciente_nombre: {{ visit.paciente.nombre|tojson }},
+        plantilla: {{ visit.plantilla | default('null') | tojson }},
+        fecha: {{ visit.fecha_formateada | default('null') | tojson }},
         id: {{ visit.id | default('null') | tojson }},
-        detected_language: {{ visit.idioma_detectado | default('null') | tojson }},
-        ai_summary: {{ visit.resumen_ai | default('null') | tojson }},
-        ai_notes: {{ visit.notas_ai | default('null') | tojson }}, // This will be markdown from DB
-        transcription: {{ visit.transcripcion | default('null') | tojson }},
-        patient_id: {{ visit.paciente.id|tojson }},
-        ai_notes_pdf_path: {{ visit.ruta_notas_ai_pdf | default('null') | tojson }} // Capture PDF path
+        idioma_detectado: {{ visit.idioma_detectado | default('null') | tojson }},
+        resumen_ai: {{ visit.resumen_ai | default('null') | tojson }},
+        notas_ai: {{ visit.notas_ai | default('null') | tojson }}, // This will be markdown from DB
+        transcripcion: {{ visit.transcripcion | default('null') | tojson }},
+        paciente_id: {{ visit.paciente.id|tojson }},
+        ruta_notas_ai_pdf: {{ visit.ruta_notas_ai_pdf | default('null') | tojson }} // Capture PDF path
     };
     {% endfor %}
 
@@ -1543,37 +1544,37 @@
         'fr': 'French',
         'de': 'German',
         'it': 'Italian',
-        'N/A': 'Unknown',
+        'N/D': 'Unknown',
         'api': 'API (Auto)'
     };
 
-    const sharePopup = document.getElementById('popup-share-email');
+    const sharePopup = document.getElementById('share-email-popup');
     const btnShareVisit = document.getElementById('btn-share-visit');
-    const shareEmailForm = document.getElementById('form-share-email');
+    const shareEmailForm = document.getElementById('share-email-form');
     const shareFeedbackDiv = document.getElementById('share-feedback');
     const patientNamePopup = document.getElementById('popup-patient-name');
     const btnSendEmailPopup = document.getElementById('btn-send-email-popup');
-    const emailLanguageSelect = document.getElementById('email-language');
+    const selectEmailLanguage = document.getElementById('email-language');
 
-    const deleteVisitForm = document.getElementById('form-eliminar-visita');
-    const btnDeleteFullVisit = document.getElementById('btn-eliminar-visita-completa');
+    const formDeleteVisit = document.getElementById('form-delete-visit');
+    const btnDeleteFullVisit = document.getElementById('btn-delete-visit-complete');
     const btnCreatePrescriptionVisit = document.getElementById('btn-create-prescription-visit');
     const btnCreateReferralVisit = document.getElementById('btn-create-referral-visit');
     const btnSpecialtyAction = document.getElementById('btn-specialty-action');
-    const tabDietPlan = document.getElementById('tab-plan-alimenticio');
+    const tabDietPlan = document.getElementById('tab-diet-plan');
     const btnDownloadAiNotesPdf = document.getElementById('btn-download-ai-notes-pdf');
 
     // References for edit functionality
-    const notesAiSummaryUnifiedContentDisplay = document.getElementById('notes-ai-summary-unified-content');
-    const notesAiSummaryUnifiedTextarea = document.getElementById('notes-ai-summary-unified-textarea');
-    const btnEditAiNotesSummary = document.getElementById('btn-edit-ai-notes-summary');
-    const btnSaveAiNotesSummary = document.getElementById('btn-save-ai-notes-summary');
-    const btnCancelAiNotesSummaryEdit = document.getElementById('btn-cancel-ai-notes-summary-edit');
+    const notesSummaryAiUnifiedContentDisplay = document.getElementById('notes-summary-ai-unified-content');
+    const notesSummaryAiUnifiedTextarea = document.getElementById('notes-summary-ai-unified-textarea');
+    const btnEditNotesSummaryIA = document.getElementById('btn-edit-notes-summary-ia');
+    const btnSaveNotesSummaryIA = document.getElementById('btn-save-notes-summary-ia');
+    const btnCancelEditNotesSummaryIA = document.getElementById('btn-cancel-edit-notes-summary-ia');
     // Reference for the combined generate button
-    const btnGenerateAiNotesSummary = document.getElementById('btn-generate-ai-notes-summary');
+    const btnGenerateNotesSummaryIA = document.getElementById('btn-generate-notes-summary-ia');
 
 
-    function changeTab(event, tabId) {
+    function switchTab(event, tabId) {
         // Hide all panels and deactivate all tabs first
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -1583,7 +1584,7 @@
         if (event) {
             tabToActivate = event.currentTarget;
         } else {
-            tabToActivate = document.querySelector(`.tab[onclick*="changeTab(event, '${tabId}')"]`);
+            tabToActivate = document.querySelector(`.tab[onclick*="switchTab(event, '${tabId}')"]`);
         }
 
         // Activate the selected tab and its corresponding panel
@@ -1598,18 +1599,18 @@
         }
     }
 
-    async function showVisitDetails(visitId) {
+    async function viewVisitDetails(visitId) {
         console.log(`Loading details for visit ID: ${visitId}`);
         currentlySelectedVisit = visitId;
 
-        const currentVisitDetails = visitDetails[visitId] || {};
+        const currentVisitDetail = visitDetails[visitId] || {};
 
         // Reset edit mode when a new visit is selected
         // This line is crucial and must be here. It ensures we are not in edit mode when switching visits.
         disableEditMode();
 
         // Ensure the "Overview" tab is active by default when loading a new visit
-        changeTab(null, 'overview');
+        switchTab(null, 'overview');
 
         if (btnShareVisit) btnShareVisit.disabled = !currentlySelectedVisit;
 
@@ -1617,7 +1618,7 @@
             btnCreatePrescriptionVisit.disabled = !currentlySelectedVisit;
             if (currentlySelectedVisit) {
                 btnCreatePrescriptionVisit.onclick = () => {
-                    window.location.href = `/visit/${currentlySelectedVisit}/prescription/new`;
+                    window.location.href = `/visit/${currentlySelectedVisit}/receta/nueva`;
                 };
             } else {
                 btnCreatePrescriptionVisit.onclick = null;
@@ -1627,7 +1628,7 @@
             btnCreateReferralVisit.disabled = !currentlySelectedVisit;
             if (currentlySelectedVisit) {
                 btnCreateReferralVisit.onclick = () => {
-                    window.location.href = `/visit/${currentlySelectedVisit}/referral/new`;
+                    window.location.href = `/visit/${currentlySelectedVisit}/referencia/nueva`;
                 };
             } else {
                 btnCreateReferralVisit.onclick = null;
@@ -1635,33 +1636,33 @@
         }
 
         if (btnSpecialtyAction) {
-            btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetails.transcription;
-            if (currentlySelectedVisit && currentVisitDetails.transcription) {
-                const routeNameFromData = btnSpecialtyAction.dataset.routeName;
-                const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
+    btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetail.transcripcion;
+    if (currentlySelectedVisit && currentVisitDetail.transcripcion) {
+        const routeNameFromData = btnSpecialtyAction.dataset.routeName;
+        const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
 
-                if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
-                    btnSpecialtyAction.onclick = () => {
-                        // This now always points to the new page for creation
-                        window.location.href = `/visit/${currentlySelectedVisit}/${routeNameFromData}`;
-                    };
-                } else {
-                    btnSpecialtyAction.onclick = null;
-                    console.warn("Route information for specialty button not found.");
-                }
-            } else {
-                btnSpecialtyAction.onclick = null;
-            }
+        if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
+            btnSpecialtyAction.onclick = () => {
+                // This now always points to the new page for creation
+                window.location.href = `/visit/${currentlySelectedVisit}/${routeNameFromData}`;
+            };
+        } else {
+            btnSpecialtyAction.onclick = null;
+            console.warn("Route information for the specialty button not found.");
         }
+    } else {
+        btnSpecialtyAction.onclick = null;
+    }
+}
         document.querySelectorAll('.visit-card').forEach(card => card.classList.remove('selected'));
         const cardElement = document.querySelector(`.visit-card[onclick*="'${visitId}'"]`);
         if (cardElement) cardElement.classList.add('selected');
 
-        const visitIdNum = currentVisitDetails.id || 'N/A';
-        const originalDetectedLanguage = currentVisitDetails.detected_language || 'N/A';
+        const visitIdNum = currentVisitDetail.id || 'N/A';
+        const originalDetectedLanguage = currentVisitDetail.idioma_detectado || 'N/D';
         const originalLanguageName = languageNames[originalDetectedLanguage] || originalDetectedLanguage.toUpperCase();
 
-        document.getElementById('visit-id-overview').textContent = `Visit ID: ${visitIdNum}`;
+        document.getElementById('visit-id-general').textContent = `Visit ID: ${visitIdNum}`;
         document.getElementById('transcription-visit-id').textContent = `Visit ID: ${visitIdNum}`;
         document.getElementById('notes-visit-id').textContent = `Visit ID: ${visitIdNum}`;
         document.getElementById('patient-visit-id').textContent = `Visit ID: ${visitIdNum}`;
@@ -1670,87 +1671,87 @@
         }
 
 
-        const originalTranscriptionText = currentVisitDetails.transcription || null;
+        const originalTranscriptionText = currentVisitDetail.transcripcion || null;
         originalTranscriptionHtml = formatTranscription(originalTranscriptionText);
         document.getElementById('full-transcription').innerHTML = originalTranscriptionHtml;
-        document.getElementById('transcription-original-lang-text').textContent = originalLanguageName;
+        document.getElementById('transcription-original-language-text').textContent = originalLanguageName;
         updateTranslationControls('transcription', originalDetectedLanguage, !!originalTranscriptionText);
 
-        if (deleteVisitForm && btnDeleteFullVisit) {
+        if (formDeleteVisit && btnDeleteFullVisit) {
             if (visitIdNum !== 'N/A' && currentlySelectedVisit) {
-                deleteVisitForm.action = `/api/delete_visit/${visitIdNum}`;
+                formDeleteVisit.action = `/api/eliminar_visita/${visitIdNum}`;
                 btnDeleteFullVisit.onclick = function() {
-                    return confirm('Are you SURE you want to delete this ENTIRE visit?\\n\\nThis action is IRREVERSIBLE and will erase all associated information (transcription, summary, notes, activity logs, etc.).');
+                    return confirm('Are you SURE you want to permanently delete this ENTIRE visit?\\n\\nThis action is IRREVERSIBLE and will erase all associated information (transcription, summary, notes, activity logs, etc.).');
                 };
                 btnDeleteFullVisit.disabled = false;
             } else {
-                deleteVisitForm.action = '#';
+                formDeleteVisit.action = '#';
                 btnDeleteFullVisit.onclick = null;
                 btnDeleteFullVisit.disabled = true;
             }
         }
 
         // --- Unified logic for AI Notes and Summary Display ---
-        originalAiSummaryText = currentVisitDetails.ai_summary || '';
-        originalAiNotesText = currentVisitDetails.ai_notes || '';
+        originalSummaryAiText = currentVisitDetail.resumen_ai || '';
+        originalNotesAiText = currentVisitDetail.notas_ai || '';
         updateUnifiedAiContentDisplay(); // Call function to update display
         originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Store for cancel
 
 
-        document.getElementById('notes-patient-name').textContent = currentVisitDetails.patient_name || 'N/A';
-        document.getElementById('notes-ai-original-lang-text').textContent = originalLanguageName;
+        document.getElementById('notes-patient-name').textContent = currentVisitDetail.paciente_nombre || 'N/A';
+        document.getElementById('ai-notes-original-language-text').textContent = originalLanguageName;
 
         // New combined button to generate Notes and Summary
-        if (btnGenerateAiNotesSummary) {
-            btnGenerateAiNotesSummary.disabled = !originalTranscriptionText;
-            btnGenerateAiNotesSummary.onclick = () => callGenerateAiNotesAndSummaryApi(visitId);
+        if (btnGenerateNotesSummaryIA) {
+            btnGenerateNotesSummaryIA.disabled = !originalTranscriptionText;
+            btnGenerateNotesSummaryIA.onclick = () => callGenerateNotesAndSummaryApi(visitId);
         }
 
-        // Update translation controls for the unified 'notes-ai' content
+        // Update translation controls for the unified 'ai-notes' content
         updateTranslationControls(
-            'notes-ai',
+            'ai-notes',
             originalDetectedLanguage,
-            (originalAiSummaryText || originalAiNotesText) // True if either has content
+            (originalSummaryAiText || originalNotesAiText) // True if either has content
         );
 
         // Set the PDF download button link for notes (summary is usually not PDF'd separately)
         if (btnDownloadAiNotesPdf) {
-            if (currentVisitDetails.ai_notes_pdf_path) {
+            if (currentVisitDetail.ruta_notas_ai_pdf) {
                 btnDownloadAiNotesPdf.style.display = 'inline-block';
-                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/notas_ia_pdf`, '_blank');
             } else {
                 btnDownloadAiNotesPdf.style.display = 'none';
             }
         }
 
-        document.getElementById('patient-info-name').textContent = currentVisitDetails.patient_name || '-';
-        document.getElementById('patient-info-id').textContent = currentVisitDetails.patient_id || '-';
-        const patientHistoryLink = document.getElementById('patient-history-link');
-        if (patientHistoryLink && currentVisitDetails.patient_id) {
-            patientHistoryLink.href = `/patient_profile/${currentVisitDetails.patient_id}`;
-            patientHistoryLink.style.display = 'inline';
-        } else if (patientHistoryLink) {
-            patientHistoryLink.style.display = 'none';
+        document.getElementById('info-patient-name').textContent = currentVisitDetail.paciente_nombre || '-';
+        document.getElementById('info-patient-id').textContent = currentVisitDetail.paciente_id || '-';
+        const historyLink = document.getElementById('patient-history-link');
+        if (historyLink && currentVisitDetail.paciente_id) {
+            historyLink.href = `/perfil_paciente/${currentVisitDetail.paciente_id}`;
+            historyLink.style.display = 'inline';
+        } else if (historyLink) {
+            historyLink.style.display = 'none';
         }
 
         document.getElementById('overview-staff-name').textContent = 'Loading...';
-        document.getElementById('overview-patient-name').textContent = currentVisitDetails.patient_name || 'Loading...';
+        document.getElementById('overview-patient-name').textContent = currentVisitDetail.paciente_nombre || 'Loading...';
         const overviewSummaryTextElem = document.getElementById('overview-summary-text');
         // Update overview summary from local data first
-        if (originalAiSummaryText) {
-            overviewSummaryTextElem.textContent = originalAiSummaryText;
-        } else if (currentVisitDetails.transcription) {
+        if (originalSummaryAiText) {
+            overviewSummaryTextElem.textContent = originalSummaryAiText;
+        } else if (currentVisitDetail.transcripcion) {
             overviewSummaryTextElem.textContent = "Transcription available. Summary not generated.";
         } else {
             overviewSummaryTextElem.innerHTML = '<div class="no-speech">Loading summary...</div>';
         }
 
-        document.getElementById('overview-activity-log-list').innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">Select a visit to see activity...</div></li>';
+        document.getElementById('overview-activity-log-list').innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">Loading activity...</div></li>';
         const templateSpan = document.getElementById('template-name');
-        if (templateSpan) templateSpan.textContent = currentVisitDetails.template || 'N/A';
+        if (templateSpan) templateSpan.textContent = currentVisitDetail.plantilla || 'N/A';
 
         try {
-            const response = await fetch(`/api/visit_overview/${visitIdNum}`);
+            const response = await fetch(`/api/visita_overview/${visitIdNum}`);
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.error || `Error ${response.status}`);
@@ -1759,52 +1760,52 @@
             console.log("Overview data received:", overviewData);
 
             document.getElementById('overview-staff-name').textContent = overviewData.staff || 'Not available';
-            document.getElementById('overview-patient-name').textContent = overviewData.patient || currentVisitDetails.patient_name || 'Not available';
+            document.getElementById('overview-patient-name').textContent = overviewData.paciente || currentVisitDetail.paciente_nombre || 'Not available';
 
-            let summaryForOverview = overviewData.ai_summary || overviewData.summary;
+            let summaryForOverview = overviewData.resumen_ai || overviewData.resumen;
             if (summaryForOverview && !summaryForOverview.startsWith("Error") && summaryForOverview !== "Not available") {
                 overviewSummaryTextElem.textContent = summaryForOverview;
-                if (originalAiSummaryText !== summaryForOverview && visitDetails[visitId] && overviewData.ai_summary) {
-                    visitDetails[visitId].ai_summary = overviewData.ai_summary;
-                    originalAiSummaryText = overviewData.ai_summary;
+                if (originalSummaryAiText !== summaryForOverview && visitDetails[visitId] && overviewData.resumen_ai) {
+                    visitDetails[visitId].resumen_ai = overviewData.resumen_ai;
+                    originalSummaryAiText = overviewData.resumen_ai;
                     updateUnifiedAiContentDisplay(); // Re-render combined content after updating summary
                 }
-            } else if (!currentVisitDetails.transcription) {
+            } else if (!currentVisitDetail.transcripcion) {
                 overviewSummaryTextElem.innerHTML = `<div class="no-speech">No summary or transcription.</div>`;
             } else {
                 overviewSummaryTextElem.textContent = "Transcription available. Summary not generated.";
             }
 
             // Update Notes AI from Overview
-            if (overviewData.ai_notes) {
-                if (originalAiNotesText !== overviewData.ai_notes) {
-                    visitDetails[visitId].ai_notes = overviewData.ai_notes;
-                    visitDetails[visitId].ai_notes_pdf_path = overviewData.ai_notes_pdf_path; // Make sure this is updated
-                    originalAiNotesText = overviewData.ai_notes;
+            if (overviewData.notas_ai) {
+                if (originalNotesAiText !== overviewData.notas_ai) {
+                    visitDetails[visitId].notas_ai = overviewData.notas_ai;
+                    visitDetails[visitId].ruta_notas_ai_pdf = overviewData.ruta_notas_ai_pdf; // Make sure this is updated
+                    originalNotesAiText = overviewData.notas_ai;
                     updateUnifiedAiContentDisplay(); // Re-render combined content after updating notes
                 }
             }
 
             // Update PDF download button based on new path from overview
             if (btnDownloadAiNotesPdf) {
-                if (visitDetails[visitId].ai_notes_pdf_path) { // Check the locally updated data
+                if (visitDetails[visitId].ruta_notas_ai_pdf) { // Check the locally updated data
                     btnDownloadAiNotesPdf.style.display = 'inline-block';
-                    btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+                    btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/notas_ia_pdf`, '_blank');
                 } else {
                     btnDownloadAiNotesPdf.style.display = 'none';
                 }
             }
 
-            if (overviewData.detected_language && visitDetails[visitId] && overviewData.detected_language !== visitDetails[visitId].detected_language) {
-                console.log(`Detected language updated for visit ${visitId} from ${visitDetails[visitId].detected_language} to ${overviewData.detected_language}`);
-                visitDetails[visitId].detected_language = overviewData.detected_language;
-                const newOriginalLanguageName = languageNames[overviewData.detected_language] || overviewData.detected_language.toUpperCase();
+            if (overviewData.idioma_detectado && visitDetails[visitId] && overviewData.idioma_detectado !== visitDetails[visitId].idioma_detectado) {
+                console.log(`Detected language updated for visit ${visitId} from ${visitDetails[visitId].idioma_detectado} to ${overviewData.idioma_detectado}`);
+                visitDetails[visitId].idioma_detectado = overviewData.idioma_detectado;
+                const newOriginalLanguageName = languageNames[overviewData.idioma_detectado] || overviewData.idioma_detectado.toUpperCase();
 
-                document.getElementById('transcription-original-lang-text').textContent = newOriginalLanguageName;
-                updateTranslationControls('transcription', overviewData.detected_language, !!originalTranscriptionText);
+                document.getElementById('transcription-original-language-text').textContent = newOriginalLanguageName;
+                updateTranslationControls('transcription', overviewData.idioma_detectado, !!originalTranscriptionText);
 
-                document.getElementById('notes-ai-original-lang-text').textContent = newOriginalLanguageName;
-                updateTranslationControls('notes-ai', overviewData.detected_language, !!(originalAiSummaryText || originalAiNotesText));
+                document.getElementById('ai-notes-original-language-text').textContent = newOriginalLanguageName;
+                updateTranslationControls('ai-notes', overviewData.idioma_detectado, !!(originalSummaryAiText || originalNotesAiText));
             }
 
             const logList = document.getElementById('overview-activity-log-list');
@@ -1821,11 +1822,11 @@
                     logList.appendChild(li);
                 });
             } else {
-                logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity logged.</div></li>';
+                logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity registered.</div></li>';
             }
         } catch (error) {
-            console.error("Error fetching or processing overview:", error);
-            if (!originalAiSummaryText && !(currentVisitDetails && currentVisitDetails.transcription)) {
+            console.error("Error in fetch or processing overview:", error);
+            if (!originalSummaryAiText && !(currentVisitDetail && currentVisitDetail.transcripcion)) {
                 overviewSummaryTextElem.innerHTML = `<div class="no-speech" style="color:red;">Error loading summary.</div>`;
             }
             const logList = document.getElementById('overview-activity-log-list');
@@ -1846,73 +1847,73 @@
         originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown;
 
         // Hide the display div and show the textarea
-        notesAiSummaryUnifiedContentDisplay.style.display = 'none';
-        notesAiSummaryUnifiedTextarea.style.display = 'block';
+        notesSummaryAiUnifiedContentDisplay.style.display = 'none';
+        notesSummaryAiUnifiedTextarea.style.display = 'block';
 
         // Populate textarea with the `unifiedAiContentMarkdown` (raw markdown with actual newlines)
-        notesAiSummaryUnifiedTextarea.value = unifiedAiContentMarkdown;
+        notesSummaryAiUnifiedTextarea.value = unifiedAiContentMarkdown;
 
         // Show/hide buttons
-        btnEditAiNotesSummary.style.display = 'none';
-        btnGenerateAiNotesSummary.style.display = 'none'; // Hide generate button during edit
-        btnSaveAiNotesSummary.style.display = 'inline-block';
-        btnCancelAiNotesSummaryEdit.style.display = 'inline-block';
+        btnEditNotesSummaryIA.style.display = 'none';
+        btnGenerateNotesSummaryIA.style.display = 'none'; // Hide generate button during edit
+        btnSaveNotesSummaryIA.style.display = 'inline-block';
+        btnCancelEditNotesSummaryIA.style.display = 'inline-block';
 
         // Disable translation controls during edit
-        const translateSelectNotesAi = document.getElementById('notes-ai-translate-select');
-        if (translateSelectNotesAi) translateSelectNotesAi.disabled = true;
-        const btnShowNotesAiOriginal = document.getElementById('btn-show-notes-ai-original');
-        if (btnShowNotesAiOriginal) btnShowNotesAiOriginal.style.display = 'none';
+        const selectTranslateAiNotes = document.getElementById('ai-notes-translate-select');
+        if (selectTranslateAiNotes) selectTranslateAiNotes.disabled = true;
+        const btnShowAiNotesOriginal = document.getElementById('btn-show-ai-notes-original');
+        if (btnShowAiNotesOriginal) btnShowAiNotesOriginal.style.display = 'none';
 
         // Disable PDF download button during edit
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
         if (btnDownloadPdf) btnDownloadPdf.style.display = 'none';
 
 
-        notesAiSummaryUnifiedTextarea.focus();
+        notesSummaryAiUnifiedTextarea.focus();
     }
 
     function disableEditMode() {
         // Hide the textarea and show the display div
-        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.style.display = 'block';
-        if (notesAiSummaryUnifiedTextarea) notesAiSummaryUnifiedTextarea.style.display = 'none';
+        if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.style.display = 'block';
+        if (notesSummaryAiUnifiedTextarea) notesSummaryAiUnifiedTextarea.style.display = 'none';
 
         // Re-render the content (important for when 'Cancel' is pressed)
         updateUnifiedAiContentDisplay();
 
         // Show/hide buttons
         const hasContent = !!unifiedAiContentMarkdown;
-        // Show btnEditAiNotesSummary only if there is content and we are not in edit mode
-        if (btnEditAiNotesSummary) btnEditAiNotesSummary.style.display = (hasContent && notesAiSummaryUnifiedTextarea.style.display === 'none') ? 'inline-block' : 'none';
+        // Show btnEditNotesSummaryIA only if there is content and not in edit mode
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.style.display = (hasContent && notesSummaryAiUnifiedTextarea.style.display === 'none') ? 'inline-block' : 'none';
 
         // Re-enable generate button only if a visit is selected and has transcription
-        const currentDetails = visitDetails[currentlySelectedVisit];
-        if (btnGenerateAiNotesSummary && currentDetails && currentDetails.transcription) {
-            btnGenerateAiNotesSummary.style.display = 'inline-block';
-        } else if (btnGenerateAiNotesSummary) {
-            btnGenerateAiNotesSummary.style.display = 'none';
+        const currentDetail = visitDetails[currentlySelectedVisit];
+        if (btnGenerateNotesSummaryIA && currentDetail && currentDetail.transcripcion) {
+            btnGenerateNotesSummaryIA.style.display = 'inline-block';
+        } else if (btnGenerateNotesSummaryIA) {
+            btnGenerateNotesSummaryIA.style.display = 'none';
         }
-        if (btnSaveAiNotesSummary) btnSaveAiNotesSummary.style.display = 'none';
-        if (btnCancelAiNotesSummaryEdit) btnCancelAiNotesSummaryEdit.style.display = 'none';
+        if (btnSaveNotesSummaryIA) btnSaveNotesSummaryIA.style.display = 'none';
+        if (btnCancelEditNotesSummaryIA) btnCancelEditNotesSummaryIA.style.display = 'none';
 
         // Re-enable translation controls
-        const translateSelectNotesAi = document.getElementById('notes-ai-translate-select');
-        if (translateSelectNotesAi) translateSelectNotesAi.disabled = false;
-        const btnShowNotesAiOriginal = document.getElementById('btn-show-notes-ai-original');
-        if (btnShowNotesAiOriginal) {
-            btnShowNotesAiOriginal.style.display = 'none';
+        const selectTranslateAiNotes = document.getElementById('ai-notes-translate-select');
+        if (selectTranslateAiNotes) selectTranslateAiNotes.disabled = false;
+        const btnShowAiNotesOriginal = document.getElementById('btn-show-ai-notes-original');
+        if (btnShowAiNotesOriginal) {
+            btnShowAiNotesOriginal.style.display = 'none';
         }
         // Re-call translation controls update to restore correct state
-        const currentDetail = visitDetails[currentlySelectedVisit];
+        const currentDetailForUpdate = visitDetails[currentlySelectedVisit];
         updateTranslationControls(
-            'notes-ai',
-            currentDetail ? currentDetail.detected_language : 'N/A',
+            'ai-notes',
+            currentDetailForUpdate ? currentDetailForUpdate.idioma_detectado : 'N/D',
             !!unifiedAiContentMarkdown
         );
 
         // Re-show PDF button if path exists
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
-        if (btnDownloadPdf && currentDetail && currentDetail.ai_notes_pdf_path) {
+        if (btnDownloadPdf && currentDetailForUpdate && currentDetailForUpdate.ruta_notas_ai_pdf) {
             btnDownloadPdf.style.display = 'inline-block';
         } else if (btnDownloadPdf) {
             btnDownloadPdf.style.display = 'none';
@@ -1924,7 +1925,7 @@
             alert("No visit selected to save.");
             return;
         }
-        const editedContent = notesAiSummaryUnifiedTextarea.value; // Get content from the textarea
+        const editedContent = notesSummaryAiUnifiedTextarea.value; // Get content from the textarea
 
         // Update `unifiedAiContentMarkdown` with the edited content immediately
         unifiedAiContentMarkdown = editedContent;
@@ -1952,20 +1953,20 @@
             summaryPart = '';
         }
 
-        if (btnSaveAiNotesSummary) {
-            btnSaveAiNotesSummary.disabled = true;
-            btnSaveAiNotesSummary.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        if (btnSaveNotesSummaryIA) {
+            btnSaveNotesSummaryIA.disabled = true;
+            btnSaveNotesSummaryIA.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         }
 
 
         try {
-            const response = await fetch('/api/update_ai_notes_summary', {
+            const response = await fetch('/api/actualizar_notas_resumen_ai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visit_id: currentlySelectedVisit,
-                    ai_summary_content: summaryPart,
-                    ai_notes_content: notesPart
+                    visita_id: currentlySelectedVisit,
+                    resumen_ai_content: summaryPart, // THIS IS NOW PURE MARKDOWN
+                    notas_ai_content: notesPart // THIS IS NOW PURE MARKDOWN
                 })
             });
 
@@ -1975,15 +1976,15 @@
             }
 
             // Update local data and re-render display
-            visitDetails[currentlySelectedVisit].ai_summary = summaryPart;
-            visitDetails[currentlySelectedVisit].ai_notes = notesPart;
-            originalAiSummaryText = summaryPart;
-            originalAiNotesText = notesPart;
+            visitDetails[currentlySelectedVisit].resumen_ai = summaryPart; // Save as pure Markdown
+            visitDetails[currentlySelectedVisit].notas_ai = notesPart; // Save as pure Markdown
+            originalSummaryAiText = summaryPart; // Update originals
+            originalNotesAiText = notesPart; // Update originals
             originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Update original for future cancels
 
             updateUnifiedAiContentDisplay(); // Render `unifiedAiContentMarkdown` for display
             disableEditMode(); // Exit edit mode
-            alert(data.message || "AI content saved successfully.");
+            alert(data.mensaje || "AI content saved successfully.");
 
             // Optionally update overview summary if needed
             const overviewSummaryElem = document.getElementById('overview-summary-text');
@@ -1993,9 +1994,9 @@
             console.error("Error saving unified AI content:", error);
             alert(`Error saving: ${error.message}`);
         } finally {
-            if (btnSaveAiNotesSummary) {
-                btnSaveAiNotesSummary.disabled = false;
-                btnSaveAiNotesSummary.innerHTML = '<i class="fas fa-save"></i> Save';
+            if (btnSaveNotesSummaryIA) {
+                btnSaveNotesSummaryIA.disabled = false;
+                btnSaveNotesSummaryIA.innerHTML = '<i class="fas fa-save"></i> Save';
             }
         }
     }
@@ -2004,34 +2005,34 @@
     function updateUnifiedAiContentDisplay() {
         let combinedContentMarkdown = '';
 
-        if (originalAiSummaryText && !originalAiSummaryText.startsWith('[Error')) {
-            combinedContentMarkdown += '### AI Summary\n\n' + originalAiSummaryText.replace(/\\n/g, '\n') + '\n\n';
-        } else if (originalAiSummaryText.startsWith('[Error')) {
-            combinedContentMarkdown += '### AI Summary (Error)\n\n' + originalAiSummaryText.replace(/\\n/g, '\n') + '\n\n';
+        if (originalSummaryAiText && !originalSummaryAiText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Summary\n\n' + originalSummaryAiText.replace(/\\n/g, '\n') + '\n\n';
+        } else if (originalSummaryAiText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Summary (Error)\n\n' + originalSummaryAiText.replace(/\\n/g, '\n') + '\n\n';
         }
 
-        if (originalAiNotesText && !originalAiNotesText.startsWith('[Error')) {
-            combinedContentMarkdown += '### AI Generated Notes\n\n' + originalAiNotesText.replace(/\\n/g, '\n') + '\n\n';
-        } else if (originalAiNotesText.startsWith('[Error')) {
-            combinedContentMarkdown += '### AI Generated Notes (Error)\n\n' + originalAiNotesText.replace(/\\n/g, '\n') + '\n\n';
+        if (originalNotesAiText && !originalNotesAiText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Generated Notes\n\n' + originalNotesAiText.replace(/\\n/g, '\n') + '\n\n';
+        } else if (originalNotesAiText.startsWith('[Error')) {
+            combinedContentMarkdown += '### AI Generated Notes (Error)\n\n' + originalNotesAiText.replace(/\\n/g, '\n') + '\n\n';
         }
 
         // Store this raw markdown for editing and original content display.
         unifiedAiContentMarkdown = combinedContentMarkdown.trim();
 
-        if (notesAiSummaryUnifiedContentDisplay) { // Ensure the element exists
+        if (notesSummaryAiUnifiedContentDisplay) { // Ensure the element exists
             if (unifiedAiContentMarkdown === '') {
-                notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
+                notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
             } else {
-                notesAiSummaryUnifiedContentDisplay.innerHTML = md.render(unifiedAiContentMarkdown);
+                notesSummaryAiUnifiedContentDisplay.innerHTML = md.render(unifiedAiContentMarkdown);
             }
         }
     }
 
 
     async function requestTranslation(visitId, contentType, targetLanguageCode) {
-        const baseDetails = visitDetails[visitId] || {};
-        const sourceLanguageCode = baseDetails.detected_language || 'N/A';
+        const baseDetail = visitDetails[visitId] || {};
+        const sourceLanguageCode = baseDetail.idioma_detectado || 'N/D';
         let originalTextToTranslate = '';
         let displayAreaId = '';
         let originalButtonId = '';
@@ -2043,34 +2044,34 @@
         disableEditMode(); // Ensure display is normal before translating
 
         if (contentType === 'transcription') {
-            originalTextToTranslate = baseDetails.transcription;
+            originalTextToTranslate = baseDetail.transcripcion;
             displayAreaId = 'full-transcription';
             originalButtonId = 'btn-show-transcription-original';
-            originalLanguageDisplaySpanId = 'transcription-original-lang-display';
+            originalLanguageDisplaySpanId = 'transcription-original-language-display';
             translateSelectId = 'transcription-translate-select';
-        } else if (contentType === 'notes-ai') {
+        } else if (contentType === 'ai-notes') {
             originalTextToTranslate = unifiedAiContentMarkdown;
 
-            displayAreaId = 'notes-ai-summary-unified-content';
-            originalButtonId = 'btn-show-notes-ai-original';
-            originalLanguageDisplaySpanId = 'notes-ai-original-lang-display';
-            translateSelectId = 'notes-ai-translate-select';
-            editButtonId = 'btn-edit-ai-notes-summary'; // Assign edit button for notes-ai
+            displayAreaId = 'notes-summary-ai-unified-content';
+            originalButtonId = 'btn-show-ai-notes-original';
+            originalLanguageDisplaySpanId = 'ai-notes-original-language-display';
+            translateSelectId = 'ai-notes-translate-select';
+            editButtonId = 'btn-edit-notes-summary-ia'; // Assign edit button for ai-notes
         } else {
             return;
         }
 
 
-        if (!sourceLanguageCode || sourceLanguageCode === 'N/A' || sourceLanguageCode === 'api') {
-            alert("Could not reliably determine original language to translate.");
+        if (!sourceLanguageCode || sourceLanguageCode === 'N/D' || sourceLanguageCode === 'api') {
+            alert("Could not reliably determine the original language for translation.");
             return;
         }
         if (!originalTextToTranslate || originalTextToTranslate.trim() === '') {
-            alert(`No original ${contentType.replace('-', ' ')} to translate.`);
+            alert(`There is no original ${contentType.replace('-', ' ')} to translate.`);
             return;
         }
         if (!targetLanguageCode || targetLanguageCode === "") {
-            alert("Please select a language from the menu.");
+            alert("Select a language from the menu.");
             return;
         }
 
@@ -2078,7 +2079,7 @@
         const originalButton = document.getElementById(originalButtonId);
         const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
         const strongElementOriginal = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
-        const strongElementOriginalId = strongElementOriginal ? strongElementOriginal.id : `${contentType}-original-lang-text`;
+        const strongElementOriginalId = strongElementOriginal ? strongElementOriginal.id : `original-language-text-${contentType}`;
         const translateSelect = document.getElementById(translateSelectId);
         const editButton = document.getElementById(editButtonId); // Get edit button
 
@@ -2102,13 +2103,13 @@
         if (editButton) editButton.disabled = true; // Disable edit button during translation
 
         try {
-            const response = await fetch('/api/translate_text', {
+            const response = await fetch('/api/traducir_texto', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    original_text: originalTextToTranslate,
-                    source_language_code: sourceLanguageCode,
-                    target_language_code: targetLanguageCode
+                    texto_original: originalTextToTranslate,
+                    idioma_origen_code: sourceLanguageCode,
+                    idioma_destino_code: targetLanguageCode
                 })
             });
             if (!response.ok) {
@@ -2121,8 +2122,8 @@
             }
             const data = await response.json();
 
-            if (data && data.translated_text) {
-                displayArea.innerHTML = md.render(data.translated_text);
+            if (data && data.texto_traducido) {
+                displayArea.innerHTML = md.render(data.texto_traducido);
 
                 if (originalButton) originalButton.style.display = 'inline-block';
                 if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #10b980;">(Showing translation to ${targetLanguageName})</span>`;
@@ -2131,19 +2132,19 @@
                     translateSelect.disabled = false;
                     translateSelect.value = "";
                     Array.from(translateSelect.options).forEach(option => {
-                        option.disabled = (option.value === targetLanguageCode) || (option.value === sourceLanguageCode && sourceLanguageCode !== 'N/A' && sourceLanguageCode !== 'api') || (option.value === "");
+                        option.disabled = (option.value === targetLanguageCode) || (option.value === sourceLanguageCode && sourceLanguageCode !== 'N/D' && sourceLanguageCode !== 'api') || (option.value === "");
                     });
                 }
             } else {
-                throw new Error("Invalid translation API response.");
+                throw new Error("Invalid API translation response.");
             }
         } catch (error) {
             console.error(`Error in translation (${contentType}):`, error);
 
             // Reconstruct original content on error based on type
             if (contentType === 'transcription') {
-                displayArea.innerHTML = formatTranscription(visitDetails[visitId].transcription || '');
-            } else if (contentType === 'notes-ai') {
+                displayArea.innerHTML = formatTranscription(visitDetails[visitId].transcripcion || '');
+            } else if (contentType === 'ai-notes') {
                 displayArea.innerHTML = md.render(unifiedAiContentMarkdown || `<div class="no-speech" style="color:red;">Error translating: ${error.message}.</div>`);
             }
 
@@ -2156,8 +2157,8 @@
     }
 
     function showOriginalContent(visitId, contentType) {
-        const baseDetails = visitDetails[visitId] || {};
-        const detectedLanguage = baseDetails.detected_language || 'N/A';
+        const baseDetail = visitDetails[visitId] || {};
+        const detectedLanguage = baseDetail.idioma_detectado || 'N/D';
         let originalText = '';
         let displayAreaId = '';
         let originalLanguageDisplaySpanId = '';
@@ -2169,33 +2170,33 @@
 
         if (contentType === 'transcription') {
             displayAreaId = 'full-transcription';
-            originalText = baseDetails.transcription;
+            originalText = baseDetail.transcripcion;
             if (document.getElementById(displayAreaId)) { // Ensure the element exists
                 document.getElementById(displayAreaId).innerHTML = formatTranscription(originalText) || '<div class="no-speech">No transcription available.</div>';
             }
-        } else if (contentType === 'notes-ai') {
+        } else if (contentType === 'ai-notes') {
             originalText = unifiedAiContentMarkdown; // Use the stored combined markdown
 
-            displayAreaId = 'notes-ai-summary-unified-content';
+            displayAreaId = 'notes-summary-ai-unified-content';
             if (document.getElementById(displayAreaId)) { // Ensure the element exists
                 document.getElementById(displayAreaId).innerHTML = md.render(originalText) || '<div class="no-speech">No AI content available.</div>';
             }
-            editButtonId = 'btn-edit-ai-notes-summary'; // Assign edit button for notes-ai
+            editButtonId = 'btn-edit-notes-summary-ia'; // Assign edit button for ai-notes
         } else {
             return;
         }
 
-        if (!originalText && contentType !== 'transcription' && contentType !== 'notes-ai' && document.getElementById(displayAreaId)) {
+        if (!originalText && contentType !== 'transcription' && contentType !== 'ai-notes' && document.getElementById(displayAreaId)) {
             document.getElementById(displayAreaId).innerHTML = `<div class="no-speech">No ${contentType.replace('-', ' ')} available.</div>`;
         }
 
-        originalLanguageDisplaySpanId = `${contentType}-original-lang-display`;
+        originalLanguageDisplaySpanId = `${contentType}-original-language-display`;
         originalButtonId = `btn-show-${contentType}-original`;
 
         const detectedLanguageName = languageNames[detectedLanguage] || detectedLanguage.toUpperCase();
         const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
         const strongElement = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
-        const strongElementOriginalId = strongElement ? strongElement.id : `${contentType}-original-lang-text`;
+        const strongElementOriginalId = strongElement ? strongElement.id : `original-language-text-${contentType}`;
 
         if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${detectedLanguageName}</strong>`;
 
@@ -2209,21 +2210,21 @@
     }
 
     function updateTranslationControls(contentType, originalDetectedLanguage, hasOriginalText) {
-        const selectId = `notes-ai-translate-select`;
-        const selectTranslate = document.getElementById(selectId);
-        const btnShowOriginal = document.getElementById(`btn-show-notes-ai-original`);
-        const btnEdit = document.getElementById(`btn-edit-ai-notes-summary`); // Only for notes-ai
+        const selectId = `${contentType}-translate-select`;
+        const translateSelect = document.getElementById(selectId);
+        const btnShowOriginal = document.getElementById(`btn-show-${contentType}-original`);
+        const btnEdit = document.getElementById(`btn-edit-notes-summary-ia`); // Only for ai-notes
 
-        if (!selectTranslate) {
+        if (!translateSelect) {
             console.warn("Select not found:", contentType, selectId);
             return;
         }
 
-        const canTranslate = (hasOriginalText && originalDetectedLanguage && originalDetectedLanguage !== 'N/A' && originalDetectedLanguage !== 'api');
-        selectTranslate.disabled = !canTranslate;
-        selectTranslate.value = "";
+        const canTranslate = (hasOriginalText && originalDetectedLanguage && originalDetectedLanguage !== 'N/D' && originalDetectedLanguage !== 'api');
+        translateSelect.disabled = !canTranslate;
+        translateSelect.value = "";
 
-        Array.from(selectTranslate.options).forEach(option => {
+        Array.from(translateSelect.options).forEach(option => {
             if (option.value === "") {
                 option.disabled = false;
             } else if (!canTranslate || option.value === originalDetectedLanguage) {
@@ -2235,7 +2236,7 @@
 
         if (btnShowOriginal) {
             // Only show the 'Original' button if the select is not currently showing original content
-            const currentLanguageDisplay = document.getElementById(`${contentType}-original-lang-text`).nextSibling; // Get the span after the strong tag
+            const currentLanguageDisplay = document.getElementById(`${contentType}-original-language-text`).nextSibling; // Get the span after the strong tag
             if (currentLanguageDisplay && currentLanguageDisplay.textContent.includes('Showing translation')) {
                 btnShowOriginal.style.display = 'inline-block';
             } else {
@@ -2244,12 +2245,12 @@
             btnShowOriginal.onclick = () => showOriginalContent(currentlySelectedVisit, contentType);
         }
 
-        // Ensure edit button for 'notes-ai' is enabled/disabled correctly
-        if (contentType === 'notes-ai' && btnEdit) {
+        // Ensure edit button for 'ai-notes' is enabled/disabled correctly
+        if (contentType === 'ai-notes' && btnEdit) {
             // Enable edit button if there's any AI content (summary or notes)
             // and it's not currently in editing mode (checked by display styles of textarea)
-            btnEdit.disabled = !hasOriginalText || notesAiSummaryUnifiedTextarea.style.display === 'block';
-            if (notesAiSummaryUnifiedTextarea.style.display === 'block') { // If in edit mode, hide it
+            btnEdit.disabled = !hasOriginalText || notesSummaryAiUnifiedTextarea.style.display === 'block';
+            if (notesSummaryAiUnifiedTextarea.style.display === 'block') { // If in edit mode, hide it
                 btnEdit.style.display = 'none';
             } else { // Otherwise, show it if there's content to edit
                 btnEdit.style.display = hasOriginalText ? 'inline-block' : 'none';
@@ -2267,7 +2268,7 @@
         lines.forEach(line => {
             line = line.trim();
             if (!line) return;
-            const parts = line.match(/^((?:SPEAKER_\d+|SPK_\d+|SPEAKER\s*\d*|UNK|Speaker\s*\d*|Speaker\s*\d*)[^:]*):\s*(.*)$/i);
+            const parts = line.match(/^((?:SPEAKER_\d+|SPK_\d+|HABLANTE\s*\d*|UNK|Speaker\s*\d*|Hablante\s*\d*)[^:]*):\s*(.*)$/i);
             if (parts && parts[1] && parts[2]) { // Ensure both parts exist
                 const speaker = escapeHtml(parts[1].trim());
                 const message = escapeHtml(parts[2].trim());
@@ -2280,26 +2281,26 @@
     }
 
     // This function is now the single point for generating both notes and summary
-    async function callGenerateAiNotesAndSummaryApi(visitId) {
+    async function callGenerateNotesAndSummaryApi(visitId) {
         if (!visitId) {
             alert("Invalid visit ID.");
             return;
         }
-        const baseDetails = visitDetails[visitId];
-        if (!baseDetails || !baseDetails.transcription) {
+        const baseDetail = visitDetails[visitId];
+        if (!baseDetail || !baseDetail.transcripcion) {
             alert("No transcription available to generate AI notes and summary.");
             return;
         }
 
-        const btn = document.getElementById('btn-generate-ai-notes-summary');
+        const btn = document.getElementById('btn-generate-notes-summary-ia');
         const originalButtonText = btn.innerHTML;
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Both...';
         }
-        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">Generating AI Notes and Summary...</div>';
+        if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">Generating AI Notes & Summary...</div>';
         if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
-        if (btnEditAiNotesSummary) btnEditAiNotesSummary.disabled = true; // Disable edit button during generation
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = true; // Disable edit button during generation
 
         let summaryGenerated = false;
         let notesGenerated = false;
@@ -2308,20 +2309,20 @@
 
         // First, generate summary
         try {
-            const responseSummary = await fetch('/api/generate_ai_summary', {
+            const responseSummary = await fetch('/api/generar_resumen_ai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visit_id: visitId
+                    visita_id: visitId
                 })
             });
             const dataSummary = await responseSummary.json();
             if (!responseSummary.ok) {
                 throw new Error(dataSummary.error || `Error ${responseSummary.status}`);
             }
-            if (dataSummary.ai_summary) {
-                visitDetails[visitId].ai_summary = dataSummary.ai_summary;
-                originalAiSummaryText = dataSummary.ai_summary;
+            if (dataSummary.resumen_ai) {
+                visitDetails[visitId].resumen_ai = dataSummary.resumen_ai;
+                originalSummaryAiText = dataSummary.resumen_ai;
                 summaryGenerated = true;
             } else {
                 throw new Error("Empty AI summary response.");
@@ -2329,31 +2330,31 @@
         } catch (error) {
             console.error("Error generating AI summary (part of unification):", error);
             summaryError = error.message;
-            visitDetails[visitId].ai_summary = `[Error generating summary: ${summaryError}]`;
-            originalAiSummaryText = `[Error generating summary: ${summaryError}]`;
+            visitDetails[visitId].resumen_ai = `[Error generating summary: ${summaryError}]`;
+            originalSummaryAiText = `[Error generating summary: ${summaryError}]`;
         }
 
         // Then, generate notes
         try {
-            const responseNotes = await fetch('/api/generate_ai_notes', {
+            const responseNotes = await fetch('/api/generar_notas_ai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visit_id: visitId
+                    visita_id: visitId
                 })
             });
             const dataNotes = await responseNotes.json();
             if (!responseNotes.ok) {
                 throw new Error(dataNotes.error || `Error ${responseNotes.status}`);
             }
-            if (dataNotes.ai_notes_markdown && dataNotes.ai_notes_html) {
-                visitDetails[visitId].ai_notes = dataNotes.ai_notes_markdown;
-                visitDetails[visitId].ai_notes_pdf_path = dataNotes.ai_notes_pdf_path;
-                originalAiNotesText = dataNotes.ai_notes_markdown;
+            if (dataNotes.notas_ai_markdown && dataNotes.notas_ai_html) {
+                visitDetails[visitId].notas_ai = dataNotes.notas_ai_markdown;
+                visitDetails[visitId].ruta_notas_ai_pdf = dataNotes.ruta_notas_ai_pdf;
+                originalNotesAiText = dataNotes.notas_ai_markdown;
                 notesGenerated = true;
-            } else if (dataNotes.ai_notes) { // Fallback if only markdown is returned
-                visitDetails[visitId].ai_notes = dataNotes.ai_notes;
-                originalAiNotesText = dataNotes.ai_notes;
+            } else if (dataNotes.notas_ai) { // Fallback if only markdown is returned
+                visitDetails[visitId].notas_ai = dataNotes.notas_ai;
+                originalNotesAiText = dataNotes.notas_ai;
                 notesGenerated = true;
             } else {
                 throw new Error("Empty AI notes response.");
@@ -2361,8 +2362,8 @@
         } catch (error) {
             console.error("Error generating AI notes (part of unification):", error);
             notesError = error.message;
-            visitDetails[visitId].ai_notes = `[Error generating notes: ${notesError}]`;
-            originalAiNotesText = `[Error generating notes: ${notesError}]`;
+            visitDetails[visitId].notas_ai = `[Error generating notes: ${notesError}]`;
+            originalNotesAiText = `[Error generating notes: ${notesError}]`;
         }
 
         // After both calls, update the display
@@ -2386,9 +2387,9 @@
 
         // Update PDF download button if notes were generated and path exists
         if (btnDownloadAiNotesPdf) {
-            if (visitDetails[visitId].ai_notes_pdf_path) {
+            if (visitDetails[visitId].ruta_notas_ai_pdf) {
                 btnDownloadAiNotesPdf.style.display = 'inline-block';
-                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/ai_notes_pdf`, '_blank');
+                btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/notas_ia_pdf`, '_blank');
             } else {
                 btnDownloadAiNotesPdf.style.display = 'none';
             }
@@ -2396,7 +2397,7 @@
 
         // Refresh activity logs and translation controls via overview API call
         try {
-            const overviewResponse = await fetch(`/api/visit_overview/${visitId}`);
+            const overviewResponse = await fetch(`/api/visita_overview/${visitId}`);
             const overviewData = await overviewResponse.json();
             if (overviewResponse.ok) {
                 const logList = document.getElementById('overview-activity-log-list');
@@ -2413,27 +2414,27 @@
                         logList.appendChild(li);
                     });
                 } else {
-                    logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity logged.</div></li>';
+                    logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity registered.</div></li>';
                 }
                 updateTranslationControls(
-                    'notes-ai',
-                    overviewData.detected_language || baseDetails.detected_language,
-                    !!(originalAiSummaryText || originalAiNotesText)
+                    'ai-notes',
+                    overviewData.idioma_detectado || baseDetail.idioma_detectado,
+                    !!(originalSummaryAiText || originalNotesAiText)
                 );
                 const overviewSummaryElem = document.getElementById('overview-summary-text');
-                if (overviewSummaryElem && overviewData.ai_summary) {
-                    overviewSummaryElem.textContent = overviewData.ai_summary;
+                if (overviewSummaryElem && overviewData.resumen_ai) {
+                    overviewSummaryElem.textContent = overviewData.resumen_ai;
                 }
             } else {
-                console.error("Error updating overview after unified AI generation:", overviewData.error);
+                console.error("Error updating overview after generating unified AI:", overviewData.error);
             }
         } catch (err) {
             console.error("Error in overview API call after unified AI:", err);
         }
 
-        btn.disabled = !(baseDetails && baseDetails.transcription);
+        btn.disabled = !(baseDetail && baseDetail.transcripcion);
         btn.innerHTML = originalButtonText;
-        if (btnEditAiNotesSummary) btnEditAiNotesSummary.disabled = false; // Re-enable edit button
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = false; // Re-enable edit button
     }
 
 
@@ -2444,7 +2445,7 @@
             return;
         }
         const visitDetail = visitDetails[visitId];
-        if (!visitDetail || !visitDetail.transcription) {
+        if (!visitDetail || !visitDetail.transcripcion) {
             alert("No transcription available to generate the diet plan.");
             return;
         }
@@ -2462,14 +2463,14 @@
         if (contentDiv) contentDiv.innerHTML = '<div class="no-speech">Generating diet plan... Please wait.</div>';
 
         // Switch to the "Diet Plan" tab
-        changeTab(null, 'diet-plan');
+        switchTab(null, 'diet-plan');
 
         try {
-            const response = await fetch('/api/generate_diet_plan', {
+            const response = await fetch('/api/generar_plan_alimenticio', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visit_id: visitId
+                    visita_id: visitId
                 })
             });
 
@@ -2480,11 +2481,11 @@
                 throw new Error(data.error || `Server error ${response.status}`);
             }
 
-            if (data.diet_plan_html) {
+            if (data.plan_alimenticio_html) {
                 // Assuming the backend returns HTML for the diet plan
-                if (contentDiv) contentDiv.innerHTML = data.diet_plan_html;
+                if (contentDiv) contentDiv.innerHTML = data.plan_alimenticio_html;
                 // Store the generated HTML in the local `visitDetails` object
-                visitDetails[visitId].diet_plan_html = data.diet_plan_html;
+                visitDetails[visitId].plan_alimenticio_html = data.plan_alimenticio_html;
             } else {
                 throw new Error("The API response did not include the diet plan.");
             }
@@ -2497,7 +2498,7 @@
             alert(`Error generating the diet plan: ${error.message}`);
         } finally {
             if (btn) { // Make sure the button exists
-                btn.disabled = !(visitDetail && visitDetail.transcription);
+                btn.disabled = !(visitDetail && visitDetail.transcripcion);
                 btn.innerHTML = originalButtonHTML; // Restore original button text/icon
             }
         }
@@ -2505,16 +2506,16 @@
     // END: Added function to generate diet plan
 
     function changeDate(delta) {
-        const dateInput = document.getElementById('date-input');
+        const dateInput = document.getElementById('date');
         const currentDate = new Date(dateInput.value + "T00:00:00");
         currentDate.setDate(currentDate.getDate() + delta);
         dateInput.value = currentDate.toISOString().split('T')[0];
         updateDateDisplay();
-        window.location.href = `/visit_history?selected_date=${dateInput.value}`;
+        window.location.href = `/historial_visitas?fecha_seleccionada=${dateInput.value}`;
     }
 
     function updateDateDisplay() {
-        const dateInput = document.getElementById('date-input');
+        const dateInput = document.getElementById('date');
         const dateText = document.getElementById('date-text');
         if (dateInput.value) {
             const dateParts = dateInput.value.split('-');
@@ -2533,7 +2534,7 @@
     }
 
     function openDatePicker() {
-        document.getElementById('date-input').showPicker();
+        document.getElementById('date').showPicker();
     }
 
     function filterVisits() {
@@ -2580,15 +2581,15 @@
                 alert("Please select a visit to share.");
                 return;
             }
-            const currentVisitDetails = visitDetails[currentlySelectedVisit];
-            patientNamePopup.textContent = currentVisitDetails ? currentVisitDetails.patient_name : "N/A";
+            const currentVisitDetail = visitDetails[currentlySelectedVisit];
+            patientNamePopup.textContent = currentVisitDetail ? currentVisitDetail.paciente_nombre : "N/A";
 
-            const originalVisitLanguage = currentVisitDetails.detected_language || 'N/A';
+            const originalVisitLanguage = currentVisitDetail.idioma_detectado || 'N/D';
             const originalVisitLanguageName = languageNames[originalVisitLanguage] || 'Unknown';
 
-            const originalOption = emailLanguageSelect.querySelector('option[value=""]');
-            if (originalOption) originalOption.textContent = `Visit's Original Language (${originalVisitLanguageName})`;
-            emailLanguageSelect.value = "";
+            const originalOption = selectEmailLanguage.querySelector('option[value=""]');
+            if (originalOption) originalOption.textContent = `Original Visit Language (${originalVisitLanguageName})`;
+            selectEmailLanguage.value = "";
 
             sharePopup.classList.add('visible');
             document.getElementById('recipient-email').focus();
@@ -2617,29 +2618,29 @@
         const recipientEmail = document.getElementById('recipient-email').value;
         const optionalSubject = document.getElementById('optional-subject').value;
         const additionalMessage = document.getElementById('additional-message').value;
-        const selectedEmailLanguage = emailLanguageSelect.value;
+        const selectedEmailLanguage = selectEmailLanguage.value;
 
         btnSendEmailPopup.disabled = true;
         btnSendEmailPopup.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        showShareFeedback("Sending email...", "in-progress");
+        showShareFeedback("Sending email...", "processing");
 
         try {
             const payload = {
-                visit_id: currentlySelectedVisit,
-                recipient_email: recipientEmail,
-                subject: optionalSubject,
-                additional_message: additionalMessage,
-                email_language: selectedEmailLanguage
+                visita_id: currentlySelectedVisit,
+                email_destinatario: recipientEmail,
+                asunto: optionalSubject,
+                mensaje_adicional: additionalMessage,
+                idioma_email: selectedEmailLanguage
             };
 
-            const response = await fetch('/api/share_visit_email', {
+            const response = await fetch('/api/compartir_visita_email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
             if (response.ok) {
-                showShareFeedback(data.message || "Email sent.", "success");
+                showShareFeedback(data.mensaje || "Email sent.", "success");
             } else {
                 showShareFeedback(data.error || "Error sending email.", "error");
             }
@@ -2659,26 +2660,26 @@
         shareFeedbackDiv.style.display = 'block';
     }
 
-    function initializeVisitHistoryPage() {
-        console.log("[HISTORY] Starting page initialization.");
+    function initializeHistoryPage() {
+        console.log("[HISTORY] Initializing page.");
 
         currentlySelectedVisit = null;
 
-        const overviewPanel = document.getElementById('overview');
-        if (overviewPanel && !overviewPanel.querySelector('.no-speech')) {
-            overviewPanel.innerHTML = '<div class="no-speech" style="padding:40px;">Select a visit to see the details or create a new one.</div>';
-        } else if (overviewPanel && overviewPanel.querySelector('.no-speech')) {
-            overviewPanel.querySelector('.no-speech').textContent = 'Select a visit to see the details or create a new one.';
+        const overviewDiv = document.getElementById('overview');
+        if (overviewDiv && !overviewDiv.querySelector('.no-speech')) {
+            overviewDiv.innerHTML = '<div class="no-speech" style="padding:40px;">Select a visit to see details or create a new one.</div>';
+        } else if (overviewDiv && overviewDiv.querySelector('.no-speech')) {
+            overviewDiv.querySelector('.no-speech').textContent = 'Select a visit to see details or create a new one.';
         }
 
         const fullTranscriptionDiv = document.getElementById('full-transcription');
         if (fullTranscriptionDiv) fullTranscriptionDiv.innerHTML = '<div class="no-speech">Select a visit.</div>';
 
         // Ensure the display div is shown and textarea is hidden initially
-        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.style.display = 'block';
-        if (notesAiSummaryUnifiedTextarea) notesAiSummaryUnifiedTextarea.style.display = 'none';
+        if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.style.display = 'block';
+        if (notesSummaryAiUnifiedTextarea) notesSummaryAiUnifiedTextarea.style.display = 'none';
 
-        if (notesAiSummaryUnifiedContentDisplay) notesAiSummaryUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
+        if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
 
         const manualNotesTextarea = document.getElementById('manual-notes-content');
         if (manualNotesTextarea) manualNotesTextarea.value = '';
@@ -2696,23 +2697,23 @@
         if (btnCreatePrescriptionVisit) btnCreatePrescriptionVisit.disabled = true;
         if (btnCreateReferralVisit) btnCreateReferralVisit.disabled = true;
 
-        if (document.getElementById('form-eliminar-visita') && btnDeleteFullVisit) {
+        if (document.getElementById('form-delete-visit') && btnDeleteFullVisit) {
             btnDeleteFullVisit.disabled = true;
-            document.getElementById('form-eliminar-visita').action = '#';
+            document.getElementById('form-delete-visit').action = '#';
         } else if (btnDeleteFullVisit) {
             btnDeleteFullVisit.disabled = true;
         }
         if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
 
         // Attach event listeners for edit buttons
-        if (btnEditAiNotesSummary) {
-            btnEditAiNotesSummary.onclick = enableEditMode;
+        if (btnEditNotesSummaryIA) {
+            btnEditNotesSummaryIA.onclick = enableEditMode;
         }
-        if (btnSaveAiNotesSummary) {
-            btnSaveAiNotesSummary.onclick = saveUnifiedAiContent;
+        if (btnSaveNotesSummaryIA) {
+            btnSaveNotesSummaryIA.onclick = saveUnifiedAiContent;
         }
-        if (btnCancelAiNotesSummaryEdit) {
-            btnCancelAiNotesSummaryEdit.onclick = function() {
+        if (btnCancelEditNotesSummaryIA) {
+            btnCancelEditNotesSummaryIA.onclick = function() {
                 unifiedAiContentMarkdown = originalUnifiedAiContentMarkdown;
                 disableEditMode();
             };
@@ -2722,7 +2723,7 @@
         disableEditMode();
 
 
-        ['transcription', 'notes-ai'].forEach(type => {
+        ['transcription', 'ai-notes'].forEach(type => {
             const selectEl = document.getElementById(`${type}-translate-select`);
             if (selectEl) {
                 selectEl.addEventListener('change', function(event) {
@@ -2746,21 +2747,21 @@
                 }
             });
         }
-        console.log("[HISTORY] Initialization completed.");
+        console.log("[HISTORY] Initialization complete.");
 
-        const recentVisitId = '{{ recent_visit.id if recent_visit else 'null' }}';
+        const recentVisitId = '{{ visita_reciente.id if visita_reciente else 'null' }}';
         if (recentVisitId !== 'null' && visitDetails[recentVisitId]) {
-            console.log(`[HISTORY] Detected recent visit: ${recentVisitId}. Loading details automatically.`);
-            showVisitDetails(recentVisitId);
+            console.log(`[HISTORY] Recent visit detected: ${recentVisitId}. Loading details automatically.`);
+            viewVisitDetails(recentVisitId); // No .then() here
         } else if (Object.keys(visitDetails).length > 0) {
             const firstVisitId = Object.keys(visitDetails)[0];
             console.log(`[HISTORY] No specific recent visit, but visits exist. Loading the first one: ${firstVisitId}`);
-            showVisitDetails(firstVisitId);
+            viewVisitDetails(firstVisitId); // No .then() here
         } else {
             console.log("[HISTORY] No visits to load automatically.");
         }
     }
 
-    document.addEventListener('DOMContentLoaded', initializeVisitHistoryPage);
+    document.addEventListener('DOMContentLoaded', initializeHistoryPage);
 </script>
 {% endblock %}
