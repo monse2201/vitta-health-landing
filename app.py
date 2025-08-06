@@ -3619,14 +3619,16 @@ def compartir_receta_email(receta_id):
         medicamentos_html_items = ""
         if not meds_lista_email:
             medicamentos_html_items = "<li>No se especificaron medicamentos.</li>"
-        for idx, med in enumerate(meds_lista_email):
-            item_html = f"<li style='margin-bottom: 15px; padding-bottom: 10
+                for idx, med in enumerate(meds_lista_email):
+            item_html = f"<li style='margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;'>"
+            
             item_html += f"<h4 style='margin: 0 0 8px 0; font-size: 1.1em; color: #333; font-weight: bold;'>{idx+1}. {med.get('nombre','Nombre no especificado')}</h4>"
             if med.get('cantidad'): item_html += f"<p style='margin: 3px 0;'><strong>Cantidad:</strong> {med['cantidad']}</p>"
             if med.get('dosis'): item_html += f"<p style='margin: 3px 0;'><strong>Dosis:</strong> {med['dosis']}</p>"
             if med.get('frecuencia'): item_html += f"<p style='margin: 3px 0;'><strong>Frecuencia:</strong> {med['frecuencia']}</p>"
             if med.get('duracion'): item_html += f"<p style='margin: 3px 0;'><strong>Duración:</strong> {med['duracion']}</p>"
             if med.get('indicaciones'): item_html += f"<p style='margin: 3px 0; font-style:italic;'><strong>Indicaciones:</strong> {med['indicaciones']}</p>"
+            
             item_html += "</li>"
             medicamentos_html_items += item_html
         cuerpo_html = f"""
