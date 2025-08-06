@@ -3619,7 +3619,7 @@ def compartir_receta_email(receta_id):
         medicamentos_html_items = ""
         if not meds_lista_email:
             medicamentos_html_items = "<li>No se especificaron medicamentos.</li>"
-                for idx, med in enumerate(meds_lista_email):
+            for idx, med in enumerate(meds_lista_email):
             item_html = f"<li style='margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;'>"
             
             item_html += f"<h4 style='margin: 0 0 8px 0; font-size: 1.1em; color: #333; font-weight: bold;'>{idx+1}. {med.get('nombre','Nombre no especificado')}</h4>"
