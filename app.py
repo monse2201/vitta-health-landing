@@ -209,7 +209,7 @@ app.secret_key = app.config['SECRET_KEY']
 
 # --- CONFIGURACIÓN DE LA BASE DE DATOS (SQLite para demo) ---
 # Usamos SQLite para un entorno de demostración simple sin necesidad de un servidor de DB externo.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///demo.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///demo.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 logging.info("✅ Configured SQLite for local file-based storage: sqlite:///demo.db")
 
