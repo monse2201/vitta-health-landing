@@ -1919,7 +1919,7 @@ def descargar_pdf_notas_ia(visita_id):
         download_name=f"notas_visita_{visita.id}.pdf",
         mimetype="application/pdf"
     )
-@@app.route('/grabar_cita')
+@app.route('/grabar_cita')
 def grabar_cita():
     plantillas = [
         "Consulta General", "Seguimiento", "Examen Físico", "SOAP", "SOAP simple",
