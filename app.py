@@ -1844,7 +1844,6 @@ def historial_visitas():
                     'notas_ai': v_db.notas_ai or "",
                     'idioma_detectado': v_db.idioma_detectado or "N/D",
                     'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
-                    # 'ruta_notas_ai_pdf': v_db.ruta_notas_ai_pdf if hasattr(v_db, 'ruta_notas_ai_pdf') else None, # Removed for client-side PDF
                     'paciente': {
                         'id': paciente_actual.id,
                         'nombre': paciente_actual.nombre,
@@ -1857,7 +1856,7 @@ def historial_visitas():
                     'paciente_nombre': paciente_actual.nombre
                 })
             else:
-                # Handle cases where patient might be None (shouldn't happen with proper foreign keys)
+                # Manejar casos donde el paciente pueda ser None (no debería ocurrir con claves foráneas adecuadas)
                 visitas_data_list.append({
                     'id': v_db.id,
                     'fecha_formateada': v_db.fecha.strftime('%d/%m/%Y %H:%M') if v_db.fecha else 'Fecha No Disponible',
@@ -1868,9 +1867,8 @@ def historial_visitas():
                     'notas_ai': v_db.notas_ai or "",
                     'idioma_detectado': v_db.idioma_detectado or "N/D",
                     'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
-                    # 'ruta_notas_ai_pdf': v_db.ruta_notas_ai_pdf if hasattr(v_db, 'ruta_notas_ai_pdf') else None, # Removed for client-side PDF
                     'paciente': {},
-                    'paciente_nombre': "Paciente Desconocido" # Placeholder name
+                    'paciente_nombre': "Paciente Desconocido" # Nombre de marcador de posición
                 })
     except Exception as e:
         logging.error(f"Error obteniendo historial de visitas para usuario 1: {e}", exc_info=True)
@@ -1878,7 +1876,6 @@ def historial_visitas():
 
     visita_reciente_data = next((v for v in visitas_data_list if v['id'] == visita_reciente_id), None) if visita_reciente_id else None
     current_date_display = datetime.now().strftime('%d/%m/%Y')
-    # Se simula la especialidad del usuario
     user_especialidad = 'Nutrición'
     action_for_specialty = SPECIALTY_ACTIONS.get(user_especialidad) if user_especialidad else None
 
@@ -1887,7 +1884,8 @@ def historial_visitas():
                            current_date_display=current_date_display,
                            visita_reciente=visita_reciente_data,
                            action_for_specialty=action_for_specialty,
-                           css_file="css/historial_visitas.css")
+                           css_file="css/historial_visitas.css",
+                           current_user=current_user) # <- LÍNEA CORREGIDA
 
 @app.route('/visita/<int:visita_id>/generar_documento_especializado/<string:doc_type>')
 def generar_documento_especializado(visita_id, doc_type):
