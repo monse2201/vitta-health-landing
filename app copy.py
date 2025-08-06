@@ -345,13 +345,7 @@ else:
     logging.info(f"LOCAL: Configured Flask-Session with filesystem at {app.config['SESSION_FILE_DIR']}")
     logging.info("LOCAL: REDIS_HOST not set. SocketIO will run without a message queue in local dev if not configured.")
 
-
-# --- SESSION CONFIGURATION ---
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_PERMANENT'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 Session(app)
-
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
