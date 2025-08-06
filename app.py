@@ -931,17 +931,8 @@ def obtener_icono_para_accion(accion):
     return iconos.get(accion, 'fas fa-cog text-gray-500')
 
 def obtener_datos_overview(visita_id_param=None):
-    if not current_user.is_authenticated:
-        logging.warning("Intento de obtener overview sin usuario autenticado.")
-        return {
-            'staff': "No Asignado", 'paciente':'No disponible', 'paciente_id': None,
-            'resumen':"Error: Por favor, inicie sesión.", 'activity_logs':[],
-            'idioma_detectado':None, 'notas_ai': None, 'plantilla': 'N/E',
-            'tipo_visita': 'N/D', 'resumen_ai': None
-        }
-
     visita_id_a_buscar = visita_id_param if visita_id_param is not None else session.get('visita_actual_id')
-    logging.info(f"Obteniendo datos overview para Visita ID: {visita_id_a_buscar} por Usuario ID: {current_user.id}")
+    logging.info(f"Obteniendo datos overview para Visita ID: {visita_id_a_buscar}")
 
     overview = {
         'staff': "No asignado", 'paciente':'No disponible', 'paciente_id': None,
@@ -952,19 +943,19 @@ def obtener_datos_overview(visita_id_param=None):
 
     if visita_id_a_buscar:
         try:
-            visita_query = db.session.query(Visita).filter_by(id=int(visita_id_a_buscar))
-            visita_query = visita_query.filter_by(medico_id=current_user.id)
-            visita = visita_query.first()
+            visita = db.session.query(Visita).filter_by(id=int(visita_id_a_buscar)).first()
         except Exception as e:
-            logging.error(f"Error obteniendo datos overview para Visita ID {visita_id_a_buscar}: {e}", exc_info=True)
+            logging.error(f"Error obteniendo datos overview para Visita ID {visita_a_buscar}: {e}", exc_info=True)
             overview.update({'resumen':"Error cargando datos de la visita.", 'paciente':"Error", 'staff':"Error"})
     else:
         overview['resumen']="No se ha especificado ninguna visita activa."
         logging.info("No se proporcionó ID de visita para obtener datos overview.")
 
     if 'visita' in locals() and visita and visita.paciente:
+        staff_nombre = visita.medico_asignado_usuario.nombre if visita.medico_asignado_usuario else "No asignado"
+
         overview.update({
-            'staff': visita.medico_asignado_usuario.nombre,
+            'staff': staff_nombre,
             'paciente': visita.paciente.nombre,
             'paciente_id': visita.paciente.id,
             'paciente_identificacion_documento': visita.paciente.identificacion_documento,
@@ -990,7 +981,7 @@ def obtener_datos_overview(visita_id_param=None):
         except Exception as e_logs:
             logging.error(f"Error obteniendo logs de actividad para visita {visita.id}: {e_logs}")
             overview['activity_logs'] = [{'accion':'error', 'descripcion':'Error al cargar logs de actividad.', 'fecha':'N/A', 'icono':'fas fa-exclamation-triangle'}]
-            
+
     return overview
 # --- Funciones de IA y Texto (Sin cambios directos aquí para la privacidad) ---
 def normalize_language_code(code):
@@ -2895,9 +2886,10 @@ def buscar_pacientes_api():
         return jsonify({"error": "Error al buscar pacientes."}), 500
 
 
-@app.route('/api/iniciar_visita', methods=['POST']) 
+@app.route('/api/iniciar_visita', methods=['POST'])
 def iniciar_visita():
-    logging.info(f"Solicitud POST a /api/iniciar_visita por Usuario ID: {current_user.id}")
+    # Eliminar la línea que usa current_user.id
+    # logging.info(f"Solicitud POST a /api/iniciar_visita por Usuario ID: {current_user.id}")
 
     try:
         data = request.get_json()
@@ -2915,54 +2907,56 @@ def iniciar_visita():
     paciente_creado_ahora = False
 
     if paciente_id_form:
-        paciente_obj = db.session.query(Paciente).filter_by(id=int(paciente_id_form), creado_por_id=current_user.id).first()
+        # Se elimina el filtro por 'creado_por_id'
+        paciente_obj = db.session.query(Paciente).filter_by(id=int(paciente_id_form)).first()
         if not paciente_obj:
-            return jsonify({"error": "Paciente seleccionado no encontrado o no pertenece a este usuario."}), 404
+            return jsonify({"error": "Paciente seleccionado no encontrado."}), 404
     elif paciente_nombre_form:
+        # Se elimina el filtro por 'creado_por_id'
         paciente_obj = db.session.query(Paciente).filter(
-            Paciente.nombre.ilike(paciente_nombre_form),
-            Paciente.creado_por_id == current_user.id
+            Paciente.nombre.ilike(paciente_nombre_form)
         ).first()
         if not paciente_obj:
-            logging.info(f"Creando nuevo paciente '{paciente_nombre_form}' para usuario {current_user.id}")
+            logging.info(f"Creando nuevo paciente '{paciente_nombre_form}'")
             paciente_obj = Paciente(
-                nombre=paciente_nombre_form,
-                creado_por_id=current_user.id
+                nombre=paciente_nombre_form
+                # Se elimina la asignación de 'creado_por_id'
             )
             db.session.add(paciente_obj)
             db.session.flush()
             paciente_creado_ahora = True
     else:
         return jsonify({"error": "Se requiere un ID o nombre de paciente."}), 400
-    
+
     if not paciente_obj:
         return jsonify({"error": "Error interno: no se pudo encontrar ni crear el paciente."}), 500
 
     nueva_visita = Visita(
         paciente_id=paciente_obj.id,
-        medico_id=current_user.id,
+        # Se elimina la asignación de 'medico_id'
         plantilla=plantilla_form,
         tipo_visita=tipo_visita_form,
         fecha=datetime.now(timezone.utc)
     )
-    
+
     try:
         db.session.add(nueva_visita)
         db.session.commit()
         session['visita_actual_id'] = nueva_visita.id
-        
+
         logging.info(f"Visita ID {nueva_visita.id} iniciada para el paciente '{paciente_obj.nombre}' (ID: {paciente_obj.id}).")
 
         reg_act = RegistroActividad(
             visita_id=nueva_visita.id,
-            usuario_id=current_user.id,
-            usuario_nombre_display=current_user.nombre,
+            # Se elimina la asignación de 'usuario_id' y 'usuario_nombre_display'
             accion="visita_creada",
             descripcion=f"Visita de tipo '{tipo_visita_form}' iniciada para el paciente '{paciente_obj.nombre}'."
         )
         db.session.add(reg_act)
         db.session.commit()
-
+        
+        # La función `obtener_datos_overview` también debe ser modificada
+        # para no depender de `current_user`
         overview = obtener_datos_overview(nueva_visita.id)
         return jsonify({
             "message": "Visita iniciada con éxito.",
@@ -2975,7 +2969,7 @@ def iniciar_visita():
 
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al iniciar una nueva visita para el usuario {current_user.id}: {e}", exc_info=True)
+        logging.error(f"Error al iniciar una nueva visita: {e}", exc_info=True)
         return jsonify({"error": "Error interno al iniciar la visita."}), 500
 
 @app.route('/api/subir_audio', methods=['POST'])
@@ -2985,11 +2979,12 @@ def subir_audio():
 
     visita_id = session['visita_actual_id']
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    # Se elimina la validación del medico_id
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
 
     if not visita:
         session.pop('visita_actual_id', None)
-        return jsonify({"error": f"La visita activa (ID: {visita_id}) no fue encontrada o no le pertenece."}), 404
+        return jsonify({"error": f"La visita activa (ID: {visita_id}) no fue encontrada."}), 404
 
     if 'audio' not in request.files:
         return jsonify({"error": "No se envió ningún archivo de audio."}), 400
@@ -3004,7 +2999,8 @@ def subir_audio():
         file_ext = os.path.splitext(original_filename)[1].lower()
 
         if file_ext not in ALLOWED_OPENAI_AUDIO_EXTENSIONS:
-            logging.warning(f"Usuario {current_user.id} intentó subir un archivo con formato no soportado: {original_filename}")
+            # Reemplazar current_user.id con una descripción genérica
+            logging.warning(f"Intento de subir un archivo con formato no soportado: {original_filename}")
             return jsonify({ "error": f"Formato de archivo no soportado ('{file_ext}')."}), 400
 
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
@@ -3040,11 +3036,12 @@ def subir_audio():
         db.session.commit()
 
         desc_log_subida = f"Grabación de audio '{original_filename}' ({duracion_seg or 'N/A'}s) subida para la visita."
-        reg_act = RegistroActividad(visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre, accion="grabacion_subida", descripcion=desc_log_subida)
+        # Se reemplaza current_user con valores anónimos
+        reg_act = RegistroActividad(visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo", accion="grabacion_subida", descripcion=desc_log_subida)
         db.session.add(reg_act)
         db.session.commit()
 
-        logging.info(f"Audio subido y procesado para Visita ID: {visita.id} por Usuario ID: {current_user.id}. Ruta en DB: {ruta_relativa_para_db}")
+        logging.info(f"Audio subido y procesado para Visita ID: {visita.id}. Ruta en DB: {ruta_relativa_para_db}")
 
         return jsonify({
             "success": True,
@@ -3447,12 +3444,14 @@ def transcribir_diarizar_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa para transcribir."}), 400
     visita_id = session['visita_actual_id']
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+
+    # Se elimina el filtro por 'medico_id'
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita:
         session.pop('visita_actual_id', None)
-        return jsonify({"error": f"Visita con ID {visita_id} no encontrada o no le pertenece."}), 404
+        return jsonify({"error": f"Visita con ID {visita_id} no encontrada."}), 404
 
-    audio_path_relativo_en_db = visita.archivos_adjuntos # Esta ruta puede tener .enc
+    audio_path_relativo_en_db = visita.archivos_adjuntos
     if not audio_path_relativo_en_db:
         return jsonify({"error": "No se especificó la ruta del archivo de audio y no hay audio asociado a la visita."}), 400
 
@@ -3462,7 +3461,6 @@ def transcribir_diarizar_audio():
         db.session.commit()
         return jsonify({"error": "Servicio de transcripción (OpenAI) no configurado en el servidor."}), 503
 
-    # Leer y desencriptar el audio si es necesario
     audio_bytes = leer_y_desencriptar_archivo(audio_path_relativo_en_db)
     if audio_bytes is None:
         logging.error(f"No se pudo leer o desencriptar el audio: {audio_path_relativo_en_db}")
@@ -3470,29 +3468,28 @@ def transcribir_diarizar_audio():
         db.session.commit()
         return jsonify({"error": "No se pudo leer o desencriptar el archivo de audio del servidor."}), 500
 
-    # Whisper espera un objeto de archivo, así que usamos BytesIO
     audio_file_like_object = io.BytesIO(audio_bytes)
-    # El nombre del archivo para Whisper no es crítico aquí, pero podemos usar el original sin .enc
     original_audio_filename_for_whisper = os.path.basename(audio_path_relativo_en_db).replace('.enc','')
 
     texto_transcrito = "[Transcripción no generada.]"
     idioma_detectado_whisper = "N/D"
     try:
-        # Pasar el objeto BytesIO y un nombre de archivo a Whisper
         respuesta_transcripcion = client_openai.audio.transcriptions.create(
             model="whisper-1",
-            file=(original_audio_filename_for_whisper, audio_file_like_object, 'application/octet-stream'), # Tupla para nombre y objeto archivo
+            file=(original_audio_filename_for_whisper, audio_file_like_object, 'application/octet-stream'),
             response_format="verbose_json"
         )
         texto_transcrito = respuesta_transcripcion.text
         idioma_detectado_whisper = respuesta_transcripcion.language
-        logging.info(f"Audio transcrito para Visita ID {visita.id} (Usuario {current_user.id}). Idioma: {idioma_detectado_whisper}. Longitud: {len(texto_transcrito)}")
-        visita.transcripcion = texto_transcrito # Considerar cifrar este campo
+        # Se elimina la referencia a current_user.id
+        logging.info(f"Audio transcrito para Visita ID {visita.id}. Idioma: {idioma_detectado_whisper}. Longitud: {len(texto_transcrito)}")
+        visita.transcripcion = texto_transcrito
         visita.idioma_detectado = idioma_detectado_whisper
         db.session.commit()
         desc_log = f"Transcripción generada para la visita. Idioma detectado: {str(idioma_detectado_whisper).upper()}."
+        # Se reemplaza current_user con valores anónimos
         reg_act = RegistroActividad(
-            visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+            visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
             accion="transcripcion_generada", descripcion=desc_log
         )
         db.session.add(reg_act); db.session.commit()
@@ -3502,28 +3499,31 @@ def transcribir_diarizar_audio():
             "overview": obtener_datos_overview(visita.id)
         }), 200
     except APIError as e_api:
-        logging.error(f"Error de API OpenAI durante la transcripción (Visita {visita.id}, Usuario {current_user.id}): {e_api}", exc_info=True)
+        # Se elimina la referencia a current_user.id
+        logging.error(f"Error de API OpenAI durante la transcripción (Visita {visita.id}): {e_api}", exc_info=True)
         error_msg = f"[Error del servicio de OpenAI al transcribir: {e_api.message if hasattr(e_api, 'message') else str(e_api)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), getattr(e_api, 'status_code', 500)
-    except BadRequestError as e_bad_req: # Esto puede ocurrir si el formato de audio no es soportado por Whisper
-        logging.error(f"Error de BadRequest OpenAI durante la transcripción (Visita {visita.id}, Usuario {current_user.id}): {e_bad_req}", exc_info=True)
+    except BadRequestError as e_bad_req:
+        # Se elimina la referencia a current_user.id
+        logging.error(f"Error de BadRequest OpenAI durante la transcripción (Visita {visita.id}): {e_bad_req}", exc_info=True)
         error_msg = f"[Error en la solicitud de transcripción a OpenAI (ej. archivo no soportado/corrupto): {e_bad_req.message if hasattr(e_bad_req, 'message') else str(e_bad_req)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), 400
     except Exception as e_gen:
-        logging.error(f"Error inesperado durante la transcripción (Visita {visita.id}, Usuario {current_user.id}): {e_gen}", exc_info=True)
+        # Se elimina la referencia a current_user.id
+        logging.error(f"Error inesperado durante la transcripción (Visita {visita.id}): {e_gen}", exc_info=True)
         visita.transcripcion = f"[Error inesperado durante la transcripción: {str(e_gen)[:100]}]"; db.session.commit()
         return jsonify({"error": "Ocurrió un error inesperado durante la transcripción."}), 500
-    # No necesitamos eliminar el archivo temporal porque usamos BytesIO
 
 @app.route('/api/generar_resumen_ai', methods=['POST'])
 def api_generar_resumen_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
-    if not visita: return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
+    # Se elimina el filtro por medico_id
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    if not visita: return jsonify({"error": "Visita no encontrada."}), 404
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar el resumen."}), 400
     idioma_prompt = normalize_language_code(visita.idioma_detectado) or 'es'
@@ -3531,18 +3531,20 @@ def api_generar_resumen_ai():
         visita.transcripcion, visita.plantilla or "Consulta General", idioma_prompt
     )
     if not resumen_gen.startswith("[Error"):
-        visita.resumen_ai = resumen_gen # Considerar cifrar
+        visita.resumen_ai = resumen_gen
         db.session.commit()
         desc_log = f"Resumen AI generado/actualizado para la visita. Plantilla: '{visita.plantilla or "General"}'. Idioma: {idioma_prompt.upper()}."
+        # Se reemplaza current_user con valores anónimos
         reg_act = RegistroActividad(
-            visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+            visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
             accion="resumen_generado", descripcion=desc_log
         )
         db.session.add(reg_act); db.session.commit()
         return jsonify({"message": "Resumen AI generado exitosamente.", "resumen_ai": resumen_gen,
                         "overview": obtener_datos_overview(visita_id)}), 200
     else:
-        logging.error(f"Fallo al generar resumen AI para Visita {visita_id} (Usuario {current_user.id}): {resumen_gen}")
+        # Se elimina la referencia a current_user.id
+        logging.error(f"Fallo al generar resumen AI para Visita {visita_id}: {resumen_gen}")
         return jsonify({"error": f"No se pudo generar el resumen AI: {resumen_gen}"}), 500
 
 @app.route('/api/generar_notas_ai', methods=['POST'])
@@ -3551,35 +3553,34 @@ def api_generar_notas_ai():
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
-    if not visita: return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
+    # Se elimina el filtro por medico_id
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    if not visita: return jsonify({"error": "Visita no encontrada."}), 404
     
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar las notas."}), 400
 
     idioma_prompt = normalize_language_code(visita.idioma_detectado) or 'es'
     
-    # <-- INICIO DE LA MODIFICACIÓN -->
-    # Obtener la especialidad del usuario actual
-    user_specialty = current_user.especialidad
-    
-    # Pasar la especialidad a la función de generación de notas
+    # Como no hay usuario autenticado, no podemos obtener la especialidad.
+    # Por lo tanto, se omite el parámetro 'especialidad_usuario' o se le da un valor por defecto.
     notas_gen_result = generar_notas_ai_desde_transcripcion(
         visita.transcripcion, 
         visita.plantilla or "SOAP", 
         idioma_prompt,
-        especialidad_usuario=user_specialty  # <-- NUEVO PARÁMETRO
+        especialidad_usuario=None
     )
-    # <-- FIN DE LA MODIFICACIÓN -->
 
     if isinstance(notas_gen_result, str) and notas_gen_result.startswith("[Error"):
-        logging.error(f"Fallo al generar notas AI para Visita {visita_id} (Usuario {current_user.id}): {notas_gen_result}")
+        # Se elimina la referencia a current_user.id
+        logging.error(f"Fallo al generar notas AI para Visita {visita_id}: {notas_gen_result}")
         return jsonify({"error": f"No se pudieron generar las notas AI: {notas_gen_result}"}), 500
 
     notas_gen_markdown = notas_gen_result.get('markdown', '')
     notas_gen_html = notas_gen_result.get('html', '') 
 
     if not notas_gen_markdown:
+        # Se elimina la referencia a current_user.id
         logging.error(f"Generación de notas AI exitosa, pero el contenido markdown está vacío para Visita {visita_id}.")
         return jsonify({"error": "Notas AI generadas, pero el contenido markdown está vacío."}), 500
 
@@ -3587,11 +3588,10 @@ def api_generar_notas_ai():
     db.session.commit()
 
     desc_log = f"Notas AI generadas/actualizadas. Plantilla: '{visita.plantilla or "SOAP"}'. Idioma: {idioma_prompt.upper()}."
-    if user_specialty and user_specialty.lower() == 'nutrición':
-        desc_log += " (Plantilla de Nutrición)" # Log específico
-        
+    
+    # Se reemplaza current_user con valores anónimos
     reg_act = RegistroActividad(
-        visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+        visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
         accion="notas_ia_generadas", descripcion=desc_log
     )
     db.session.add(reg_act)
@@ -3702,7 +3702,7 @@ def compartir_visita_email():
         return jsonify({"error": "Falta ID de visita o email del destinatario."}), 400
 
     visita = db.session.query(Visita).filter_by(id=visita_id).first()
-    if not visita: return jsonify({"error": "Visita no encontrada o no tiene permiso para compartirla."}), 404
+    if not visita: return jsonify({"error": "Visita no encontrada."}), 404
 
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
         logging.error("Configuración de correo incompleta en el servidor.")
@@ -3716,12 +3716,9 @@ def compartir_visita_email():
             if 0 <= fecha_vis_obj.month -1 < 12 else fecha_vis_obj.strftime('%d/%m/%Y %H:%M %Z')
         asunto_final = asunto_opc or f"Detalles de la Visita Clínica: {pac_nombre} - {fecha_vis_obj.strftime('%d/%m/%Y')}"
 
-        # Define el cuerpo HTML del correo. Si hay imagen, se enfoca en eso.
-        # Si NO hay imagen, entonces incluye la transcripción, resumen y notas como texto/markdown.
         cuerpo_html = ""
         if image_data_b64:
-            # Si se envía una imagen, el correo solo la contendrá junto a un message
-            image_bytes = base64.b64decode(image_data_b64.split(',')[1]) # Decodificar la imagen
+            image_bytes = base64.b64decode(image_data_b64.split(',')[1])
             nombre_archivo_imagen = f"Notas_Resumen_Visita_{visita_id}_{pac_nombre.replace(' ','_')}.png"
 
             msg_adic_html = f"<p><b>Mensaje adicional:</b><br>{msg_adic_raw.replace(chr(10), '<br>')}</p>" if msg_adic_raw else ''
@@ -3747,15 +3744,14 @@ def compartir_visita_email():
 
             desc_log_email = f"Información de la Visita ID {visita_id} (Notas AI como imagen) compartida por email a {email_dest}."
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
                 accion="visita_compartida", descripcion=desc_log_email
             )
             db.session.add(reg_act); db.session.commit()
-            logging.info(f"Email con imagen de notas AI de la visita {visita_id} enviado a {email_dest} (Usuario {current_user.id}).")
+            logging.info(f"Email con imagen de notas AI de la visita {visita_id} enviado a {email_dest}.")
             return jsonify({"message": f"Notas AI de la visita enviadas exitosamente como imagen a {email_dest}."}), 200
 
         else:
-            # Lógica existente para enviar el contenido de texto si no hay imagen adjunta
             trans_orig = visita.transcripcion if visita.transcripcion and not visita.transcripcion.startswith("[Error") else 'Transcripción no disponible o con errores.'
             res_orig = visita.resumen_ai if visita.resumen_ai and not visita.resumen_ai.startswith("[Error") else 'Resumen IA no disponible o con errores.'
             notas_orig = visita.notas_ai if visita.notas_ai and not visita.notas_ai.startswith("[Error") else 'Notas IA no disponibles o con errores.'
@@ -3767,7 +3763,7 @@ def compartir_visita_email():
             if idioma_email_sel:
                 norm_idioma_deseado = normalize_language_code(idioma_email_sel)
                 if norm_idioma_deseado and norm_idioma_deseado != idioma_orig_vis:
-                    logging.info(f"Traduciendo contenido de visita {visita_id} de {idioma_orig_vis} a {norm_idioma_deseado} para el email (Usuario {current_user.id}).")
+                    logging.info(f"Traduciendo contenido de visita {visita_id} de {idioma_orig_vis} a {norm_idioma_deseado} para el email.")
                     temp_trans = _traducir_texto_interno(trans_orig, idioma_orig_vis, norm_idioma_deseado)
                     temp_res = _traducir_texto_interno(res_orig, idioma_orig_vis, norm_idioma_deseado)
                     temp_notas = _traducir_texto_interno(notas_orig, idioma_orig_vis, norm_idioma_deseado)
@@ -3853,14 +3849,14 @@ def compartir_visita_email():
             desc_log_email = f"Información de la Visita ID {visita_id} compartida por email a {email_dest}."
             if traducido and idioma_final_email != idioma_orig_vis: desc_log_email += f" (Contenido traducido a {idioma_final_email.upper()})"
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
                 accion="visita_compartida", descripcion=desc_log_email
             )
             db.session.add(reg_act); db.session.commit()
-            logging.info(f"Email con detalles de la visita {visita_id} enviado a {email_dest} (Usuario {current_user.id}).")
+            logging.info(f"Email con detalles de la visita {visita_id} enviado a {email_dest}.")
             return jsonify({"message": f"Información de la visita enviada exitosamente a {email_dest}."}), 200
     except Exception as e:
-        logging.error(f"Error al intentar enviar email para visita {visita_id} (Usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al intentar enviar email para visita {visita_id}: {e}", exc_info=True)
         return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
 
 @app.route('/api/receta/<int:receta_id>/compartir_email', methods=['POST'])
@@ -3872,8 +3868,8 @@ def compartir_receta_email(receta_id):
     msg_adic_raw = data.get('message_adicional', '')
     idioma_email_sel = data.get('idioma_email', 'es')
     if not email_dest: return jsonify({"error": "Falta email del destinatario."}), 400
-    receta = db.session.query(RecetaMedica).filter_by(id=receta_id, medico_id=current_user.id).first()
-    if not receta: return jsonify({"error": "Receta no encontrada o no tiene permiso para compartirla."}), 404
+    receta = db.session.query(RecetaMedica).filter_by(id=receta_id).first()
+    if not receta: return jsonify({"error": "Receta no encontrada."}), 404
     if not receta.paciente_receta: return jsonify({"error": "Paciente asociado a la receta no encontrado."}), 404
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
         logging.error("Configuración de correo incompleta para compartir receta.")
@@ -3886,13 +3882,10 @@ def compartir_receta_email(receta_id):
         fecha_em_str = f"{fecha_em_obj.day} de {meses_es[fecha_em_obj.month - 1]} de {fecha_em_obj.year}" \
             if 0 <= fecha_em_obj.month -1 < 12 else fecha_em_obj.strftime('%d/%m/%Y')
         asunto_final = asunto_opc or f"Receta Médica para {pac_nombre} - Emitida el {fecha_em_obj.strftime('%d/%m/%Y')}"
-        # Asumir que la receta original está en español para la lógica de traducción
         idioma_orig_receta = 'es'
         norm_idioma_deseado = normalize_language_code(idioma_email_sel) or 'es'
         traducido = False
 
-        # Desencriptar campos si estuvieran cifrados en BD antes de traducir
-        # diag_orig = desencriptar_si_necesario(receta.diagnostico_relacionado)
         diag_orig = receta.diagnostico_relacionado or "No especificado"
         diag_para_email = diag_orig
         if norm_idioma_deseado != idioma_orig_receta and diag_para_email != "No especificado" and not diag_para_email.startswith("[Error"):
@@ -3901,7 +3894,6 @@ def compartir_receta_email(receta_id):
                 diag_para_email = trad_diag
                 traducido = True
 
-        # notas_orig = desencriptar_si_necesario(receta.notas_adicionales_receta)
         notas_orig = receta.notas_adicionales_receta or ""
         notas_para_email = notas_orig
         if norm_idioma_deseado != idioma_orig_receta and notas_para_email and not notas_para_email.startswith("[Error"):
@@ -3910,7 +3902,6 @@ def compartir_receta_email(receta_id):
                 notas_para_email = trad_notas
                 traducido = True
 
-        # meds_json_orig = desencriptar_si_necesario(receta.medicamentos_json)
         meds_json_orig = receta.medicamentos_json or '[]'
         meds_lista_orig = json.loads(meds_json_orig)
         meds_lista_email = []
@@ -3987,19 +3978,16 @@ body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-col
         mail.send(msg_obj)
         desc_log_email = f"Receta Médica ID {receta_id} compartida por email a {email_dest}."
         if traducido and norm_idioma_deseado != idioma_orig_receta: desc_log_email += f" (Contenido traducido a {norm_idioma_deseado.upper()})"
-        reg_act_data = {"usuario_id": current_user.id, "usuario_nombre_display": current_user.nombre, "accion": "receta_compartida", "descripcion": desc_log_email}
+        reg_act_data = {"usuario_id": None, "usuario_nombre_display": "Sistema anónimo", "accion": "receta_compartida", "descripcion": desc_log_email}
         if receta.visita_id: reg_act_data["visita_id"] = receta.visita_id
-        reg_act = RegistroActividad(**reg_act_data) # type: ignore
+        reg_act = RegistroActividad(**reg_act_data)
         db.session.add(reg_act); db.session.commit()
-        logging.info(f"Email con receta médica {receta_id} enviado a {email_dest} (Usuario {current_user.id}).")
+        logging.info(f"Email con receta médica {receta_id} enviado a {email_dest}.")
         return jsonify({"message": f"Receta médica enviada exitosamente a {email_dest}."}), 200
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al intentar enviar email para receta {receta_id} (Usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al intentar enviar email para receta {receta_id}: {e}", exc_info=True)
         return jsonify({"error": f"No se pudo enviar el email de la receta: {str(e)}"}), 500
-
-def enviar_messages_programados_worker():
-    pass
 
 @app.route('/api/plan_nutricional/<int:plan_id>/compartir_email', methods=['POST'])
 def compartir_plan_nutricional_email(plan_id):
@@ -4010,7 +3998,7 @@ def compartir_plan_nutricional_email(plan_id):
     email_dest = data.get('email_destinatario')
     asunto_opc = data.get('asunto')
     msg_adic_raw = data.get('message_adicional', '')
-    image_data_b64 = data.get('image_data') # <-- NUEVO: Recibimos la imagen en base64
+    image_data_b64 = data.get('image_data')
 
     if not email_dest or not image_data_b64:
         return jsonify({"error": "Falta email del destinatario o los datos de la imagen."}), 400
@@ -4018,7 +4006,7 @@ def compartir_plan_nutricional_email(plan_id):
     plan = db.session.query(PlanNutricional).options(
         joinedload(PlanNutricional.paciente_plan),
         joinedload(PlanNutricional.medico_emisor_plan)
-    ).filter_by(id=plan_id, medico_id=current_user.id).first()
+    ).filter_by(id=plan_id).first()
 
     if not plan:
         return jsonify({"error": "Plan nutricional no encontrado."}), 404
@@ -4035,11 +4023,8 @@ def compartir_plan_nutricional_email(plan_id):
         asunto_final = asunto_opc or f"Plan Nutricional Adjunto para {paciente_obj.nombre} - {fecha_em_str}"
         nombre_archivo_imagen = f"Plan_Nutricional_{paciente_obj.nombre.replace(' ', '_')}_{plan.id}.png"
 
-        # Decodificar la imagen de base64 a bytes
-        # La cabecera 'data:image/png;base64,' se elimina antes de decodificar
         image_bytes = base64.b64decode(image_data_b64.split(',')[1])
 
-        # Crear el cuerpo del email
         msg_adic_html = f"<p><b>Mensaje adicional:</b><br>{msg_adic_raw.replace(chr(10), '<br>')}</p>" if msg_adic_raw else ''
         cuerpo_html = f"""
         <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>{asunto_final}</title></head>
@@ -4053,18 +4038,16 @@ def compartir_plan_nutricional_email(plan_id):
         </body></html>
         """
 
-        # Adjuntar la imagen y enviar
         msg = Message(asunto_final, recipients=[email_dest], html=cuerpo_html, sender=app.config['MAIL_DEFAULT_SENDER'])
         msg.attach(
             filename=nombre_archivo_imagen,
-            content_type='image/png', # <-- Cambiado a image/png
+            content_type='image/png',
             data=image_bytes
         )
         mail.send(msg)
 
-        # Registrar actividad
         reg_act_data = {
-            "usuario_id": current_user.id, "usuario_nombre_display": current_user.nombre,
+            "usuario_id": None, "usuario_nombre_display": "Sistema anónimo",
             "accion": "plan_nutricional_compartido",
             "descripcion": f"Plan Nutricional (ID: {plan.id}) compartido como IMAGEN adjunta por email a {email_dest}."}
         if plan.visita_id:
