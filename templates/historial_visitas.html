@@ -1618,7 +1618,7 @@
             btnCreatePrescriptionVisit.disabled = !currentlySelectedVisit;
             if (currentlySelectedVisit) {
                 btnCreatePrescriptionVisit.onclick = () => {
-                    window.location.href = `/visit/${currentlySelectedVisit}/receta/nueva`;
+                    window.location.href = `/visita/${currentlySelectedVisit}/receta/nueva`;
                 };
             } else {
                 btnCreatePrescriptionVisit.onclick = null;
@@ -1628,7 +1628,7 @@
             btnCreateReferralVisit.disabled = !currentlySelectedVisit;
             if (currentlySelectedVisit) {
                 btnCreateReferralVisit.onclick = () => {
-                    window.location.href = `/visit/${currentlySelectedVisit}/referencia/nueva`;
+                    window.location.href = `/visita/${currentlySelectedVisit}/referencia/nueva`;
                 };
             } else {
                 btnCreateReferralVisit.onclick = null;
@@ -1644,7 +1644,7 @@
         if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
             btnSpecialtyAction.onclick = () => {
                 // This now always points to the new page for creation
-                window.location.href = `/visit/${currentlySelectedVisit}/${routeNameFromData}`;
+                window.location.href = `/visita/${currentlySelectedVisit}/${routeNameFromData}`;
             };
         } else {
             btnSpecialtyAction.onclick = null;
@@ -2313,7 +2313,8 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visita_id: visitId
+                    visita_id: visitId,
+                    idioma_objetivo: 'en'
                 })
             });
             const dataSummary = await responseSummary.json();
@@ -2340,7 +2341,8 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    visita_id: visitId
+                    visita_id: visitId,
+                    idioma_objetivo: 'en'
                 })
             });
             const dataNotes = await responseNotes.json();

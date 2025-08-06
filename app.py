@@ -3524,12 +3524,19 @@ def transcribir_diarizar_audio():
 def api_generar_resumen_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
+    
+    # NUEVO: Obtener el idioma deseado del frontend, con 'en' (inglés) como valor por defecto.
+    idioma_objetivo = data.get('idioma_objetivo', 'en')
+
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita: return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar el resumen."}), 400
-    idioma_prompt = normalize_language_code(visita.idioma_detectado) or 'es'
+    
+    # CORREGIDO: Usar el idioma_objetivo recibido del frontend.
+    idioma_prompt = normalize_language_code(idioma_objetivo) or 'en'
+    
     resumen_gen = generar_resumen_ai_desde_transcripcion(
         visita.transcripcion, visita.plantilla or "Consulta General", idioma_prompt
     )
@@ -3553,6 +3560,10 @@ def api_generar_resumen_ai():
 def api_generar_notas_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
+
+    # NUEVO: Obtener el idioma deseado del frontend, con 'en' (inglés) como valor por defecto.
+    idioma_objetivo = data.get('idioma_objetivo', 'en')
+
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
@@ -3561,20 +3572,17 @@ def api_generar_notas_ai():
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar las notas."}), 400
 
-    idioma_prompt = normalize_language_code(visita.idioma_detectado) or 'es'
+    # CORREGIDO: Usar el idioma_objetivo recibido del frontend.
+    idioma_prompt = normalize_language_code(idioma_objetivo) or 'en'
     
-    # <-- INICIO DE LA MODIFICACIÓN -->
-    # Obtener la especialidad del usuario actual
     user_specialty = current_user.especialidad
     
-    # Pasar la especialidad a la función de generación de notas
     notas_gen_result = generar_notas_ai_desde_transcripcion(
         visita.transcripcion, 
         visita.plantilla or "SOAP", 
         idioma_prompt,
-        especialidad_usuario=user_specialty  # <-- NUEVO PARÁMETRO
+        especialidad_usuario=user_specialty
     )
-    # <-- FIN DE LA MODIFICACIÓN -->
 
     if isinstance(notas_gen_result, str) and notas_gen_result.startswith("[Error"):
         logging.error(f"Fallo al generar notas AI para Visita {visita_id} (Usuario {current_user.id}): {notas_gen_result}")
@@ -3592,7 +3600,7 @@ def api_generar_notas_ai():
 
     desc_log = f"Notas AI generadas/actualizadas. Plantilla: '{visita.plantilla or "SOAP"}'. Idioma: {idioma_prompt.upper()}."
     if user_specialty and user_specialty.lower() == 'nutrición':
-        desc_log += " (Plantilla de Nutrición)" # Log específico
+        desc_log += " (Plantilla de Nutrición)"
         
     reg_act = RegistroActividad(
         visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
@@ -3607,8 +3615,6 @@ def api_generar_notas_ai():
         "notas_ai_html": notas_gen_html,
         "overview": obtener_datos_overview(visita_id)
     }), 200
-
-
 @app.route('/api/generar_plan_alimenticio', methods=['POST'])
 @login_required
 def api_generar_plan_alimenticio():
