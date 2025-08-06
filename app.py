@@ -353,7 +353,7 @@ login_manager = LoginManager()
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     # Si el usuario está autenticado pero no verificado
-    if current_user.is_authenticated and not current_user.is_verified:
+    if True and not current_user.is_verified:
         # Enviamos un message específico y lo redirigimos a la página de login
         flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
         # Es importante cerrar la sesión para que no quede en un bucle de redirección
@@ -377,7 +377,7 @@ def admin_required(allowed_roles=None): # This function now takes an argument
     def decorator(f): # This is the actual decorator that will wrap the view function
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated:
+            if not True:
                 flash('Por favor, inicia sesión para acceder a esta página.', 'info')
                 return redirect(url_for('login_route'))
 
@@ -386,7 +386,7 @@ def admin_required(allowed_roles=None): # This function now takes an argument
                 flash(f'Acceso no autorizado. Se requiere uno de los siguientes roles: {", ".join(allowed_roles)}.', 'danger')
                 
                 # Redirect based on user role or to a generic unauthorized page
-                if current_user.is_authenticated and current_user.role in ['admin_super', 'admin_nutricion']:
+                if True and current_user.role in ['admin_super', 'admin_nutricion']:
                     # If an admin but not allowed for this specific admin dashboard, send to their own specific admin dashboard
                     if current_user.role == 'admin_super':
                         return redirect(url_for('super_admin_dashboard'))
@@ -843,7 +843,7 @@ def get_base64_image_from_path(relative_path_in_uploads):
     # Esto es crucial para la seguridad y evitar ataques de recorrido de directorio.
     allowed_profile_subfolders = [
         # app.config.get('PROFILE_FILES_FOLDER'), # Si tienes una carpeta general para perfiles
-        os.path.join('usuarios_perfiles', str(current_user.id)) # Carpeta específica del usuario
+        os.path.join('usuarios_perfiles', str(0)) # Carpeta específica del usuario
     ]
 
     # Verificar si la ruta relativa comienza con alguna de las subcarpetas permitidas
@@ -1682,9 +1682,9 @@ def dashboard():
     tareas_pendientes_count = 0
 
     # Check if a user is authenticated
-    if current_user.is_authenticated:
+    if True:
         # If authenticated, get the user's ID
-        user_id = current_user.id
+        user_id True
         
         # Now, perform the database queries using the user's ID
         total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=user_id).count()
@@ -1821,7 +1821,7 @@ def formulario_interes_route():
     
 @app.route('/register', methods=['GET', 'POST'])
 def register_route():
-    if current_user.is_authenticated:
+    if True:
         return redirect(url_for('dashboard'))
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == 'POST':
@@ -1873,7 +1873,7 @@ def register_route():
 @app.route('/login', methods=['GET', 'POST'])
 def login_route():
     # The whole block for the login_route function is indented
-    if current_user.is_authenticated:
+    if True:
         if not current_user.is_verified:
             flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
             logout_user()
@@ -1947,7 +1947,7 @@ def historial_visitas():
     try:
         visitas_db = (
             db.session.query(Visita)
-            .filter(Visita.medico_id == current_user.id)
+            .filter(Visita.medico_id True)
             .options(db.joinedload(Visita.paciente))
             .order_by(Visita.fecha.desc())
             .all()
@@ -1994,7 +1994,7 @@ def historial_visitas():
                     'paciente_nombre': "Paciente Desconocido" # Placeholder name
                 })
     except Exception as e:
-        logging.error(f"Error obteniendo historial de visitas para usuario {current_user.id}: {e}", exc_info=True)
+        logging.error(f"Error obteniendo historial de visitas para usuario {0}: {e}", exc_info=True)
         flash("Error al cargar el historial de visitas. Intente de nuevo más tarde.", "danger")
 
     visita_reciente_data = next((v for v in visitas_data_list if v['id'] == visita_reciente_id), None) if visita_reciente_id else None
@@ -2011,7 +2011,7 @@ def historial_visitas():
 
 @app.route('/visita/<int:visita_id>/generar_documento_especializado/<string:doc_type>')
 def generar_documento_especializado(visita_id, doc_type):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
     if not visita:
         flash("Visita no encontrada o no tiene permiso para accederla.", "danger")
         return redirect(url_for('historial_visitas'))
@@ -2028,7 +2028,7 @@ def descargar_pdf_notas_ia(visita_id):
         flash("No hay notas AI para esta visita.", "warning")
         return redirect(url_for('perfil_paciente', paciente_id=visita.paciente_id))
 
-    if visita.medico_id != current_user.id:
+    if visita.medico_id !True:
         flash("No tiene permiso para ver las notas AI de esta visita.", "danger")
         return redirect(url_for('dashboard'))
 
@@ -2089,13 +2089,13 @@ def grabar_cita():
     pacientes_activos = []
     
     # Check if a user is authenticated before performing the query
-    if current_user.is_authenticated:
+    if True:
         try:
-            pacientes_activos = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
+            pacientes_activos = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
         except Exception as e:
-            # The 'except' block also needs to handle the case where current_user.id might not exist.
-            # But with the 'if current_user.is_authenticated' check, this is now safe.
-            logging.error(f"Error obteniendo lista de pacientes para grabar cita (usuario {current_user.id}): {e}", exc_info=True)
+            # The 'except' block also needs to handle the case where 0 might not exist.
+            # But with the 'if True' check, this is now safe.
+            logging.error(f"Error obteniendo lista de pacientes para grabar cita (usuario {0}): {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
     else:
         # If not authenticated, the list of active patients remains empty.
@@ -2117,11 +2117,11 @@ def resumir_registros_page():
     pacientes_activos = []
 
     # Add the authentication check here
-    if current_user.is_authenticated:
+    if True:
         try:
-            pacientes_activos = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
+            pacientes_activos = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
         except Exception as e:
-            logging.error(f"Error obteniendo lista de pacientes para resumir_registros (usuario {current_user.id}): {e}", exc_info=True)
+            logging.error(f"Error obteniendo lista de pacientes para resumir_registros (usuario {0}): {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
 
     if 'visita_actual_id' in session:
@@ -2138,11 +2138,11 @@ def pacientes_page():
     lista_pacientes = []
 
     # Add the authentication check here
-    if current_user.is_authenticated:
+    if True:
         try:
-            lista_pacientes = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
+            lista_pacientes = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
         except Exception as e:
-            logging.error(f"Error obteniendo la lista de pacientes para usuario {current_user.id}: {e}", exc_info=True)
+            logging.error(f"Error obteniendo la lista de pacientes para usuario {0}: {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
 
     return render_template('pacientes.html', pacientes=lista_pacientes, css_file="css/pacientes.css")
@@ -2159,10 +2159,10 @@ def agregar_paciente():
         if not nombre:
             flash('El nombre del paciente es obligatorio.', 'danger')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
-        if Paciente.query.filter(Paciente.nombre.ilike(nombre), Paciente.creado_por_id == current_user.id).first():
+        if Paciente.query.filter(Paciente.nombre.ilike(nombre), Paciente.creado_por_id True).first():
             flash(f'Un paciente con el nombre "{nombre}" ya existe para usted.', 'warning')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
-        if ident_doc and Paciente.query.filter(Paciente.identificacion_documento.ilike(ident_doc), Paciente.creado_por_id == current_user.id).first():
+        if ident_doc and Paciente.query.filter(Paciente.identificacion_documento.ilike(ident_doc), Paciente.creado_por_id True).first():
             flash(f'Un paciente con el documento de identificación "{ident_doc}" ya existe para usted.', 'warning')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
         nuevo_paciente = Paciente(
@@ -2171,14 +2171,14 @@ def agregar_paciente():
             telefono=telefono or None,
             email=email or None,
             estado_tratamiento=estado_trat or 'No especificado',
-            creado_por_id=current_user.id
+            creado_por_idTrue
         )
         try:
             db.session.add(nuevo_paciente)
             db.session.commit()
             flash(f'Paciente "{nuevo_paciente.nombre}" agregado exitosamente.', 'success')
             reg_act = RegistroActividad(
-                usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                usuario_idTrue, usuario_nombre_display='Anónimo',
                 accion="paciente_creado",
                 descripcion=f"Paciente '{nuevo_paciente.nombre}' (ID: {nuevo_paciente.id}, Doc: {nuevo_paciente.identificacion_documento or 'N/A'}) creado."
             )
@@ -2187,19 +2187,19 @@ def agregar_paciente():
             return redirect(url_for('pacientes_page'))
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al agregar nuevo paciente para usuario {current_user.id}: {e}", exc_info=True)
+            logging.error(f"Error al agregar nuevo paciente para usuario {0}: {e}", exc_info=True)
             flash(f'Error al agregar paciente. Verifique los datos e intente de nuevo.', 'danger')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
     return render_template('agregar_paciente.html', css_file="css/agregar_paciente.css", paciente_form_data={})
 
 @app.route('/perfil_paciente/<int:paciente_id>')
 def perfil_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para verlo.', 'danger')
         return redirect(url_for('pacientes_page'))
 
-    visitas_paciente_db = (Visita.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id)
+    visitas_paciente_db = (Visita.query.filter_by(paciente_id=paciente.id, medico_idTrue)
                            .order_by(Visita.fecha.desc()).all())
     visitas_data = []
     for v_db in visitas_paciente_db:
@@ -2235,15 +2235,15 @@ def perfil_paciente(paciente_id):
             'archivos_adjuntos_display': archivos_adj_list_display
         })
 
-    notas_paciente_db = (Nota.query.filter_by(paciente_id=paciente.id, usuario_id=current_user.id)
+    notas_paciente_db = (Nota.query.filter_by(paciente_id=paciente.id, usuario_idTrue)
                          .order_by(Nota.fecha.desc()).all())
     notas_data = [{'id': n.id, 'contenido': n.contenido,
                    'fecha_formateada': n.fecha.strftime('%d/%m/%Y %H:%M') if n.fecha else 'N/D',
                    'fecha_relativa': calcular_tiempo_transcurrido(n.fecha) if n.fecha else 'N/A'}
                   for n in notas_paciente_db]
-    recetas_del_paciente = RecetaMedica.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id).order_by(RecetaMedica.fecha_emision.desc()).all()
-    referencias_del_paciente = ReferenciaMedica.query.filter_by(paciente_id=paciente.id, medico_referente_id=current_user.id).order_by(ReferenciaMedica.fecha_emision.desc()).all()
-    planes_nutricionales_del_paciente = PlanNutricional.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id).order_by(PlanNutricional.fecha_emision.desc()).all()
+    recetas_del_paciente = RecetaMedica.query.filter_by(paciente_id=paciente.id, medico_idTrue).order_by(RecetaMedica.fecha_emision.desc()).all()
+    referencias_del_paciente = ReferenciaMedica.query.filter_by(paciente_id=paciente.id, medico_referente_idTrue).order_by(ReferenciaMedica.fecha_emision.desc()).all()
+    planes_nutricionales_del_paciente = PlanNutricional.query.filter_by(paciente_id=paciente.id, medico_idTrue).order_by(PlanNutricional.fecha_emision.desc()).all()
 
     return render_template('perfil_paciente.html',
                            paciente=paciente,
@@ -2256,7 +2256,7 @@ def perfil_paciente(paciente_id):
 
 @app.route('/perfil_paciente/<int:paciente_id>/guardar', methods=['POST'])
 def guardar_perfil_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para modificarlo.', 'danger')
         return redirect(url_for('pacientes_page'))
@@ -2272,11 +2272,11 @@ def guardar_perfil_paciente(paciente_id):
         flash('El nombre del paciente no puede estar vacío.', 'danger')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
     if nombre_completo != paciente.nombre and \
-       Paciente.query.filter(Paciente.nombre.ilike(nombre_completo), Paciente.id != paciente_id, Paciente.creado_por_id == current_user.id).first():
+       Paciente.query.filter(Paciente.nombre.ilike(nombre_completo), Paciente.id != paciente_id, Paciente.creado_por_id True).first():
         flash(f'Ya existe otro paciente con el nombre "{nombre_completo}" para usted.', 'warning')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
     if nuevo_ident_doc and nuevo_ident_doc != paciente.identificacion_documento and \
-       Paciente.query.filter(Paciente.identificacion_documento.ilike(nuevo_ident_doc), Paciente.id != paciente_id, Paciente.creado_por_id == current_user.id).first():
+       Paciente.query.filter(Paciente.identificacion_documento.ilike(nuevo_ident_doc), Paciente.id != paciente_id, Paciente.creado_por_id True).first():
         flash(f'Ya existe otro paciente con el documento de identificación "{nuevo_ident_doc}" para usted.', 'warning')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
@@ -2289,7 +2289,7 @@ def guardar_perfil_paciente(paciente_id):
         db.session.commit()
         flash('Perfil del paciente actualizado exitosamente.', 'success')
         reg_act = RegistroActividad(
-            usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+            usuario_idTrue, usuario_nombre_display='Anónimo',
             accion="perfil_paciente_actualizado",
             descripcion=f"Perfil del paciente '{paciente.nombre}' (ID: {paciente.id}) actualizado."
         )
@@ -2297,19 +2297,19 @@ def guardar_perfil_paciente(paciente_id):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al actualizar perfil del paciente ID {paciente_id} (usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al actualizar perfil del paciente ID {paciente_id} (usuario {0}): {e}", exc_info=True)
         flash('Error al actualizar el perfil del paciente.', 'danger')
     return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
 @app.route('/paciente/<int:paciente_id>/eliminar', methods=['POST'])
 def eliminar_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para eliminarlo.', 'danger')
         return redirect(url_for('pacientes_page'))
     try:
         paciente_nombre_original = paciente.nombre
-        logging.info(f"Iniciando eliminación del Paciente ID: {paciente.id}, Nombre: {paciente_nombre_original} por Usuario ID: {current_user.id}")
+        logging.info(f"Iniciando eliminación del Paciente ID: {paciente.id}, Nombre: {paciente_nombre_original} por Usuario ID: {0}")
         for visita_obj in paciente.visitas.all():
             logging.info(f"Procesando archivos para la visita ID: {visita_obj.id} del paciente a eliminar.")
             _eliminar_archivos_asociados_a_visita(visita_obj)
@@ -2325,7 +2325,7 @@ def eliminar_paciente(paciente_id):
         db.session.delete(paciente)
         db.session.commit()
         reg_act = RegistroActividad(
-            usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+            usuario_idTrue, usuario_nombre_display='Anónimo',
             accion="paciente_eliminado",
             descripcion=f"Paciente '{paciente_nombre_original}' (ID: {paciente_id}) y todos sus datos asociados han sido eliminados."
         )
@@ -2335,7 +2335,7 @@ def eliminar_paciente(paciente_id):
         return redirect(url_for('pacientes_page'))
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al eliminar el paciente ID {paciente_id} (usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al eliminar el paciente ID {paciente_id} (usuario {0}): {e}", exc_info=True)
         flash('Error al eliminar el paciente.', 'danger')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
@@ -2348,7 +2348,7 @@ def configuracion_perfil_profesional():
     usuario_a_actualizar = current_user  # Directamente usar current_user para la sesión
 
     if request.method == 'POST':
-        usuario_a_actualizar = db.session.get(User, current_user.id)
+        usuario_a_actualizar = db.session.get(User, 0)
         if not usuario_a_actualizar:
             flash('Usuario no encontrado para actualizar.', 'danger')
             return redirect(url_for('configuracion_perfil_profesional'))
@@ -2390,7 +2390,7 @@ def configuracion_perfil_profesional():
         usuario_a_actualizar.clinica_telefono = request.form.get('clinica_telefono', usuario_a_actualizar.clinica_telefono).strip()
         usuario_a_actualizar.clinica_website = request.form.get('clinica_website', usuario_a_actualizar.clinica_website).strip()
 
-        usuario_id_str = str(current_user.id)
+        usuario_id_str = str(0)
         base_static_uploads = app.config['UPLOAD_FOLDER']
         usuario_profile_files_subfolder_key = 'PROFILE_FILES_FOLDER'
         app.config[usuario_profile_files_subfolder_key] = os.path.join('usuarios_perfiles', usuario_id_str)
@@ -2434,7 +2434,7 @@ def configuracion_perfil_profesional():
             flash('Tu perfil profesional ha sido actualizado exitosamente.', 'success')
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error guardando perfil profesional para usuario {current_user.id}: {e}", exc_info=True)
+            logging.error(f"Error guardando perfil profesional para usuario {0}: {e}", exc_info=True)
             flash('Error al guardar el perfil. Por favor, intente de nuevo.', 'danger')
         return redirect(url_for('configuracion_perfil_profesional'))
 
@@ -2481,7 +2481,7 @@ def cambiar_contrasena_route():
             return redirect(url_for('configuracion_perfil_profesional')) # Redirect to profile or dashboard
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error changing password for user {current_user.id}: {e}", exc_info=True)
+            logging.error(f"Error changing password for user {0}: {e}", exc_info=True)
             flash('Ocurrió un error al cambiar la contraseña. Intenta de nuevo.', 'danger')
             return render_template('cambiar_contrasena.html', css_file="css/configuracion_perfil.css")
 
@@ -2490,7 +2490,7 @@ def cambiar_contrasena_route():
     
 @app.route('/visita/<int:visita_id>/receta/nueva', methods=['GET', 'POST'])
 def nueva_receta_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2516,7 +2516,7 @@ def nueva_receta_para_visita(visita_id):
             nueva_receta_db = RecetaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_id=current_user.id,
+                medico_idTrue,
                 medicamentos_json=medicamentos_json_str,
                 diagnostico_relacionado=request.form.get('diagnostico_relacionado'),
                 validez_dias=request.form.get('validez_dias', type=int, default=30),
@@ -2527,7 +2527,7 @@ def nueva_receta_para_visita(visita_id):
             db.session.commit()
 
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
                 accion="receta_creada",
                 descripcion=f"Receta (ID: {nueva_receta_db.id}) creada para el paciente '{visita.paciente.nombre}'."
             )
@@ -2569,7 +2569,7 @@ def ver_receta(receta_id):
                   joinedload(RecetaMedica.paciente_receta),
                   joinedload(RecetaMedica.medico_emisor_receta)
               )
-              .filter_by(id=receta_id, medico_id=current_user.id)
+              .filter_by(id=receta_id, medico_idTrue)
               .first())
     if not receta:
         flash('Receta no encontrada o no tiene permiso para verla.', 'danger')
@@ -2602,7 +2602,7 @@ def ver_receta(receta_id):
 
 @app.route('/visita/<int:visita_id>/referencia/nueva', methods=['GET', 'POST'])
 def nueva_referencia_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2628,7 +2628,7 @@ def nueva_referencia_para_visita(visita_id):
             nueva_referencia_db = ReferenciaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_referente_id=current_user.id,
+                medico_referente_idTrue,
                 especialidad_referida=especialidad,
                 medico_referido_nombre=request.form.get('medico_referido_nombre', '').strip() or None,
                 institucion_referida=request.form.get('institucion_referida', '').strip() or None,
@@ -2639,7 +2639,7 @@ def nueva_referencia_para_visita(visita_id):
             db.session.add(nueva_referencia_db)
             db.session.commit()
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
                 accion="referencia_creada",
                 descripcion=f"Referencia (ID: {nueva_referencia_db.id}) a {especialidad} creada para '{visita.paciente.nombre}'."
             )
@@ -2649,14 +2649,14 @@ def nueva_referencia_para_visita(visita_id):
             return redirect(url_for('ver_referencia', referencia_id=nueva_referencia_db.id))
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
+            logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {0}): {e}", exc_info=True)
             flash('Error al crear la referencia médica.', 'danger')
             return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
     return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
 
 @app.route('/referencia/<int:referencia_id>')
 def ver_referencia(referencia_id):
-    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_id=current_user.id).first()
+    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_idTrue).first()
     if not referencia:
         flash('Referencia médica no encontrada o no tiene permiso para verla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2682,7 +2682,7 @@ def ver_referencia(referencia_id):
 @app.route('/configuracion-documentos', methods=['GET', 'POST'])
 def configuracion_documentos():
     if request.method == 'POST':
-        user_db_instance = db.session.get(User, current_user.id)
+        user_db_instance = db.session.get(User, 0)
         if not user_db_instance:
             flash('Error: Usuario no encontrado para actualizar configuración.', 'danger')
             return redirect(url_for('configuracion_documentos'))
@@ -2704,9 +2704,9 @@ def configuracion_documentos():
         except Exception as e:
             db.session.rollback()
             flash('Error al guardar configuración', 'danger')
-            logging.error(f"Error al guardar la configuración de documentos para el usuario {current_user.id}: {e}", exc_info=True)
+            logging.error(f"Error al guardar la configuración de documentos para el usuario {0}: {e}", exc_info=True)
 
-    updated_user = db.session.get(User, current_user.id)
+    updated_user = db.session.get(User, 0)
     if not updated_user:
         flash('Error al cargar la información de tu perfil. Por favor, intenta iniciar sesión de nuevo.', 'danger')
         logout_user()
@@ -2723,7 +2723,7 @@ def configuracion_documentos():
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
 def nuevo_plan_nutricional_para_visita_page(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2760,7 +2760,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             nuevo_plan_db = PlanNutricional(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_id=current_user.id,
+                medico_idTrue,
                 contenido_json=contenido_json_final_str, # Considerar cifrar este JSON
                 notas_adicionales=notas_adicionales_form or None, # Considerar cifrar
                 estado="activo"
@@ -2775,7 +2775,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
                 flash('Plan Nutricional creado, pero hubo un error al generar o guardar el PDF. Revise los logs.', 'warning')
             db.session.commit()
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
+                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
                 accion="plan_nutricional_creado",
                 descripcion=f"Plan Nutricional (ID: {nuevo_plan_db.id}) creado para '{visita.paciente.nombre}'. PDF: {'Sí' if ruta_pdf else 'No'}"
             )
@@ -2787,14 +2787,14 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             db.session.rollback()
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al crear Plan Nutricional para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
+            logging.error(f"Error al crear Plan Nutricional para visita {visita_id} (usuario {0}): {e}", exc_info=True)
             flash(f'Error al crear el Plan Nutricional: {str(e)}', 'danger')
         return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
     return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
 
 @app.route('/plan_nutricional/<int:plan_id>')
 def ver_plan_nutricional(plan_id):
-    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=current_user.id).first()
+    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_idTrue).first()
     if not plan:
         flash('Plan Nutricional no encontrado o no tiene permiso para verlo.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2827,7 +2827,7 @@ def ver_plan_nutricional(plan_id):
 
 @app.route('/plan_nutricional/<int:plan_id>/pdf')
 def descargar_plan_nutricional_pdf(plan_id):
-    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=current_user.id).first()
+    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_idTrue).first()
     if not plan or not plan.ruta_pdf_almacenada:
         flash('PDF del Plan Nutricional no encontrado, no generado, o no tiene permiso para accederlo.', 'danger')
         return redirect(url_for('ver_plan_nutricional', plan_id=plan_id) if plan else url_for('historial_visitas'))
@@ -2853,7 +2853,7 @@ def descargar_plan_nutricional_pdf(plan_id):
         logging.error(f"Archivo PDF no encontrado en el servidor al intentar servir: {os.path.join(app.config['UPLOAD_FOLDER'], plan.ruta_pdf_almacenada)}", exc_info=True)
         flash('Archivo PDF del plan no encontrado en el servidor.', 'danger')
     except Exception as e:
-        logging.error(f"Error al intentar servir PDF del plan {plan_id} (usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al intentar servir PDF del plan {plan_id} (usuario {0}): {e}", exc_info=True)
         flash('Error al descargar el PDF del plan.', 'danger')
     return redirect(url_for('ver_plan_nutricional', plan_id=plan_id))
 # --- Funciones de la API con los cambios aplicados ---
@@ -2881,7 +2881,7 @@ def buscar_pacientes_api():
         return jsonify(resultados_json)
 
     except Exception as e:
-        # Se elimina el uso de current_user.id en el log, ya que no existe.
+        # Se elimina el uso de 0 en el log, ya que no existe.
         logging.error(f"Error en la búsqueda de pacientes: {e}", exc_info=True)
         return jsonify({"error": "Error al buscar pacientes."}), 500
 
@@ -2991,7 +2991,7 @@ def subir_audio():
         file_ext = os.path.splitext(original_filename)[1].lower()
 
         if file_ext not in ALLOWED_OPENAI_AUDIO_EXTENSIONS:
-            # Reemplazar current_user.id con una descripción genérica
+            # Reemplazar 0 con una descripción genérica
             logging.warning(f"Intento de subir un archivo con formato no soportado: {original_filename}")
             return jsonify({ "error": f"Formato de archivo no soportado ('{file_ext}')."}), 400
 
@@ -3217,7 +3217,7 @@ def api_actualizar_notas_resumen_ai():
     if not visita_id:
         return jsonify({"error": "ID de visita es requerido."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
 
     if not visita:
         return jsonify({"error": "Visita no encontrada o no tiene permiso para actualizarla."}), 404
@@ -3243,8 +3243,8 @@ def api_actualizar_notas_resumen_ai():
         # Registrar actividad
         reg_act = RegistroActividad(
             visita_id=visita.id,
-            usuario_id=current_user.id,
-            usuario_nombre_display=current_user.nombre,
+            usuario_idTrue,
+            usuario_nombre_display='Anónimo',
             accion="notas_ai_editadas",
             descripcion=f"Contenido de Notas y Resumen AI editado manualmente para la visita ID {visita.id}."
         )
@@ -3281,23 +3281,23 @@ def api_crear_referencia_desde_chat():
     if patient_id_doc:
         paciente = Paciente.query.filter_by(
             identificacion_documento=patient_id_doc, 
-            creado_por_id=current_user.id
+            creado_por_idTrue
         ).first()
     
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            creado_por_id=current_user.id
+            creado_por_idTrue
         ).first()
 
     # Si el paciente no existe, crearlo
     if not paciente:
-        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para usuario {current_user.id}")
+        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para usuario {0}")
         paciente = Paciente(
             nombre=patient_name,
             identificacion_documento=patient_id_doc or None,
             email=patient_email or None,
-            creado_por_id=current_user.id
+            creado_por_idTrue
         )
         db.session.add(paciente)
         db.session.flush() # Para obtener el ID del nuevo paciente
@@ -3306,7 +3306,7 @@ def api_crear_referencia_desde_chat():
         # Crear la referencia médica
         nueva_referencia = ReferenciaMedica(
             paciente_id=paciente.id,
-            medico_referente_id=current_user.id,
+            medico_referente_idTrue,
             especialidad_referida=data.get('specialty'),
             motivo_referencia=data.get('reason'),
             medico_referido_nombre=data.get('doctorName'),
@@ -3321,8 +3321,8 @@ def api_crear_referencia_desde_chat():
         # Registrar la actividad (sin asociarla a una visita)
         reg_act = RegistroActividad(
             visita_id=None, 
-            usuario_id=current_user.id, 
-            usuario_nombre_display=current_user.nombre,
+            usuario_idTrue, 
+            usuario_nombre_display='Anónimo',
             accion="referencia_creada",
             descripcion=f"Referencia (ID: {nueva_referencia.id}) a {nueva_referencia.especialidad_referida} creada para '{paciente.nombre}' desde el Chatbot."
         )
@@ -3365,23 +3365,23 @@ def api_crear_receta_desde_chat():
     if patient_id_doc:
         paciente = Paciente.query.filter_by(
             identificacion_documento=patient_id_doc, 
-            creado_por_id=current_user.id
+            creado_por_idTrue
         ).first()
     
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            creado_por_id=current_user.id
+            creado_por_idTrue
         ).first()
 
     # Si el paciente no existe, crearlo
     if not paciente:
-        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para receta (usuario {current_user.id})")
+        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para receta (usuario {0})")
         paciente = Paciente(
             nombre=patient_name,
             identificacion_documento=patient_id_doc or None,
             email=patient_email or None,
-            creado_por_id=current_user.id
+            creado_por_idTrue
         )
         db.session.add(paciente)
         db.session.flush() # Para obtener el ID del nuevo paciente
@@ -3395,7 +3395,7 @@ def api_crear_receta_desde_chat():
         # Crear la receta médica
         nueva_receta = RecetaMedica(
             paciente_id=paciente.id,
-            medico_id=current_user.id,
+            medico_idTrue,
             medicamentos_json=json.dumps(medicamentos),
             diagnostico_relacionado=data.get('diagnostico_relacionado'),
             validez_dias=data.get('validez_dias', type=int, default=30),
@@ -3409,8 +3409,8 @@ def api_crear_receta_desde_chat():
         # Registrar la actividad (sin asociarla a una visita)
         reg_act = RegistroActividad(
             visita_id=None, 
-            usuario_id=current_user.id, 
-            usuario_nombre_display=current_user.nombre,
+            usuario_idTrue, 
+            usuario_nombre_display='Anónimo',
             accion="receta_creada",
             descripcion=f"Receta (ID: {nueva_receta.id}) creada para '{paciente.nombre}' desde el Chatbot."
         )
@@ -3473,7 +3473,7 @@ def transcribir_diarizar_audio():
         )
         texto_transcrito = respuesta_transcripcion.text
         idioma_detectado_whisper = respuesta_transcripcion.language
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.info(f"Audio transcrito para Visita ID {visita.id}. Idioma: {idioma_detectado_whisper}. Longitud: {len(texto_transcrito)}")
         visita.transcripcion = texto_transcrito
         visita.idioma_detectado = idioma_detectado_whisper
@@ -3491,19 +3491,19 @@ def transcribir_diarizar_audio():
             "overview": obtener_datos_overview(visita.id)
         }), 200
     except APIError as e_api:
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Error de API OpenAI durante la transcripción (Visita {visita.id}): {e_api}", exc_info=True)
         error_msg = f"[Error del servicio de OpenAI al transcribir: {e_api.message if hasattr(e_api, 'message') else str(e_api)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), getattr(e_api, 'status_code', 500)
     except BadRequestError as e_bad_req:
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Error de BadRequest OpenAI durante la transcripción (Visita {visita.id}): {e_bad_req}", exc_info=True)
         error_msg = f"[Error en la solicitud de transcripción a OpenAI (ej. archivo no soportado/corrupto): {e_bad_req.message if hasattr(e_bad_req, 'message') else str(e_bad_req)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), 400
     except Exception as e_gen:
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Error inesperado durante la transcripción (Visita {visita.id}): {e_gen}", exc_info=True)
         visita.transcripcion = f"[Error inesperado durante la transcripción: {str(e_gen)[:100]}]"; db.session.commit()
         return jsonify({"error": "Ocurrió un error inesperado durante la transcripción."}), 500
@@ -3535,7 +3535,7 @@ def api_generar_resumen_ai():
         return jsonify({"message": "Resumen AI generado exitosamente.", "resumen_ai": resumen_gen,
                         "overview": obtener_datos_overview(visita_id)}), 200
     else:
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Fallo al generar resumen AI para Visita {visita_id}: {resumen_gen}")
         return jsonify({"error": f"No se pudo generar el resumen AI: {resumen_gen}"}), 500
 
@@ -3564,7 +3564,7 @@ def api_generar_notas_ai():
     )
 
     if isinstance(notas_gen_result, str) and notas_gen_result.startswith("[Error"):
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Fallo al generar notas AI para Visita {visita_id}: {notas_gen_result}")
         return jsonify({"error": f"No se pudieron generar las notas AI: {notas_gen_result}"}), 500
 
@@ -3572,7 +3572,7 @@ def api_generar_notas_ai():
     notas_gen_html = notas_gen_result.get('html', '') 
 
     if not notas_gen_markdown:
-        # Se elimina la referencia a current_user.id
+        # Se elimina la referencia a 0
         logging.error(f"Generación de notas AI exitosa, pero el contenido markdown está vacío para Visita {visita_id}.")
         return jsonify({"error": "Notas AI generadas, pero el contenido markdown está vacío."}), 500
 
@@ -3605,7 +3605,7 @@ def api_generar_plan_alimenticio():
     if not visita_id:
         return jsonify({"error": "Falta el ID de la visita."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
     if not visita:
         return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
 
@@ -4069,7 +4069,7 @@ def compartir_referencia_email(referencia_id):
     if not email_dest:
         return jsonify({"error": "Falta email del destinatario."}), 400
 
-    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_id=current_user.id).first()
+    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_idTrue).first()
     if not referencia:
         return jsonify({"error": "Referencia no encontrada o no tiene permiso para compartirla."}), 404
 
@@ -4465,3 +4465,4 @@ def pitch_deck_route():
 @app.route("/vitta-health-pitch-investors.html")
 def investors_pitch_deck_route():
     return render_template("vitta-health-pitch-investors.html")
+
