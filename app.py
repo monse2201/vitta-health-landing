@@ -340,8 +340,30 @@ else:
 Session(app)
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+with app.app_context():
 
+    usuario_demo = db.session.get(User, 1)
+    
+    if not usuario_demo:
+        print("INFO: Usuario de demostración (ID=1) no encontrado. Creándolo ahora...")
+        
+        usuario_demo = User(
+            id=1, 
+            nombre="Usuario de Demostración",
+            email="demo@vitta.health",
+            role="medico",
+            is_verified=True,
+            especialidad="Nutrición"
+        )
+        usuario_demo.set_password("una_contraseña_segura_para_la_demo")
+        
+        try:
+            db.session.add(usuario_demo)
+            db.session.commit()
+            print("✅ ÉXITO: Usuario de demostración creado y guardado en la base de datos.")
+        except Exception as e:
+            print(f"🚨 ERROR: No se pudo crear el usuario de demostración: {e}")
+            db.session.rollback()
 with app.app_context():
     db.create_all()
 socketio_kwargs = {
