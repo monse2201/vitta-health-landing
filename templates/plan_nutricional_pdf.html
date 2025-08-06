@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Nutritional Plan - {{ plan.paciente_plan.nombre }}</title>
+    <title>Nutrition Plan - {{ plan.paciente_plan.nombre }}</title>
     <style>
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -13,6 +13,8 @@
             border: 1px solid #e9ecef;
             border-radius: 12px;
             padding: 30px 40px;
+            position: relative; /* Required for watermark */
+            overflow: hidden;
         }
         .header-document {
             padding-bottom: 20px;
@@ -109,21 +111,39 @@
             font-size: 8pt;
             color: #95a5a6;
         }
+        /* --- Watermark Style --- */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 6rem; /* Large font size for visibility */
+            color: rgba(220, 53, 69, 0.1); /* Very light, transparent red */
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 5px;
+            pointer-events: none;
+            z-index: 1000;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
     <div class="document-container-scribe">
+        <div class="watermark">DEMO - NO MEDICAL VALIDITY</div>
+
         <div class="header-document">
             <div>
-                <h1>Nutritional Plan</h1>
+                <h1>Nutrition Plan</h1>
                 <p>Issued by Vitta Health Scribe</p>
             </div>
         </div>
 
         <div class="info-section">
             <p><strong>Patient:</strong> {{ plan.paciente_plan.nombre }}</p>
-            <p><strong>Patient ID:</strong> {{ plan.paciente_plan.identificacion_documento or 'N/A' }}</p>
-            <p><strong>Date of Issue:</strong> {{ plan.fecha_emision.strftime('%d/%m/%Y') }}</p>
+            <p><strong>Patient Document:</strong> {{ plan.paciente_plan.identificacion_documento or 'N/A' }}</p>
+            <p><strong>Date of Issue:</strong> {{ plan.fecha_emision.strftime('%B %d, %Y') }}</p>
         </div>
 
         <div class="info-section">
@@ -146,11 +166,11 @@
 
         <div class="section-title">Daily Plan Example</div>
         <div class="meals-grid">
-            {% for meal_name, options in contenido.plan_diario_tipo.items() %}
+            {% for meal_name, food_options in contenido.plan_diario_tipo.items() %}
             <div class="meal-box">
                 <h4>{{ meal_name }}</h4>
                 <ul>
-                    {% for food_option in options %}
+                    {% for food_option in food_options %}
                     <li>{{ food_option }}</li>
                     {% endfor %}
                 </ul>
@@ -159,14 +179,14 @@
         </div>
 
         {% if plan.notas_adicionales %}
-        <div class="section-title">Additional Notes</div>
+        <div class="section-title">Additional Plan Notes</div>
         <div class="notes-section">
             <p>{{ plan.notas_adicionales }}</p>
         </div>
         {% endif %}
 
         <div class="footer">
-            <p>This plan is a guide and may require adjustments. Consult your professional with any questions.</p>
+            <p>This plan is a guide and may require adjustments. Consult your healthcare professional with any questions.</p>
         </div>
     </div>
 </body>

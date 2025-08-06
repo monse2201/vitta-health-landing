@@ -6,7 +6,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-    /* ... (All your existing CSS goes here, no need to change it) ... */
+    /* ... (Your existing CSS goes here, no changes needed) ... */
     :root {
         --vitta-blue: #007bff;
         --vitta-blue-dark: #005cb8;
@@ -19,7 +19,7 @@
         --background-secondary: #f8f9fa;
         --white-color: #ffffff;
         --danger-color: #dc3545;
-        --font-family-sans-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
@@ -274,8 +274,7 @@
     }
 </style>
 
-<div class="document-container-scribe" id="nutritional-plan-container">
-    {# --- The plan content remains exactly the same --- #}
+<div class="document-container-scribe" id="nutrition-plan-container">
     <div class="header-document">
         <div class="institution-details" style="text-align: left; width: 250px;">
             {% if logo_clinica_base64 %}
@@ -306,7 +305,7 @@
                     <p>License: {{ medico.licencia_profesional or 'N/A' }}</p>
                 {% endif %}
                 {% if show_doctor_phone %}
-                    <p>Tel: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
+                    <p>Phone: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
                 {% endif %}
                 {% if show_doctor_bio %}
                     <p>{{ medico.biografia or 'Bio N/A' }}</p>
@@ -327,7 +326,7 @@
     <div class="info-grid">
         <div class="info-item">
             <strong>Date of Issue:</strong>
-            <span>{{ plan.fecha_emision.strftime('%d/%m/%Y %H:%M') if plan.fecha_emision else 'N/A' }}</span>
+            <span>{{ plan.fecha_emision.strftime('%B %d, %Y') if plan.fecha_emision else 'N/A' }}</span>
         </div>
         <div class="info-item">
             <strong>Main Objective:</strong>
@@ -372,10 +371,9 @@
     {% endif %}
 </div>
 
-{# --- MODIFIED BUTTONS SECTION --- #}
 <div class="document-container-scribe footer-actions">
     <a href="{{ url_for('perfil_paciente', paciente_id=plan.paciente_id) }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back
+        <i class="fas fa-arrow-left"></i> Go Back
     </a>
     <button type="button" class="btn btn-secondary" onclick="window.print();">
         <i class="fas fa-print"></i> Print
@@ -383,12 +381,11 @@
     <button type="button" id="btnDownloadImage" class="btn btn-primary">
         <i class="fas fa-camera"></i> Download Image
     </button>
-    <button type="button" class="btn btn-primary" id="btnOpenSharePlanModal">
+    <button type="button" class="btn btn-primary" id="btnOpenShareModal">
         <i class="fas fa-envelope"></i> Share
     </button>
 </div>
 
-{# --- MODAL (unchanged in its HTML) --- #}
 <div id="sharePlanModal" class="modal-scribe">
     <div class="modal-scribe-content">
         <div class="modal-scribe-header">
@@ -402,8 +399,8 @@
                     <input type="email" class="form-control" id="recipient_email_plan" required>
                 </div>
                 <div class="form-group">
-                    <label for="email_subject_plan">Subject (Optional)</label>
-                    <input type="text" class="form-control" id="email_subject_plan">
+                    <label for="subject_email_plan">Subject (Optional)</label>
+                    <input type="text" class="form-control" id="subject_email_plan">
                 </div>
                 <div class="form-group">
                     <label for="additional_message_plan">Additional Message (Optional)</label>
@@ -419,26 +416,20 @@
     </div>
 </div>
 
-{# --- MODIFIED SCRIPT TO HANDLE IMAGE GENERATION --- #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const sharePlanModal = document.getElementById('sharePlanModal');
-    const btnOpenSharePlanModal = document.getElementById('btnOpenSharePlanModal');
+    const shareModal = document.getElementById('sharePlanModal');
+    const btnOpenShareModal = document.getElementById('btnOpenShareModal');
     const btnDownloadImage = document.getElementById('btnDownloadImage');
-    const planContainer = document.getElementById('nutritional-plan-container');
+    const planContainer = document.getElementById('nutrition-plan-container');
 
-    // Function to capture the plan as an image and perform an action
     async function generateImage(action) {
-        // Temporarily hide buttons so they don't appear in the capture
         document.querySelector('.footer-actions').style.display = 'none';
-
         const canvas = await html2canvas(planContainer, {
-            scale: 2, // Increases image resolution
+            scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff'
         });
-
-        // Show buttons again
         document.querySelector('.footer-actions').style.display = 'flex';
         
         if (action.type === 'download') {
@@ -451,7 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Button to download the image
     btnDownloadImage.addEventListener('click', function() {
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
@@ -464,24 +454,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Open the share modal
-    if (btnOpenSharePlanModal) {
-        btnOpenSharePlanModal.addEventListener('click', function() {
-            sharePlanModal.style.display = 'block';
+    if (btnOpenShareModal) {
+        btnOpenShareModal.addEventListener('click', function() {
+            shareModal.style.display = 'block';
             const patientName = {{ plan.paciente_plan.nombre | tojson }};
-            const planDate = "{{ plan.fecha_emision.strftime('%d/%m/%Y') if plan.fecha_emision else 'N/A' }}";
-            const subjectInput = document.getElementById('email_subject_plan');
+            const planDate = "{{ plan.fecha_emision.strftime('%B %d, %Y') if plan.fecha_emision else 'N/A' }}";
+            const subjectInput = document.getElementById('subject_email_plan');
             if (subjectInput.value.trim() === '') {
-                 subjectInput.value = `Nutritional Plan: ${patientName} - Issued ${planDate}`;
+                 subjectInput.value = `Nutritional Plan for ${patientName} - Issued ${planDate}`;
             }
         });
     }
 
-    // Logic for the modal's "Send" button
     document.getElementById('btnSendPlanEmail').addEventListener('click', function() {
         const recipientEmail = document.getElementById('recipient_email_plan').value;
         if (!recipientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-            showFeedback(document.getElementById('share-plan-feedback'), "Please enter a valid email.", "error");
+            showFeedback(document.getElementById('share-plan-feedback'), "Please enter a valid email address.", "error");
             return;
         }
 
@@ -489,13 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating and Sending...';
         showFeedback(document.getElementById('share-plan-feedback'), "Generating plan image...", "processing");
 
-        // Generate the image and then send it
         generateImage({ type: 'share' });
     });
 
     function sendEmailWithImage(imageDataBase64) {
         const recipientEmail = document.getElementById('recipient_email_plan').value;
-        const subject = document.getElementById('email_subject_plan').value;
+        const subject = document.getElementById('subject_email_plan').value;
         const additionalMessage = document.getElementById('additional_message_plan').value;
         const feedbackDiv = document.getElementById('share-plan-feedback');
         const btn = document.getElementById('btnSendPlanEmail');
@@ -504,12 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
             recipient_email: recipientEmail,
             subject: subject,
             additional_message: additionalMessage,
-            image_data: imageDataBase64 // <-- The Base64 image
+            image_data: imageDataBase64
         };
 
         showFeedback(feedbackDiv, "Sending email...", "processing");
 
-        fetch(`/api/nutritional_plan/{{ plan.id }}/share_email`, { 
+        fetch(`/api/plan_nutricional/{{ plan.id }}/share_email`, { 
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
@@ -518,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(({ ok, data }) => {
             if (!ok) throw new Error(data.error || 'Unknown server error.');
             showFeedback(feedbackDiv, data.message || "Sent successfully", "success");
-            setTimeout(() => { sharePlanModal.style.display = 'none'; }, 2500);
+            setTimeout(() => { shareModal.style.display = 'none'; }, 2500);
         })
         .catch(error => {
             console.error('Error sharing nutritional plan:', error);
@@ -530,12 +517,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Modal functions (unchanged)
-    sharePlanModal.querySelector('.close-scribe-modal').addEventListener('click', () => sharePlanModal.style.display = 'none');
-    sharePlanModal.querySelector('.modal-scribe-footer .btn-secondary').addEventListener('click', () => sharePlanModal.style.display = 'none');
+    shareModal.querySelector('.close-scribe-modal').addEventListener('click', () => shareModal.style.display = 'none');
+    shareModal.querySelector('.modal-scribe-footer .btn-secondary').addEventListener('click', () => shareModal.style.display = 'none');
     window.addEventListener('click', (event) => {
-        if (event.target == sharePlanModal) {
-            sharePlanModal.style.display = 'none';
+        if (event.target == shareModal) {
+            shareModal.style.display = 'none';
         }
     });
 

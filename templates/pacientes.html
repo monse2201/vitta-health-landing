@@ -2,36 +2,35 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-{# <link rel="stylesheet" href="{{ url_for('static', filename='css/patients_page.css') }}"> #}
 
 <style>
   :root {
     --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --body-background: #f8f9fa; /* A very light gray for the general background */
+    --body-background: #f8f9fa;
     --card-background: #ffffff;
-    --text-primary: #212529; /* Softer black */
-    --text-secondary: #495057; /* Dark gray for secondary text */
-    --text-muted: #6c757d;   /* Lighter gray for muted text */
-    --accent-color: #007bff; /* Classic primary blue */
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-muted: #6c757d;
+    --accent-color: #007bff;
     --accent-color-darker: #0056b3;
     --accent-color-hover: #0069d9;
-    --success-color: #198754; /* Green for success */
+    --success-color: #198754;
     --success-bg-light: #d1e7dd;
     --warning-color: #ffc107;
     --danger-color: #dc3545;
     --info-color: #0dcaf0;
-    --border-color: #dee2e6; /* A standard border color */
+    --border-color: #dee2e6;
     --border-color-light: #f1f3f5;
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-    --border-radius: 0.375rem; /* Equivalent to 6px, bootstrap uses .25rem and .375rem */
-    --border-radius-lg: 0.5rem; /* 8px */
-    --spacing-xs: 0.25rem; /* 4px */
-    --spacing-sm: 0.5rem;  /* 8px */
-    --spacing-md: 1rem;    /* 16px */
-    --spacing-lg: 1.5rem;  /* 24px */
-    --spacing-xl: 2rem;    /* 32px */
+    --border-radius: 0.375rem;
+    --border-radius-lg: 0.5rem;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
   }
 
   body {
@@ -40,11 +39,11 @@
     color: var(--text-primary);
     margin: 0;
     line-height: 1.6;
-    font-size: 15px; /* A bit larger for base */
+    font-size: 15px;
   }
 
   .patient-page-container {
-    max-width: 1200px; /* Wider for large screens */
+    max-width: 1200px;
     margin: var(--spacing-xl) auto;
     padding: var(--spacing-lg);
   }
@@ -59,7 +58,7 @@
   }
 
   .patient-page-header h2 {
-    font-size: 28px; /* More prominent */
+    font-size: 28px;
     color: var(--text-primary);
     font-weight: 600;
     margin: 0;
@@ -69,24 +68,23 @@
     color: var(--accent-color);
   }
 
-  /* General Action Buttons */
   .action-btn {
     background-color: var(--card-background);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem; /* Adjusted to rems */
+    padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
-    font-size: 0.9rem; /* Slightly smaller */
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm);
-    text-decoration: none; /* For links styled as buttons */
+    text-decoration: none;
   }
   .action-btn:hover {
-    background-color: #e9ecef; /* Very light gray on hover */
+    background-color: #e9ecef;
     border-color: #adb5bd;
     color: var(--text-primary);
   }
@@ -101,7 +99,7 @@
     border-color: var(--accent-color-hover);
     color: white;
   }
-  .action-btn-success { /* New style for success buttons */
+  .action-btn-success {
     background-color: var(--success-color);
     color: white;
     border-color: var(--success-color);
@@ -117,18 +115,18 @@
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
     flex-wrap: wrap;
-    align-items: flex-end; /* Align items to the end */
+    align-items: flex-end;
   }
 
   .patient-search-actions .search-input-group {
     flex-grow: 1;
     display: flex;
-    position: relative; /* For the icon inside */
+    position: relative;
   }
 
   .patient-search-actions input[type="text"] {
-    padding: 0.6rem 0.9rem; /* More padding */
-    padding-left: 2.5rem; /* Space for the icon */
+    padding: 0.6rem 0.9rem;
+    padding-left: 2.5rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 0.95rem;
@@ -141,36 +139,34 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     outline: none;
   }
-  .search-input-group .search-icon { /* Icon inside the input */
+  .search-input-group .search-icon {
     position: absolute;
     left: 0.9rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    pointer-events: none; /* So it doesn't interfere with clicks on the input */
+    pointer-events: none;
   }
-
-  /* .btn-search-paciente removed, icon is integrated */
 
   .patient-list-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* A bit smaller for more cards */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--spacing-lg);
   }
 
   .patient-card {
     background-color: var(--card-background);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg); /* More rounded borders */
+    border-radius: var(--border-radius-lg);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.25s ease-out, transform 0.25s ease-out;
-    display: flex; /* Use flex for internal structure */
-    flex-direction: column; /* Stack header, info, actions */
+    display: flex;
+    flex-direction: column;
   }
   .patient-card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-3px); /* Subtle lifting effect */
+    transform: translateY(-3px);
   }
 
   .patient-card-header {
@@ -179,10 +175,10 @@
     margin-bottom: var(--spacing-md);
   }
   .patient-card-avatar {
-    width: 48px; /* Slightly larger */
+    width: 48px;
     height: 48px;
-    background-color: var(--accent-color-light); /* Softer background color */
-    color: var(--accent-color-darker); /* Darker text for contrast */
+    background-color: #e9f0ff;
+    color: var(--accent-color-darker);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -193,13 +189,13 @@
     text-transform: uppercase;
   }
   .patient-card-name {
-    font-size: 1.15rem; /* Slightly larger */
+    font-size: 1.15rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin: 0; /* Remove h3 margin */
+    margin: 0;
     line-height: 1.3;
   }
-  .patient-card-id { /* Style for patient ID if shown */
+  .patient-card-id {
     font-size: 0.8rem;
     color: var(--text-muted);
     display: block;
@@ -209,7 +205,7 @@
   .patient-card-info {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    flex-grow: 1; /* So this section takes up available space */
+    flex-grow: 1;
   }
   .patient-card-info p {
     margin-bottom: var(--spacing-sm);
@@ -223,25 +219,24 @@
   .patient-card-info p i {
     margin-right: var(--spacing-sm);
     color: var(--text-muted);
-    width: 18px; /* Fixed width for alignment */
+    width: 18px;
     text-align: center;
   }
-  .patient-card-info strong { /* Not necessary, main text is already dark */
-    /* color: var(--text-primary); */
+  .patient-card-info strong {
     font-weight: 500;
   }
 
   .patient-card-status {
     display: inline-block;
     padding: 0.2rem 0.6rem;
-    border-radius: var(--border-radius);
-    font-size: 0.75rem; /* Smaller */
-    font-weight: 600; /* Bolder */
-    margin-left: var(--spacing-xs);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: var(--spacing-sm);
     line-height: 1.2;
   }
-  /* Status colors already defined, they are kept but could be refined */
-  .status-active { background-color: var(--success-bg-light); color: var(--success-color); border: 1px solid var(--success-color) }
+
+  .status-active { background-color: var(--success-bg-light); color: var(--success-color); border: 1px solid #a3cfbb; }
   .status-follow-up { background-color: #fff3cd; color: #856404; border: 1px solid #ffda6a;}
   .status-inactive { background-color: #f8f9fa; color: var(--text-muted); border: 1px solid #ced4da;}
 
@@ -251,7 +246,6 @@
     border-top: 1px solid var(--border-color-light);
     text-align: right;
   }
-  /* The "View Profile" button will use .action-btn and .action-btn-primary or .action-btn-success */
 
   .global-patient-actions {
     margin-top: var(--spacing-xl);
@@ -259,14 +253,14 @@
     border-top: 1px solid var(--border-color);
     display: flex;
     gap: var(--spacing-md);
-    justify-content: flex-start; /* Or center/flex-end as preferred */
+    justify-content: flex-start;
   }
 
   .no-patients {
     text-align: center;
     padding: var(--spacing-xl) var(--spacing-lg);
     color: var(--text-muted);
-    font-size: 1.1rem; /* Larger */
+    font-size: 1.1rem;
     background-color: var(--card-background);
     border-radius: var(--border-radius-lg);
     border: 1px dashed var(--border-color);
@@ -275,7 +269,7 @@
     font-size: 48px;
     display: block;
     margin-bottom: var(--spacing-md);
-    color: #ced4da; /* A lighter gray for the large icon */
+    color: #ced4da;
   }
 
   /* Flash Messages (improved) */
@@ -301,8 +295,8 @@
   .flash-messages .danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
   .flash-messages .warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
   .flash-messages .info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
-
 </style>
+
 
 <div class="patient-page-container">
 
@@ -310,7 +304,7 @@
       {% if messages %}
         <ul class="flash-messages">
         {% for category, message in messages %}
-          {# Add icons to flash messages #}
+          {# Íconos para los mensajes flash #}
           <li class="{{ category }}">
             {% if category == 'success' %}<i class="fas fa-check-circle"></i>
             {% elif category == 'danger' %}<i class="fas fa-exclamation-triangle"></i>
@@ -325,57 +319,53 @@
     {% endwith %}
 
     <div class="patient-page-header">
-        <h2><i class="fas fa-users"></i> Patient Management</h2> {# Slightly modified title #}
-        <a href="{{ url_for('agregar_paciente') }}" class="action-btn action-btn-primary" id="addPatientBtn"> {# Use <a> for semantic navigation #}
+        <h2><i class="fas fa-users"></i> Patient Management</h2>
+        <a href="{{ url_for('agregar_paciente') }}" class="action-btn action-btn-primary" id="addPatientBtn">
             <i class="fas fa-user-plus"></i> Add New Patient
         </a>
     </div>
 
     <div class="patient-search-actions">
         <div class="search-input-group">
-            <i class="fas fa-search search-icon"></i> {# Icon inside the input #}
+            <i class="fas fa-search search-icon"></i>
             <input type="text" id="patientSearchInput" placeholder="Search by name, email..." />
-            {# Explicit search button removed, search can be automatic upon typing #}
         </div>
-        {# <button class="action-btn"> <i class="fas fa-filter"></i> Advanced Filters </button> #}
     </div>
 
-    {% if patients %}
+    {% if pacientes %}
     <div class="patient-list-grid" id="patientListGrid">
-        {% for patient_item in patients %}
-        <div class="patient-card" data-name="{{ patient_item.name.lower() }}" data-email="{{ patient_item.email.lower() if patient_item.email else '' }}">
+        {% for patient_item in pacientes %}
+        <div class="patient-card" data-name="{{ patient_item.nombre.lower() }}" data-email="{{ patient_item.email.lower() if patient_item.email else '' }}">
             <div class="patient-card-header">
                 <div class="patient-card-avatar">
-                    {{ patient_item.name[0]|upper if patient_item.name else 'P' }}
+                    {{ patient_item.nombre[0]|upper if patient_item.nombre else 'P' }}
                 </div>
-                <div> {# Container for name and ID if added #}
-                    <h3 class="patient-card-name">{{ patient_item.name }}</h3>
-                    {# Optional: Display patient ID here if it's useful and short #}
-                    {# <span class="patient-card-id">ID: {{ patient_item.id }}</span> #}
+                <div>
+                    <h3 class="patient-card-name">{{ patient_item.nombre }}</h3>
                 </div>
             </div>
             <div class="patient-card-info">
                 {% if patient_item.email and patient_item.email != 'N/A' %}
                 <p><i class="fas fa-envelope"></i>{{ patient_item.email }}</p>
                 {% endif %}
-                {% if patient_item.phone and patient_item.phone != 'N/A' %}
-                <p><i class="fas fa-phone"></i>{{ patient_item.phone }}</p>
+                {% if patient_item.telefono and patient_item.telefono != 'N/A' %}
+                <p><i class="fas fa-phone"></i>{{ patient_item.telefono }}</p>
                 {% endif %}
-                {% if patient_item.treatment_status %}
+                {% if patient_item.estado_tratamiento %}
                 <p><i class="fas fa-notes-medical"></i>Status:
                     <span class="patient-card-status
-                        {% set status_lower = patient_item.treatment_status.lower() %}
-                        {% if 'active' in status_lower %}status-active
-                        {% elif 'follow-up' in status_lower %}status-follow-up
-                        {% elif 'inactive' in status_lower %}status-inactive
+                        {% set status_lower = patient_item.estado_tratamiento.lower() %}
+                        {% if 'activo' in status_lower %}status-active
+                        {% elif 'seguimiento' in status_lower %}status-follow-up
+                        {% elif 'inactivo' in status_lower %}status-inactive
                         {% else %}status-inactive{% endif %}">
-                        {{ patient_item.treatment_status }}
+                        {{ patient_item.estado_tratamiento }}
                     </span>
                 </p>
                 {% endif %}
             </div>
             <div class="patient-card-actions">
-                <a href="{{ url_for('patient_profile', patient_id=patient_item.id) }}" class="action-btn action-btn-success"> {# Changed to success for profile #}
+                <a href="{{ url_for('perfil_paciente', paciente_id=patient_item.id) }}" class="action-btn action-btn-success">
                     <i class="fas fa-address-card"></i> View Profile
                 </a>
             </div>
@@ -384,14 +374,13 @@
     </div>
     {% else %}
     <div class="no-patients">
-        <i class="fas fa-user-md"></i> {# More thematic icon #}
+        <i class="fas fa-user-md"></i>
         <p>You don't have any registered patients yet.</p>
         <p>Get started by clicking "Add New Patient".</p>
     </div>
     {% endif %}
 
     <div class="global-patient-actions">
-        {# These buttons might need more styling or specific functionality #}
         <button class="action-btn" id="importPatientsBtn"><i class="fas fa-file-import"></i> Import</button>
         <button class="action-btn" id="downloadPatientsBtn"><i class="fas fa-file-download"></i> Download</button>
     </div>
@@ -399,20 +388,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // The "Add Patient" button is now an <a> link, no JS needed for navigation.
-    // If it's kept as a button and JS is needed, the previous logic is correct.
-    // const addPatientBtn = document.getElementById('addPatientBtn');
-    // if (addPatientBtn) {
-    //     addPatientBtn.addEventListener('click', function() {
-    //         window.location.href = "{{ url_for('add_patient') }}";
-    //     });
-    // }
+    // El bloque de JavaScript que causaba el error ha sido eliminado.
+    // El enlace <a> para agregar paciente ya funciona por sí solo.
 
     const patientSearchInput = document.getElementById('patientSearchInput');
     const patientListGrid = document.getElementById('patientListGrid');
 
     function filterPatients() {
-        if (!patientListGrid) return; // Exit if the list doesn't exist (e.g., no patients)
+        if (!patientListGrid) return; // Salir si la lista no existe
         
         const searchTerm = patientSearchInput.value.toLowerCase().trim();
         const cards = patientListGrid.querySelectorAll('.patient-card');
@@ -421,9 +404,6 @@ document.addEventListener('DOMContentLoaded', function() {
         cards.forEach(card => {
             const name = card.dataset.name || '';
             const email = card.dataset.email || '';
-            // To search by ID, if you add it to the data-attribute:
-            // const id = card.dataset.id || ''; 
-            // if (name.includes(searchTerm) || email.includes(searchTerm) || id.includes(searchTerm)) {
             
             if (name.includes(searchTerm) || email.includes(searchTerm)) {
                 card.style.display = '';
@@ -433,13 +413,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Optional: Show message if the search yields no results
+        // Opcional: Mostrar mensaje si la búsqueda no arroja resultados
         let noResultsMsg = document.getElementById('noSearchResults');
         if (!hasResults && searchTerm !== '') {
             if (!noResultsMsg) {
                 noResultsMsg = document.createElement('p');
                 noResultsMsg.id = 'noSearchResults';
-                noResultsMsg.className = 'no-patients'; // Reuse style or create a new one
+                noResultsMsg.className = 'no-patients';
                 noResultsMsg.innerHTML = '<i class="fas fa-search-minus"></i> No patients were found matching your search.';
                 patientListGrid.parentNode.insertBefore(noResultsMsg, patientListGrid.nextSibling);
             }
@@ -449,11 +429,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if(patientSearchInput) { // No search button needed for real-time search
+    if(patientSearchInput) {
         patientSearchInput.addEventListener('keyup', filterPatients);
     }
 
-    // Placeholder functionality for import/download buttons
+    // Funcionalidad de ejemplo para los botones de importar/descargar
     const importPatientsBtn = document.getElementById('importPatientsBtn');
     if(importPatientsBtn) {
         importPatientsBtn.addEventListener('click', function() {
