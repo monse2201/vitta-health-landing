@@ -211,10 +211,7 @@ app.secret_key = os.environ.get('SECRET_KEY', '1cc211a1a2357f80fb028885caa21d0e3
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY') 
 # Hugging Face Token (para modelos de traducción)
 hf_token = os.environ.get('HUGGINGFACE_TOKEN', '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')
-
 # --- NUEVA VARIABLE DE ENTORNO PARA CIFRADO DE ARCHIVOS ---
-# Generar con: from cryptography.fernet import Fernet; Fernet.generate_key().decode()
-# Esta clave DEBE ser de 32 bytes codificados en base64 seguros para URL.
 FILE_ENCRYPTION_KEY_STR = os.environ.get('FILE_ENCRYPTION_KEY')
 fernet_cipher = None
 if FILE_ENCRYPTION_KEY_STR and Fernet:
@@ -230,34 +227,29 @@ else:
     logging.warning("⚠️ Biblioteca 'cryptography' no disponible. El cifrado de archivos a nivel de aplicación está DESHABILITADO.")
 
 
-@app.# --- INICIO DE LA CORRECCIÓN ---
+# --- CONFIGURACIÓN DE BASE DE DATOS, CORREO Y REDIS ---
 
 # Importar la utilidad para parsear URLs de forma segura
 from urllib.parse import urlparse
 
-# Database Configuration
-# Usa la variable de entorno `DATABASE_URL` que DigitalOcean provee.
-# Si no la encuentra, usa una URL local por defecto para desarrollo.
+# Configuración de Base de Datos (Lógica Simplificada y Corregida)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     logging.warning("DATABASE_URL no encontrada en el entorno. Usando base de datos local por defecto.")
     DATABASE_URL = 'postgresql+psycopg2://whatsapp_user:securepassword@postgres-db:5432/whatsapp_project'
 
-# --- CONFIGURACIÓN DE LA APLICACIÓN (app.config) ---
+# Asignar la configuración a la aplicación Flask
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 
-# Loguear a qué base de datos nos conectamos sin exponer la contraseña
+# Registrar a qué base de datos nos conectamos sin exponer la contraseña
 try:
     parsed_uri = urlparse(DATABASE_URL)
     logging.info(f"Conectando a la base de datos en host: {parsed_uri.hostname}")
 except Exception as e:
     logging.error(f"No se pudo parsear la DATABASE_URL: {e}")
 
-# --- FIN DE LA CORRECCIÓN ---
-
-
-# Configuración de correo electrónico (este bloque no cambia)
+# Configuración de correo electrónico
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 MAIL_PORT = int(os.environ.get('MAIL_PORT', 465))
 MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'false').lower() in ('true', '1', 't')
@@ -266,15 +258,12 @@ MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'info@vitta.health')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'duzo nztm nfst flnr')
 MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'info@vitta.health')
 
-# Configuración de Redis para SocketIO y Flask-Session (este bloque no cambia)
+# Configuración de Redis
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
 REDIS_USE_SSL = os.environ.get('REDIS_USE_SSL', 'false').lower() == 'true'
-redis_url_for_socketio = os.environ.get("REDIS_URL_SOCKETIO")('/grabar_cita')def subir_audio():
-    # En producción, se asume que un proxy inverso (Nginx, Caddy) maneja TLS 1.3 para HTTPS.
-    # La aplicación Flask en sí no necesita manejar certificados SSL directamente en este caso.
-
+redis_url_for_socketio = os.environ.get("REDIS_URL_SOCKETIO")
 client_openai = None
 if OPENAI_API_KEY and OpenAI:
     try:
