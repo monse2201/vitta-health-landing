@@ -32,6 +32,43 @@ from mutagen.wave import WAVE
 from mutagen.flac import FLAC
 from pydub import AudioSegment
 
+# --- INICIALIZACIÓN DE LA APLICACIÓN FLASK ---
+app = Flask(__name__)
+
+# --- INICIO DEL CÓDIGO DE CORRECCIÓN MOVIDO Y UNIFICADO ---
+# Este bloque ahora está en el lugar correcto, al inicio, para que
+# todas las funciones y clases estén disponibles para el resto de la aplicación.
+
+# Simulación del objeto 'current_user' que Flask-Login proporcionaría
+class MockUser:
+    def __init__(self, id, email, nombre):
+        self.id = id
+        self.email = email
+        self.nombre = nombre
+
+# Decoradores simulados para las rutas de admin
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # En un sistema real, aquí se verificaría la sesión del usuario.
+        # Para esta demo, simplemente continuamos.
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(allowed_roles=None):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # En un sistema real, se verificaría el rol del usuario.
+            # Aquí, simplemente permitimos el acceso.
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+# Usuario simulado global, AHORA UNIFICADO con ID 1 para consistencia
+current_user = MockUser(id=1, email="demo@vitta.health", nombre="Usuario de Demostración")
+# --- FIN DEL CÓDIGO DE CORRECCIÓN MOVIDO Y UNIFICADO ---
+
 
 def convertir_webm_a_wav(ruta_original):
     if not ruta_original.endswith(".webm"):
@@ -55,20 +92,6 @@ def obtener_duracion_audio_segundos(ruta_archivo):
         logging.warning(f"Could not get audio duration: {e}")
         return None
 
-
-def convertir_webm_a_wav(ruta_original):
-    if not ruta_original.endswith(".webm"):
-        return ruta_original  # No conversion needed
-
-    ruta_convertida = ruta_original.replace(".webm", ".wav")
-    try:
-        audio = AudioSegment.from_file(ruta_original, format="webm")
-        audio.export(ruta_convertida, format="wav")
-        return ruta_convertida
-    except Exception as e:
-        logging.error(f"Error converting audio: {e}")
-        return None
-
 from mutagen.mp4 import MP4
 import math
 
@@ -78,7 +101,7 @@ class ListPagination:
         self.total = len(items_list)
         self.page = page
         self.per_page = per_page
-        
+
         start_index = (page - 1) * per_page
         end_index = start_index + per_page
         self.items = items_list[start_index:end_index]
@@ -183,7 +206,6 @@ except ImportError:
 # --- CONFIGURACIÓN DE LOGGING ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # --- DATOS FIJOS PARA LA DEMO DE PROFESIONALES ---
-# --- DATOS FIJOS PARA LA DEMO DE PROFESIONALES ---
 DEMO_STATS_PROFESIONALES = {
     # Nombres completos actualizados
     "María Liseth Arias Tames": {"minutos": 2815, "docs_creados": 47, "pacientes": 62, "visitas": 62, "resumidos": 20},
@@ -196,8 +218,6 @@ ALLOWED_OPENAI_AUDIO_EXTENSIONS = [
     '.mpga', '.oga', '.ogg', '.wav', '.webm'
 ]
 
-# --- INICIALIZACIÓN DE LA APLICACIÓN FLASK ---
-app = Flask(__name__)
 
 # === ENVIRONMENT-BASED CONFIGURATION ===
 import os
@@ -569,15 +589,16 @@ class ProspectoInteres(db.Model):
 
     def __repr__(self):
         return f'<ProspectoInteres {self.id} - {self.nombre} {self.apellidos}>'
+
 # --- INICIO: CÓDIGO PARA CREAR USUARIO DE DEMO ---
 # Este bloque se asegura de que el usuario principal para la demo exista.
 with app.app_context():
     # Verificar si el usuario demo con id=1 ya existe.
     usuario_demo = db.session.get(User, 1)
-    
+
     if not usuario_demo:
         print("INFO: Usuario de demostración (ID=1) no encontrado. Creándolo ahora...")
-        
+
         # Si no existe, lo creamos
         usuario_demo = User(
             id=1,  # Asignamos explícitamente el ID 1
@@ -589,7 +610,7 @@ with app.app_context():
         )
         # Es crucial establecer una contraseña, aunque no se use para iniciar sesión
         usuario_demo.set_password("una_contraseña_segura_para_la_demo")
-        
+
         try:
             db.session.add(usuario_demo)
             db.session.commit()
@@ -597,7 +618,7 @@ with app.app_context():
         except Exception as e:
             print(f"🚨 ERROR: No se pudo crear el usuario de demostración: {e}")
             db.session.rollback()
-    
+
     # Esta línea es importante, asegura que todas las tablas se creen
     db.create_all()
 # --- FIN: CÓDIGO PARA CREAR USUARIO DE DEMO ---
@@ -1302,7 +1323,7 @@ def generar_notas_ai_desde_transcripcion(transcripcion, plantilla_tipo="SOAP", i
     global client_openai
     if not client_openai:
         return "[Error: Servicio IA (OpenAI) no configurado para notas.]"
-    
+
     nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"el idioma del texto ({idioma_objetivo_para_prompt})")
     if especialidad_usuario and especialidad_usuario.strip().lower() == 'nutrición':
         prompt_sistema = (
@@ -1329,7 +1350,7 @@ def generar_notas_ai_desde_transcripcion(transcripcion, plantilla_tipo="SOAP", i
             f"Transcripción:\n{transcripcion}\n\n"
             f"Notas de Consulta Nutricional Detalladas (en {nombre_idioma_prompt}):"
         )
-        
+
         logging.info(f"Generando NOTAS AI para transcripción con plantilla de NUTRICIÓN. Idioma: {idioma_objetivo_para_prompt}")
 
     else:
@@ -1593,7 +1614,7 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
     base_filename_prefix: prefijo para el nombre del archivo PDF (ej. 'notas_visita').
     """
     global fernet_cipher
-    
+
     if not HTML:
         logging.warning(f"Weasyprint no está instalado. No se puede generar el PDF para {base_filename_prefix}.")
         return None
@@ -1646,20 +1667,20 @@ def dashboard():
 
     # Aquí se simula un usuario con ID 1
     user_id = 1
-    
+
     # Ahora, se realizan las consultas a la base de datos usando el ID simulado
     total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=user_id).count()
-    
+
     today_utc = datetime.now(timezone.utc).date()
     today_start_utc = datetime.combine(today_utc, datetime.min.time(), tzinfo=timezone.utc)
     today_end_utc = datetime.combine(today_utc, datetime.max.time(), tzinfo=timezone.utc)
-    
+
     visitas_hoy_count = db.session.query(Visita.id).filter(
         Visita.medico_id == user_id,
         Visita.fecha >= today_start_utc,
         Visita.fecha <= today_end_utc
     ).count()
-    
+
     tareas_pendientes_count = db.session.query(Tarea.id).filter(
         Tarea.usuario_id == user_id,
         Tarea.status != "Completada"
@@ -1693,7 +1714,7 @@ def formulario_interes_route():
         carne_medico = request.form.get('carne_medico', '').strip()
         identificacion = request.form.get('identificacion', '').strip()
         lugar_trabajo = request.form.get('lugar_trabajo', '').strip()
-        
+
         if not all([nombre, apellidos, email, telefono]):
             return jsonify({'error': 'Nombre, apellidos, correo y teléfono son obligatorios.'}), 400
 
@@ -1708,7 +1729,7 @@ def formulario_interes_route():
             lugar_trabajo=lugar_trabajo or None,
             consentimiento=True
         )
-        
+
         try:
             db.session.add(nuevo_prospecto)
             db.session.commit()
@@ -1729,20 +1750,20 @@ def formulario_interes_route():
                     <li><strong>Lugar de Trabajo:</strong> {lugar_trabajo or 'No proporcionado'}</li>
                 </ul>
                 """
-                
+
                 msg = Message(
                     subject="Nuevo Prospecto de Interés Registrado",
                     sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER']),
                     recipients=['info@vitta.health'],
                     html=html_body
                 )
-                
+
                 mail.send(msg)
                 logging.info(f"Correo de notificación enviado a info@vitta.health para el prospecto {email}.")
 
             except Exception as e_mail:
                 logging.error(f"FALLO al enviar el correo de notificación para {email}: {e_mail}", exc_info=True)
-            
+
             # --- INICIO DEL NUEVO CÓDIGO: Enviar correo de confirmación al prospecto ---
             try:
                 # Renderizar la plantilla HTML del correo de confirmación
@@ -1750,7 +1771,7 @@ def formulario_interes_route():
                     'confirmacion_interes.html',
                     nombre=nuevo_prospecto.nombre
                 )
-                
+
                 # Crear el objeto del message para el prospecto
                 msg_prospecto = Message(
                     subject="Confirmación de tu solicitud en Vitta Health",
@@ -1758,7 +1779,7 @@ def formulario_interes_route():
                     recipients=[nuevo_prospecto.email], # El destinatario es el correo del prospecto
                     html=html_confirmacion_prospecto
                 )
-                
+
                 # Enviar el correo de confirmación
                 mail.send(msg_prospecto)
                 logging.info(f"Correo de confirmación enviado exitosamente a {nuevo_prospecto.email}.")
@@ -1767,14 +1788,14 @@ def formulario_interes_route():
                 # Si falla el envío al prospecto, solo se registra el error pero no se detiene el proceso
                 logging.error(f"FALLO al enviar el correo de confirmación al prospecto {nuevo_prospecto.email}: {e_mail_prospecto}", exc_info=True)
             # --- FIN DEL NUEVO CÓDIGO ---
-            
+
             return jsonify({'message': 'Solicitud recibida exitosamente.'}), 200
 
         except Exception as e:
             db.session.rollback()
             logging.error(f"Error al registrar prospecto de interés {email}: {e}", exc_info=True)
             return jsonify({'error': 'Ocurrió un error al guardar tu información.'}), 500
-    
+
     # La parte del método GET no necesita cambios.
     return render_template('formulario_interes.html', form_data={})
 
@@ -1973,7 +1994,7 @@ def grabar_cita():
     usuario_simulado.is_authenticated = True
     usuario_simulado.role = 'medico'
     # --- FIN DEL CÓDIGO CORREGIDO ---
-    
+
     return render_template('grabar_cita.html',
                            css_file="css/grabar_cita.css",
                            plantillas=plantillas,
@@ -2258,13 +2279,13 @@ def nueva_receta_para_visita(visita_id):
         if not medicamentos_json_str:
             flash('Debe agregar al menos un medicamento a la receta.', 'danger')
             return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_repost)
-        
+
         try:
             parsed_meds = json.loads(medicamentos_json_str)
             if not isinstance(parsed_meds, list) or not parsed_meds:
                 flash('Debe agregar al menos un medicamento válido.', 'danger')
                 raise json.JSONDecodeError("La lista de medicamentos no puede estar vacía.", medicamentos_json_str, 0)
-            
+
             nueva_receta_db = RecetaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
@@ -2296,7 +2317,7 @@ def nueva_receta_para_visita(visita_id):
             db.session.rollback()
             logging.error(f"Error al crear receta para visita {visita_id}: {e}", exc_info=True)
             flash(f'Error al crear la receta: {str(e)}', 'danger')
-        
+
         # Si ocurre un error, volver a renderizar el formulario con los datos que el usuario ya ingresó
         return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_repost)
 
@@ -2309,7 +2330,7 @@ def nueva_receta_para_visita(visita_id):
             flash(f"Se han sugerido {len(datos_ia['medicamentos'])} medicamento(s) basados en la transcripción. Por favor, revísalos y ajústalos.", 'info')
         if datos_ia and datos_ia.get("diagnostico_sugerido") and not datos_ia.get("diagnostico_sugerido","").startswith("[Error"):
             form_data_initial['diagnostico_relacionado'] = datos_ia["diagnostico_sugerido"]
-            
+
     form_data_initial.setdefault('validez_dias', '30')
 
     return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_initial)
@@ -2326,14 +2347,14 @@ def ver_receta(receta_id):
     if not receta:
         flash('Receta no encontrada o no tiene permiso para verla.', 'danger')
         return redirect(url_for('historial_visitas'))
-    
+
     medicamentos_lista = []
     try:
         if receta.medicamentos_json:
             medicamentos_lista = json.loads(receta.medicamentos_json)
     except json.JSONDecodeError:
         flash('Error al leer los medicamentos de la receta. El formato podría estar corrupto.', 'warning')
-    
+
     # Se simula el usuario médico para el PDF
     medico_for_pdf = User(nombre="Usuario de Demostración", especialidad="Medicina General")
     medico_for_pdf.show_clinic_name_pdf = True
@@ -2710,7 +2731,7 @@ def iniciar_visita():
         )
         db.session.add(reg_act)
         db.session.commit()
-        
+
         overview = obtener_datos_overview(nueva_visita.id)
         return jsonify({
             "message": "Visita iniciada con éxito.",
@@ -2837,7 +2858,7 @@ def api_resumir_documentos_e_iniciar_visita():
 
             if Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form), creado_por_id=1).first(): # Se usa un ID fijo
                  return jsonify({"error": f"Ya existe un paciente con el nombre '{pac_nom_form}'."}), 409
-            
+
             pac_obj = Paciente(
                 nombre=pac_nom_form,
                 identificacion_documento=pac_ident_doc_form or None,
@@ -2991,7 +3012,7 @@ def api_actualizar_notas_resumen_ai():
         else:
             visita.notas_ai = visita.notas_ai # Mantiene el valor existente
         # --- FIN DEL CAMBIO CLAVE ---
-        
+
         db.session.commit()
 
         # Registrar actividad
@@ -3026,7 +3047,7 @@ def api_crear_referencia_desde_chat():
     patient_name = data.get('patientName', '').strip()
     patient_id_doc = data.get('patientId', '').strip()
     patient_email = data.get('patientEmail', '').strip()
-    
+
     if not patient_name:
         return jsonify({'error': 'El nombre del paciente es obligatorio.'}), 400
 
@@ -3037,7 +3058,7 @@ def api_crear_referencia_desde_chat():
             identificacion_documento=patient_id_doc,
             creado_por_id=1 # Se usa un ID fijo
         ).first()
-    
+
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
@@ -3110,7 +3131,7 @@ def api_crear_receta_desde_chat():
     patient_name = data.get('patientName', '').strip()
     patient_id_doc = data.get('patientId', '').strip()
     patient_email = data.get('patientEmail', '').strip()
-    
+
     if not patient_name:
         return jsonify({'error': 'El nombre del paciente es obligatorio.'}), 400
 
@@ -3121,7 +3142,7 @@ def api_crear_receta_desde_chat():
             identificacion_documento=patient_id_doc,
             creado_por_id=1 # Se usa un ID fijo
         ).first()
-    
+
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
@@ -3289,15 +3310,15 @@ def api_generar_notas_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
-    
+
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=1).first() # Se usa un ID fijo
     if not visita: return jsonify({"error": "Visita no encontrada."}), 404
-    
+
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar las notas."}), 400
 
     idioma_prompt = normalize_language_code(visita.idioma_detectado) or 'es'
-    
+
     notas_gen_result = generar_notas_ai_desde_transcripcion(
         visita.transcripcion,
         visita.plantilla or "SOAP",
@@ -3320,14 +3341,14 @@ def api_generar_notas_ai():
     db.session.commit()
 
     desc_log = f"Notas AI generadas/actualizadas. Plantilla: '{visita.plantilla or "SOAP"}'. Idioma: {idioma_prompt.upper()}."
-    
+
     reg_act = RegistroActividad(
         visita_id=visita.id, usuario_id=1, usuario_nombre_display='Usuario Anónimo',
         accion="notas_ia_generadas", descripcion=desc_log
     )
     db.session.add(reg_act)
     db.session.commit()
-    
+
     return jsonify({
         "message": "Notas AI generadas exitosamente.",
         "notas_ai_markdown": notas_gen_markdown,
@@ -3415,7 +3436,7 @@ def eliminar_visita_completa(visita_id_param):
         db.session.rollback()
         logging.error(f"Error al eliminar la visita ID {visita_id_param}: {e}", exc_info=True)
         return jsonify({"error": "Error al eliminar la visita."}), 500
-        
+
 @app.route('/api/compartir_visita_email', methods=['POST'])
 def compartir_visita_email():
     data = request.get_json()
