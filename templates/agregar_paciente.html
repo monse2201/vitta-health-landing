@@ -3,7 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  /* Basic styles for the form (you can move them to a CSS file) */
+  /* Basic form styles (you can move this to a CSS file) */
   .form-container {
     max-width: 600px;
     margin: 30px auto;
@@ -50,7 +50,7 @@
     margin-top: 25px;
     text-align: right;
   }
-  .action-btn {
+  .btn-accion {
     background-color: #f3f4f6;
     color: #374151;
     border: 1px solid #d1d5db;
@@ -65,20 +65,20 @@
     gap: 6px;
     text-decoration: none; /* For the cancel link */
   }
-  .action-btn:hover {
+  .btn-accion:hover {
     background-color: #e5e7eb;
     border-color: #9ca3af;
   }
-  .action-btn-primary {
+  .btn-accion-primary {
     background-color: #1c64f2;
     color: white;
     border-color: #1c64f2;
   }
-  .action-btn-primary:hover {
+  .btn-accion-primary:hover {
     background-color: #1a56db;
     border-color: #1a56db;
   }
-    /* Styles for Flash messages */
+  /* Styles for Flash Messages */
   .flash-messages {
     list-style: none;
     padding: 0;
@@ -100,7 +100,7 @@
 <div class="form-container">
     <h2><i class="fas fa-user-plus"></i> Add New Patient</h2>
 
-    {# Show flash messages if they exist #}
+    {# Display flash messages if they exist #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ul class="flash-messages">
@@ -112,29 +112,29 @@
     {% endwith %}
 
     <form method="POST" action="{{ url_for('agregar_paciente') }}">
-        {# CSRF Token if you are using Flask-WTF, otherwise you can omit it #}
+        {# CSRF Token if you're using Flask-WTF, otherwise you can omit it #}
         {# {{ form.csrf_token }} #}
 
         <div class="form-group">
-            <label for="patient_name">Full Name *</label>
-            <input type="text" id="patient_name" name="patient_name" required value="{{ nombre_prev or '' }}">
+            <label for="nombre_paciente">Full Name *</label>
+            <input type="text" id="nombre_paciente" name="nombre_paciente" required value="{{ nombre_prev or '' }}">
         </div>
 
         <div class="form-group">
-            <label for="patient_email">Email</label>
-            <input type="email" id="patient_email" name="patient_email" value="{{ email_prev or '' }}">
+            <label for="email_paciente">Email</label>
+            <input type="email" id="email_paciente" name="email_paciente" value="{{ email_prev or '' }}">
         </div>
 
         <div class="form-group">
-            <label for="patient_phone">Phone</label>
-            <input type="text" id="patient_phone" name="patient_phone" value="{{ telefono_prev or '' }}">
+            <label for="telefono_paciente">Phone</label>
+            <input type="text" id="telefono_paciente" name="telefono_paciente" value="{{ telefono_prev or '' }}">
         </div>
 
         <div class="form-group">
-            <label for="treatment_status">Treatment Status</label>
-            <select id="treatment_status" name="treatment_status">
+            <label for="estado_tratamiento">Treatment Status</label>
+            <select id="estado_tratamiento" name="estado_tratamiento">
                 <option value="Active" {% if estado_prev == 'Activo' %}selected{% endif %}>Active</option>
-                <option value="On Follow-up" {% if estado_prev == 'En Seguimiento' %}selected{% endif %}>On Follow-up</option>
+                <option value="In Follow-up" {% if estado_prev == 'En Seguimiento' %}selected{% endif %}>In Follow-up</option>
                 <option value="Inactive" {% if estado_prev == 'Inactivo' %}selected{% endif %}>Inactive</option>
                 <option value="Not specified" {% if not estado_prev or estado_prev == 'No especificado' %}selected{% endif %}>Not specified</option>
                 {# Add more statuses if needed #}
@@ -142,10 +142,10 @@
         </div>
 
         <div class="form-actions">
-            <a href="{{ url_for('pacientes_page') }}" class="action-btn">
+            <a href="{{ url_for('pacientes_page') }}" class="btn-accion">
                 <i class="fas fa-times"></i> Cancel
             </a>
-            <button type="submit" class="action-btn action-btn-primary">
+            <button type="submit" class="btn-accion btn-accion-primary">
                 <i class="fas fa-save"></i> Save Patient
             </button>
         </div>

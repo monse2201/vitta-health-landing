@@ -67,7 +67,7 @@
     .dashboard-container { display: flex; min-height: 100vh; }
 
     .sidebar {
-        width: 270px; /* Ancho por defecto (expandido) */
+        width: 270px; /* Default width (expanded) */
         background-color: var(--sidebar-bg);
         color: var(--sidebar-text-color);
         display: flex;
@@ -241,7 +241,7 @@
     @media (max-width: 992px) { 
         .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
         .sidebar.open { transform: translateX(0); }
-        /* Anular estilos de .collapsed cuando está .open en móvil para que se vea completo */
+        /* Override .collapsed styles when .open is active on mobile to ensure full visibility */
         .sidebar.collapsed.open .sidebar-header .app-name,
         .sidebar.collapsed.open .sidebar-nav ul li a span,
         .sidebar.collapsed.open .sidebar-footer .config-section-title,
@@ -316,7 +316,7 @@
     <div class="config-section-title">Account</div>
     <ul>
         <li class="{{ 'active' if request.endpoint == 'configuracion_perfil_profesional' else '' }}">
-            <a href="{{ url_for('configuracion_perfil_profesional') }}" title="My Profile and Settings" class="user-profile-link-wrapper">
+            <a href="{{ url_for('configuracion_perfil_profesional') }}" title="My Profile & Settings" class="user-profile-link-wrapper">
                 <div class="user-profile-brief">
                     <div class="user-avatar-initial-small">
                         <span>{{ current_user.nombre[0]|upper if current_user and current_user.nombre else 'U' }}</span>
@@ -332,7 +332,7 @@
             <a href="{{ url_for('cambiar_contrasena_route') }}"><i class="fas fa-key fa-fw"></i> <span>Change Password</span></a>
         </li>
         <li>
-            <a href="{{ url_for('logout_route') }}"><i class="fas fa-sign-out-alt fa-fw"></i> <span>Logout</span></a>
+            <a href="{{ url_for('logout_route') }}"><i class="fas fa-sign-out-alt fa-fw"></i> <span>Log Out</span></a>
         </li>
     </ul>
 </div>
@@ -341,7 +341,7 @@
 
         <div class="main-content-wrapper">
             <header class="topbar">
-                <button class="sidebar-toggle-mobile" id="sidebarToggleMobile" aria-label="Toggle sidebar móvil">
+                <button class="sidebar-toggle-mobile" id="sidebarToggleMobile" aria-label="Toggle mobile sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="topbar-user-actions">
@@ -368,15 +368,15 @@
                         <div class="widget-header">
                             <div class="widget-icon"><i class="fas fa-rocket"></i></div>
                             <div class="widget-title-group">
-                                 <h4>Get Started</h4>
+                                 <h4>Start Here</h4>
                             </div>
                         </div>
                         <div class="widget-content">
                             <ul class="quick-actions-list">
                                 <li><a href="{{ url_for('grabar_cita') }}"><i class="fas fa-microphone-alt"></i> Record New Consultation</a></li>
-                                <li><a href="{{ url_for('resumir_registros_page') }}"><i class="fas fa-file-import"></i> Summarize Documents de Paciente</a></li>
-                                <li><a href="{{ url_for('pacientes_page') }}"><i class="fas fa-users"></i> Ver Lista de Patients</a></li>
-                                <li><a href="{{ url_for('historial_visitas') }}"><i class="fas fa-history"></i> Consultar Visit History</a></li>
+                                <li><a href="{{ url_for('resumir_registros_page') }}"><i class="fas fa-file-import"></i> Summarize Patient Documents</a></li>
+                                <li><a href="{{ url_for('pacientes_page') }}"><i class="fas fa-users"></i> View Patient List</a></li>
+                                <li><a href="{{ url_for('historial_visitas') }}"><i class="fas fa-history"></i> Check Visit History</a></li>
                             </ul>
                         </div>
                     </div>
@@ -385,14 +385,14 @@
                         <div class="widget-header">
                             <div class="widget-icon"><i class="fas fa-users"></i></div>
                             <div class="widget-title-group">
-                                <h4>Patients Registrados</h4>
+                                <h4>Registered Patients</h4>
                                 <p class="widget-value">{{ total_pacientes if total_pacientes is defined else 'N/A' }}</p>
                             </div>
                         </div>
                         <div class="widget-content">
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top:8px;">Keep your patients' information up to date for better tracking.</p>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top:8px;">Keep your patient information up-to-date for better tracking.</p>
                         </div>
-                         <a href="{{ url_for('pacientes_page') }}" class="widget-link">Gestionar Patients <i class="fas fa-arrow-right"></i></a>
+                         <a href="{{ url_for('pacientes_page') }}" class="widget-link">Manage Patients <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </main>
@@ -402,8 +402,8 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
-        const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Botón en sidebar-header
-        const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');   // Botón en topbar
+        const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Button in sidebar-header
+        const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');   // Button in topbar
     
         const currentDateEl = document.getElementById('currentDate');
         if (currentDateEl) {
@@ -412,10 +412,10 @@
             });
         }
     
-        // Estados para el sidebar de escritorio:
-        // 'pinned-expanded': User lo fijó expandido. No hover. Sin .collapsed. Icono: fa-times.
-        // 'pinned-collapsed': User lo fijó colapsado. No hover. Con .collapsed. Icono: fa-bars.
-        // 'auto': Interactivo con hover. Default con .collapsed, se expande en hover. Icono: fa-bars.
+        // States for the desktop sidebar:
+        // 'pinned-expanded': User pinned it expanded. No hover. Without .collapsed. Icon: fa-xmark.
+        // 'pinned-collapsed': User pinned it collapsed. No hover. With .collapsed. Icon: fa-bars.
+        // 'auto': Interactive on hover. Defaults to .collapsed, expands on hover. Icon: fa-bars.
         let sidebarPinnedState; 
     
         function updateDesktopToggleIcon() {
@@ -442,12 +442,12 @@
             } else if (sidebarPinnedState === 'pinned-collapsed') {
                 sidebar.classList.add('collapsed');
             } else { // 'auto'
-                // Si no es por un clic directo que lo pone en 'auto', y es 'auto',
-                // el estado visual inicial es colapsado. Si es por un clic, y estaba expandido,
-                // el clic a 'auto' podría significar "volver a hover desde expandido", entonces colapsar.
-                // Esta lógica es cubierta por el manejador del clic.
-                // Para carga inicial y resize, 'auto' significa empezar colapsado.
-                if(!fromClick){ // Solo aplicar colapso por defecto si no es un clic directo que activa 'auto'
+                // If it's not a direct click that sets it to 'auto', and it is 'auto',
+                // the initial visual state is collapsed. If it is from a click, and it was expanded,
+                // the click to 'auto' could mean "return to hover from expanded", so collapse.
+                // This logic is handled by the click handler.
+                // For initial load and resize, 'auto' means starting collapsed.
+                if(!fromClick){ // Only apply default collapse if not a direct click activating 'auto'
                    sidebar.classList.add('collapsed'); 
                 }
             }
@@ -488,10 +488,10 @@
                         } else if (sidebarPinnedState === 'pinned-collapsed') {
                             nextState = 'pinned-expanded';
                         } else { // sidebarPinnedState === 'auto'
-                            if (!sidebar.classList.contains('collapsed')) { // Estaba expandido por hover
-                                nextState = 'pinned-collapsed'; // Fijar colapsado
-                            } else { // Estaba colapsado (estado base de 'auto')
-                                nextState = 'pinned-expanded'; // Fijar expandido
+                            if (!sidebar.classList.contains('collapsed')) { // Was expanded by hover
+                                nextState = 'pinned-collapsed'; // Pin it collapsed
+                            } else { // Was collapsed (base state of 'auto')
+                                nextState = 'pinned-expanded'; // Pin it expanded
                             }
                         }
                         applyDesktopSidebarState(nextState, true);
