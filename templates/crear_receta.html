@@ -7,7 +7,7 @@
     /* --- Design Variables (Consistent with other templates) --- */
     :root {
         --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        --body-background: #f8f9fa; /* A very light gray */
+        --body-background: #f8f9fa; /* Very light gray */
         --card-background: #ffffff;
         --text-primary: #212529; /* Soft black */
         --text-secondary: #495057; /* Dark gray */
@@ -26,7 +26,7 @@
     }
 
     /* --- Global Styles --- */
-    body { /* Applied to body if this template does not inherit from a base.html with these styles */
+    body { /* Applied to body if this template doesn't inherit from a base.html with these styles */
         font-family: var(--font-family-primary);
         background-color: var(--body-background);
         color: var(--text-primary);
@@ -124,7 +124,7 @@
         resize: vertical;
     }
 
-    .form-row { /* Used by Bootstrap, ensure no conflicts */
+    .form-row { /* Used by Bootstrap, ensure no conflict */
         display: flex;
         flex-wrap: wrap;
         margin-right: -7.5px;
@@ -156,7 +156,7 @@
     }
 
 
-    /* --- Styles for the Medications section --- */
+    /* --- Medication Section Styles --- */
     #medications-container {
         margin-bottom: 1rem; /* Space before the "Add" button */
     }
@@ -180,7 +180,7 @@
         border-top: 1px solid #eee;
     }
 
-    /* --- Buttons --- */
+    /* --- Button Styles --- */
     .btn {
         display: inline-flex; /* To align icon and text */
         align-items: center;
@@ -263,7 +263,6 @@
         <p><strong>Patient:</strong> {{ paciente.nombre }}</p>
         <p><strong>Visit from:</strong> {{ visita.fecha.strftime('%d/%m/%Y %H:%M') if visita.fecha else 'N/A' }}</p>
     </div>
-    {# Removed the <hr> here because .header-form already has a border-bottom #}
 
     <form method="POST" id="prescription-form">
         <h4 class="form-section-title">Medications</h4>
@@ -279,7 +278,7 @@
         <div class="form-group">
             <label for="related_diagnosis">Related Diagnosis (Optional)</label>
             <input type="text" class="form-control" id="related_diagnosis" name="related_diagnosis"
-                   value="{{ form_data.diagnostico_relacionado if form_data else '' }}" placeholder="E.g., HTA, Acute Pharyngitis">
+                   value="{{ form_data.diagnostico_relacionado if form_data else '' }}" placeholder="E.g., Hypertension, Acute Pharyngitis">
         </div>
 
         <div class="form-row">
@@ -292,8 +291,8 @@
         </div>
 
         <div class="form-group">
-            <label for="additional_prescription_notes">Additional Notes for the Prescription (Optional)</label>
-            <textarea class="form-control" id="additional_prescription_notes" name="additional_prescription_notes" rows="3">{{ form_data.notas_adicionales_receta if form_data else '' }}</textarea>
+            <label for="additional_notes_prescription">Additional Notes for Prescription (Optional)</label>
+            <textarea class="form-control" id="additional_notes_prescription" name="additional_notes_prescription" rows="3">{{ form_data.notas_adicionales_receta if form_data else '' }}</textarea>
         </div>
 
         <div class="form-actions-footer">
@@ -313,23 +312,23 @@ function addMedicationItem(medication = null) {
     // Use values from the 'medication' object if provided, otherwise empty
     const nameVal = medication && medication.nombre ? medication.nombre : '';
     const quantityVal = medication && medication.cantidad ? medication.cantidad : '';
-    const doseVal = medication && medication.dosis ? medication.dosis : '';
+    const dosageVal = medication && medication.dosis ? medication.dosis : '';
     const frequencyVal = medication && medication.frecuencia ? medication.frecuencia : '';
     const durationVal = medication && medication.duracion ? medication.duracion : '';
-    const directionsVal = medication && medication.indicaciones ? medication.indicaciones : '';
-    const isAntibioticChecked = medication && medication.es_antibiotico ? 'checked' : ''; // <-- NEW
+    const instructionsVal = medication && medication.indicaciones ? medication.indicaciones : '';
+    const isAntibioticChecked = medication && medication.es_antibiotico ? 'checked' : '';
 
     const itemHtml = `
         <div class="medication-item" data-idx="${idx}">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6>Medication #${idx + 1} <small class="text-muted">${medication && medication.fuente === 'ia_sugerido' ? '(AI Suggested)' : ''}</small></h6>
+                <h6>Medication #${idx + 1} <small class="text-muted">${medication && medication.source === 'ai_suggested' ? '(AI Suggested)' : ''}</small></h6>
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeMedicationItem(this)" title="Remove this medication">
                     <i class="fas fa-trash-alt"></i> Remove
                 </button>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-8">
-                    <label for="med_name_${idx}">Name & Presentation *</label>
+                    <label for="med_name_${idx}">Name and Presentation *</label>
                     <input type="text" class="form-control med-name" id="med_name_${idx}" value="${nameVal}" placeholder="E.g., Amoxicillin 500mg Tablets" required>
                 </div>
                 <div class="form-group col-md-4">
@@ -339,12 +338,12 @@ function addMedicationItem(medication = null) {
             </div>
             <div class="form-row">
                 <div class="form-group col-md-4">
-                    <label for="med_dose_${idx}">Dose *</label>
-                    <input type="text" class="form-control med-dose" id="med_dose_${idx}" value="${doseVal}" placeholder="E.g., 1 tablet, 5 ml" required>
+                    <label for="med_dosage_${idx}">Dosage *</label>
+                    <input type="text" class="form-control med-dosage" id="med_dosage_${idx}" value="${dosageVal}" placeholder="E.g., 1 tablet, 5 ml" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="med_frequency_${idx}">Frequency *</label>
-                    <input type="text" class="form-control med-frequency" id="med_frequency_${idx}" value="${frecuenciaVal}" placeholder="E.g., Every 8 hours" required>
+                    <input type="text" class="form-control med-frequency" id="med_frequency_${idx}" value="${frequencyVal}" placeholder="E.g., Every 8 hours" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="med_duration_${idx}">Treatment Duration *</label>
@@ -352,13 +351,12 @@ function addMedicationItem(medication = null) {
                 </div>
             </div>
             <div class="form-group">
-                <label for="med_directions_${idx}">Specific Directions (Optional)</label>
-                <textarea class="form-control med-directions" id="med_directions_${idx}" rows="2" placeholder="E.g., Take with food, Do not consume dairy...">${directionsVal}</textarea>
+                <label for="med_instructions_${idx}">Specific Instructions (Optional)</label>
+                <textarea class="form-control med-instructions" id="med_instructions_${idx}" rows="2" placeholder="E.g., Take with food, Do not consume dairy...">${instructionsVal}</textarea>
             </div>
-            {# NEW: Checkbox to mark as antibiotic #}
             <div class="form-group form-check mt-2">
                 <input type="checkbox" class="form-check-input med-is-antibiotic" id="med_antibiotic_${idx}" ${isAntibioticChecked}>
-                <label class="form-check-label" for="med_antibiotic_${idx}">Is it an Antibiotic?</label>
+                <label class="form-check-label" for="med_antibiotic_${idx}">Is this an Antibiotic?</label>
             </div>
         </div>
     `;
@@ -377,21 +375,21 @@ function removeMedicationItem(button) {
 document.getElementById('prescription-form').addEventListener('submit', function(event) {
     const medicationsArray = [];
     let allRequiredFieldsFilled = true;
-    let antibioticsCount = 0; // <-- NEW: Antibiotic counter
+    let antibioticsCount = 0;
 
     document.querySelectorAll('#medications-container .medication-item').forEach(item => {
         const nameInput = item.querySelector('.med-name');
         const quantityInput = item.querySelector('.med-quantity');
-        const doseInput = item.querySelector('.med-dose');
+        const dosageInput = item.querySelector('.med-dosage');
         const frequencyInput = item.querySelector('.med-frequency');
         const durationInput = item.querySelector('.med-duration');
-        const isAntibioticCheckbox = item.querySelector('.med-is-antibiotic'); // <-- NEW
+        const isAntibioticCheckbox = item.querySelector('.med-is-antibiotic');
 
-        if (!nameInput.value.trim() || !quantityInput.value.trim() || !doseInput.value.trim() || !frequencyInput.value.trim() || !durationInput.value.trim()) {
+        if (!nameInput.value.trim() || !quantityInput.value.trim() || !dosageInput.value.trim() || !frequencyInput.value.trim() || !durationInput.value.trim()) {
             allRequiredFieldsFilled = false;
         }
 
-        if (isAntibioticCheckbox && isAntibioticCheckbox.checked) { // <-- NEW: Count if it's an antibiotic
+        if (isAntibioticCheckbox && isAntibioticCheckbox.checked) {
             antibioticsCount++;
         }
 
@@ -399,11 +397,11 @@ document.getElementById('prescription-form').addEventListener('submit', function
              medicationsArray.push({
                 nombre: nameInput.value.trim(),
                 cantidad: quantityInput.value.trim(),
-                dosis: doseInput.value.trim(),
+                dosis: dosageInput.value.trim(),
                 frecuencia: frequencyInput.value.trim(),
                 duracion: durationInput.value.trim(),
-                indicaciones: item.querySelector('.med-directions').value.trim(),
-                es_antibiotico: isAntibioticCheckbox ? isAntibioticCheckbox.checked : false, // <-- ADDED
+                indicaciones: item.querySelector('.med-instructions').value.trim(),
+                es_antibiotico: isAntibioticCheckbox ? isAntibioticCheckbox.checked : false,
             });
         }
     });
@@ -414,7 +412,7 @@ document.getElementById('prescription-form').addEventListener('submit', function
         return false;
     }
     if (!allRequiredFieldsFilled) {
-        alert("Please fill in all required fields (*) for each medication listed.");
+        alert("Please fill in all required fields (*) for each listed medication.");
         event.preventDefault();
         return false;
     }
@@ -423,7 +421,7 @@ document.getElementById('prescription-form').addEventListener('submit', function
     // According to Costa Rican regulations (as of May 2025), prescriptions are limited to a maximum of three systemic antimicrobial drugs.
     // This validation ensures compliance with this regulation.
     if (antibioticsCount > 3) {
-        alert("¡Attention! Costa Rican regulations (as of May 2025) limit prescriptions to a maximum of three systemic antimicrobial drugs. Please adjust the prescription.");
+        alert("Attention! Costa Rican regulations (as of May 2025) limit prescriptions to a maximum of three systemic antimicrobial drugs. Please adjust the prescription.");
         event.preventDefault(); // Prevents form submission if the limit is exceeded
         return false;
     }
@@ -447,14 +445,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     // Priority 2: AI suggestions (if no previous user data)
-    else if (formDataSource && formDataSource.suggested_medications_json) {
+    else if (formDataSource && formDataSource.medicamentos_sugeridos_json) {
         try {
-            let suggestions = JSON.parse(formDataSource.suggested_medications_json);
+            let suggestions = JSON.parse(formDataSource.medicamentos_sugeridos_json);
             if (Array.isArray(suggestions)) {
-                medicationsToPopulate = suggestions.map(s => ({...s, fuente: 'ia_sugerido'})); // Mark source
+                medicationsToPopulate = suggestions.map(s => ({...s, source: 'ai_suggested'})); // Mark source
             }
         } catch (e) {
-            console.error("Error parsing suggested_medications_json:", e);
+            console.error("Error parsing AI-suggested medications JSON:", e);
         }
     }
 
@@ -474,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (validityInput && formDataSource.validez_dias) {
             validityInput.value = formDataSource.validez_dias;
         }
-        const notesInput = document.getElementById('additional_prescription_notes');
+        const notesInput = document.getElementById('additional_notes_prescription');
         if (notesInput && formDataSource.notas_adicionales_receta) {
             notesInput.value = formDataSource.notas_adicionales_receta;
         }

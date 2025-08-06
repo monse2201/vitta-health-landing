@@ -13,13 +13,11 @@
             color: #333;
         }
 
-        /* Container for action buttons */
         .page-actions {
             text-align: center;
             padding: 1rem 0;
         }
 
-        /* The "paper sheet" */
         .document-sheet {
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -29,13 +27,14 @@
             min-height: 29.7cm;
             font-size: 12pt;
             line-height: 1.5;
+            position: relative; /* Required for watermark positioning */
+            overflow: hidden; /* Prevents watermark from spilling out */
         }
 
-        /* NEW HEADER STYLES */
         .header-document {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Aligns elements to the top */
+            align-items: flex-start;
             border-bottom: 2px solid #333;
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
@@ -43,20 +42,20 @@
         .institution-details {
             font-size: 10pt;
             line-height: 1.4;
-            width: 250px; /* Fixes width for layout */
+            width: 250px; /* Fixed width for layout */
         }
         .institution-details img {
-            max-height: 60px; /* Adjusts maximum logo size */
+            max-height: 60px;
             margin-bottom: 10px;
-            display: block; /* Ensures bottom margin works */
+            display: block;
         }
         .institution-details p {
-            margin: 2px 0; /* Reduced spacing between paragraphs */
+            margin: 2px 0;
         }
         .institution-details strong {
             font-weight: bold;
         }
-        .institution-details:last-child { /* For the right block (doctor's info) */
+        .institution-details:last-child {
             text-align: right;
         }
 
@@ -105,14 +104,26 @@
             font-weight: bold;
         }
 
-        /* Print styles */
+        /* --- Watermark Style --- */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 5rem;
+            color: rgba(220, 53, 69, 0.15); /* Light, transparent red */
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 5px;
+            pointer-events: none; /* Allows clicking through the watermark */
+            z-index: 1000;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
         @media print {
-            body {
-                background-color: #fff;
-            }
-            .page-actions, .modal {
-                display: none !important;
-            }
+            body { background-color: #fff; }
+            .page-actions, .modal { display: none !important; }
             .document-sheet {
                 width: 100%;
                 min-height: auto;
@@ -120,6 +131,7 @@
                 box-shadow: none;
                 padding: 0;
             }
+            .watermark { color: rgba(220, 53, 69, 0.1) !important; }
         }
     </style>
 </head>
@@ -138,11 +150,12 @@
     </div>
 
     <div class="document-sheet">
-        {# REPLACED original <header class="document-header"> with the new structure #}
+        <div class="watermark">DEMO - NO MEDICAL VALIDITY</div>
+
         <div class="header-document">
-            <div class="institution-details" style="text-align: left; width: 250px;">
+            <div class="institution-details">
                 {% if logo_clinica_base64 %}
-                    <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" style="max-height: 60px; margin-bottom: 10px; display: block;">
+                    <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo">
                 {% endif %}
                 {% if show_clinic_name %}
                     <p><strong>{{ medico.clinica_nombre or 'Clinic Name' }}</strong></p>
@@ -157,16 +170,8 @@
                     <p>Web: {{ medico.clinica_website or 'Website' }}</p>
                 {% endif %}
             </div>
-
-            {# Document Title - This div is maintained for the central title #}
-            {# Note: The original snippet did not include a div for the title inside 'header-document', #}
-            {# but it's common to have one. If the title should be part of this flexbox, this is how you would do it. #}
-            {# To maintain the original style with a large centered title, I leave it outside this flexbox #}
-            {# and rely on the global CSS .document-title to position it correctly. #}
-            {# If you want the title to be between the clinic and doctor info, you would need a div here with flex-grow: 1 #}
-            {# Example: <div style="flex-grow: 1; text-align: center;"><h1>Medical Referral</h1></div> #}
             
-            <div class="institution-details" style="text-align: right; width: 250px;">
+            <div class="institution-details" style="text-align: right;">
                 {% if medico %}
                     <p><strong>{{ medico.nombre }}</strong></p>
                     <p>{{ medico.especialidad or 'Specialty not indicated' }}</p>
@@ -174,7 +179,7 @@
                         <p>License: {{ medico.licencia_profesional or 'N/A' }}</p>
                     {% endif %}
                     {% if show_doctor_phone %}
-                        <p>Tel: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
+                        <p>Phone: {{ medico.telefono_profesional or 'Phone N/A' }}</p>
                     {% endif %}
                     {% if show_doctor_bio %}
                         <p>{{ medico.biografia or 'Bio N/A' }}</p>
@@ -188,8 +193,8 @@
 
             <div class="section patient-info">
                 <div class="info-grid">
-                    <div class="info-item"><strong>Date:</strong> {{ referencia.fecha_emision.strftime('%d of %B of %Y') if referencia.fecha_emision else 'N/A' }}</div>
-                    <div class="info-item"><strong>Addressed to Specialty:</strong> {{ referencia.especialidad_referida }}</div>
+                    <div class="info-item"><strong>Date:</strong> {{ referencia.fecha_emision.strftime('%B %d, %Y') if referencia.fecha_emision else 'N/A' }}</div>
+                    <div class="info-item"><strong>Referred to Specialty:</strong> {{ referencia.especialidad_referida }}</div>
                 </div>
                 <hr>
                 <div class="info-grid">
@@ -220,7 +225,7 @@
 
         <footer class="document-footer">
             <div class="signature-line">
-                Doctor's Signature
+                Physician's Signature
             </div>
         </footer>
     </div>
@@ -273,20 +278,20 @@
             const spinner = document.getElementById('send-email-spinner');
 
             if (!recipientEmail) {
-                showAlert('Please enter a valid email.', 'danger');
+                showAlert('Please enter a valid email address.', 'danger');
                 return;
             }
 
             sendBtn.disabled = true;
             spinner.style.display = 'inline-block';
 
-            fetch(`/api/referral/{{ referencia.id }}/share_email`, {
+            fetch(`/api/referencia/{{ referencia.id }}/compartir_email`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    recipient_email: recipientEmail,
-                    subject: subject,
-                    additional_message: message
+                    email_destinatario: recipientEmail,
+                    asunto: subject,
+                    mensaje_adicional: message
                 })
             })
             .then(response => response.json())
@@ -294,7 +299,7 @@
                 if (data.error) {
                     showAlert(data.error, 'danger');
                 } else {
-                    showAlert(data.message, 'success');
+                    showAlert(data.message, 'success'); // Assuming backend returns 'message' key
                     setTimeout(() => { $('#emailModal').modal('hide'); }, 2000);
                 }
             })
@@ -307,12 +312,14 @@
                 spinner.style.display = 'none';
             });
         });
+
         function showAlert(message, type) {
             const emailAlert = document.getElementById('email-alert');
             emailAlert.className = `alert alert-${type}`;
             emailAlert.textContent = message;
             emailAlert.style.display = 'block';
         }
+
         $('#emailModal').on('hidden.bs.modal', function () {
             document.getElementById('email-alert').style.display = 'none';
         });

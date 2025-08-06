@@ -149,6 +149,7 @@
     .logo-full { display: none; font-weight: 700;}
     .sidebar.expanded .logo-full { display: inline; }
 
+
     .menu {
       list-style: none;
       padding: 0;
@@ -245,12 +246,13 @@
        color: var(--sidebar-active-text);
     }
 
+
     .sidebar-footer {
         padding: 12px 0; 
         border-top: 1px solid var(--sidebar-border-color);
     }
 
-    .settings-link-title {
+    .configuracion-link-title {
         font-size: 0.75rem;
         color: var(--neutral-500);
         text-transform: uppercase;
@@ -264,7 +266,7 @@
         overflow: hidden;
         transition: opacity 0.2s ease, height 0.25s ease, padding 0.25s ease, visibility 0s linear 0.2s;
     }
-    .sidebar.expanded .settings-link-title {
+    .sidebar.expanded .configuracion-link-title {
         opacity: 1;
         visibility: visible;
         height: auto;
@@ -398,6 +400,7 @@
         color: var(--sidebar-active-text); 
     }
 
+
     .user-subtitle {
         font-size: 0.75rem;
         color: var(--neutral-400); 
@@ -408,6 +411,7 @@
     .sidebar-footer a.active .user-subtitle {
         color: var(--neutral-100); 
     }
+
 
     .main-content-wrapper {
       flex-grow: 1;
@@ -494,6 +498,7 @@
     .toggle-sidebar i { transition: transform 0.25s ease; }
     .sidebar.expanded .toggle-sidebar i { transform: rotate(180deg); }
 
+
     .alert-messages-container {
         position: fixed; top: 20px; right: 20px; z-index: 2000; width: auto; max-width:400px;
     }
@@ -557,7 +562,7 @@
 
       <ul class="menu">
         
-        {# --- Admin section --- #}
+        {# --- Admin Links --- #}
         {% if current_user.is_authenticated and current_user.role in ['admin', 'admin_super'] %}
         <li>
           <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
@@ -571,59 +576,60 @@
         </li>
         {% endif %}
 
+        {# --- User Links (text translated to English) --- #}
         <li>
           <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
-            <i class="fas fa-home fa-fw"></i><span class="menu-text">Home</span>
+            <i class="fas fa-home fa-fw"></i><span class="menu-text">Dashboard</span>
           </a>
         </li>
         <li>
-          <a href="{{ url_for('record_session') }}" class="{% if request.endpoint == 'record_session' %}active{% endif %}">
+          <a href="{{ url_for('grabar_cita') }}" class="{% if request.endpoint == 'grabar_cita' %}active{% endif %}">
             <i class="fas fa-microphone-alt fa-fw"></i><span class="menu-text">Record Session</span>
           </a>
         </li>
         <li>
-          <a href="{{ url_for('summarize_documents_page') }}" class="{% if request.endpoint == 'summarize_documents_page' %}active{% endif %}">
-            <i class="fas fa-file-import fa-fw"></i><span class="menu-text">Summarize Documents</span>
+          <a href="{{ url_for('resumir_registros_page') }}" class="{% if request.endpoint == 'resumir_registros_page' %}active{% endif %}">
+            <i class="fas fa-file-import fa-fw"></i><span class="menu-text">Summarize Docs</span>
           </a>
         </li>
         <li>
-          <a href="{{ url_for('patients_page') }}" class="{% if request.endpoint in ['patients_page', 'patient_profile', 'add_patient'] %}active{% endif %}">
+          <a href="{{ url_for('pacientes_page') }}" class="{% if request.endpoint in ['pacientes_page', 'perfil_paciente', 'agregar_paciente'] %}active{% endif %}">
             <i class="fas fa-users fa-fw"></i><span class="menu-text">Patients</span>
           </a>
         </li>
         <li>
-          <a href="{{ url_for('visit_history') }}" class="{% if request.endpoint in ['visit_history', 'view_prescription', 'view_referral', 'new_prescription_for_visit', 'new_referral_for_visit'] %}active{% endif %}">
-            <i class="fas fa-history fa-fw"></i><span class="menu-text">Visit History</span>
+          <a href="{{ url_for('historial_visitas') }}" class="{% if request.endpoint in ['historial_visitas', 'ver_receta', 'ver_referencia', 'nueva_receta_para_visita', 'nueva_referencia_para_visita'] %}active{% endif %}">
+            <i class="fas fa-history fa-fw"></i><span class="menu-text">Session History</span>
           </a>
         </li>
       </ul>
     </div>
 
     <div class="sidebar-footer">
-        <div class="settings-link-title">Account</div>
+        {# --- Footer Links (text translated to English) --- #}
+        <div class="configuracion-link-title">Account</div>
 
-        <a href="{{ url_for('profile_settings') }}" class="user-profile-sidebar-link {% if request.endpoint == 'profile_settings' %}active{% endif %}" title="My Profile & Settings">
+        <a href="{{ url_for('configuracion_perfil_profesional') }}" class="user-profile-sidebar-link {% if request.endpoint == 'configuracion_perfil_profesional' %}active{% endif %}" title="My Profile & Settings">
             <div class="user-profile-info">
                 <div class="user-avatar-initial">
-                    {% if current_user and current_user.is_authenticated and current_user.profile_photo_url %}
-                        <img src="{{ url_for('static', filename=current_user.profile_photo_url.replace('\\', '/')) }}" alt="My profile" class="user-avatar-image">
+                    {% if current_user and current_user.is_authenticated and current_user.url_foto_perfil %}
+                        <img src="{{ url_for('static', filename=current_user.url_foto_perfil.replace('\\', '/')) }}" alt="My profile" class="user-avatar-image">
                     {% else %}
-                        <span>{{ (current_user.name[0] if current_user and current_user.is_authenticated and current_user.name else 'U')|upper }}</span>
+                        <span>{{ (current_user.nombre[0] if current_user and current_user.is_authenticated and current_user.nombre else 'U')|upper }}</span>
                     {% endif %}
                 </div>
                 <div class="user-details">
-                    <span class="user-name">{{ current_user.name if current_user and current_user.is_authenticated else 'User' }}</span>
-                    <span class="user-subtitle">{{ current_user.specialty if current_user and current_user.is_authenticated and current_user.specialty else 'Settings' }}</span>
+                    <span class="user-name">{{ current_user.nombre if current_user and current_user.is_authenticated else 'User' }}</span>
+                    <span class="user-subtitle">{{ current_user.especialidad if current_user and current_user.is_authenticated and current_user.especialidad else 'Settings' }}</span>
                 </div>
             </div>
         </a>
         
-        {# NEW: Link to Document Settings #}
-        <a href="{{ url_for('document_settings') }}" class="{% if request.endpoint == 'document_settings' %}active{% endif %}" title="Document Settings">
+        <a href="{{ url_for('configuracion_documentos') }}" class="{% if request.endpoint == 'configuracion_documentos' %}active{% endif %}" title="Document Settings">
             <i class="fas fa-file-alt fa-fw"></i><span class="btn-text">Document Settings</span>
         </a>
 
-        <a href="{{ url_for('change_password_route') }}" class="{% if request.endpoint == 'change_password_route' %}active{% endif %}" title="Change Password">
+        <a href="{{ url_for('cambiar_contrasena_route') }}" class="{% if request.endpoint == 'cambiar_contrasena_route' %}active{% endif %}" title="Change Password">
             <i class="fas fa-key fa-fw"></i><span class="btn-text">Change Password</span>
         </a>
         
@@ -657,7 +663,6 @@
   </div>
 
   <script>
-    // --- Sidebar Logic --- //
     const sidebar = document.getElementById('sidebar');
     const mainContentWrapper = document.getElementById('mainContentWrapper');
     const toggleIcon = document.getElementById('toggleIcon'); 
@@ -667,24 +672,36 @@
     let isDesktopSidebarManuallyExpanded = false;
 
     function setDesktopSidebarState(isExpanded) {
-        if (!sidebar) return;
-        if (isExpanded) {
-            sidebar.classList.add('expanded');
-        } else {
-            sidebar.classList.remove('expanded');
+        if (sidebar) { 
+            if (isExpanded) {
+                sidebar.classList.add('expanded');
+                if (mainContentWrapper) mainContentWrapper.style.marginLeft = '270px';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-left');
+                    toggleIcon.classList.add('fa-chevron-right');
+                }
+            } else {
+                sidebar.classList.remove('expanded');
+                if (mainContentWrapper) mainContentWrapper.style.marginLeft = '80px';
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-right');
+                    toggleIcon.classList.add('fa-chevron-left');
+                }
+            }
         }
     }
 
     function handleDesktopToggle() {
-        if (!sidebar) return;
-        isDesktopSidebarManuallyExpanded = !sidebar.classList.contains('expanded');
-        setDesktopSidebarState(isDesktopSidebarManuallyExpanded);
-        localStorage.setItem('sidebarDesktopExpanded', isDesktopSidebarManuallyExpanded.toString());
+        if (sidebar) { 
+            isDesktopSidebarManuallyExpanded = !sidebar.classList.contains('expanded');
+            setDesktopSidebarState(isDesktopSidebarManuallyExpanded);
+            localStorage.setItem('sidebarDesktopExpanded', isDesktopSidebarManuallyExpanded.toString());
+        }
     }
 
     function handleMobileToggle() {
         if (sidebar) { 
-            sidebar.classList.toggle('expanded'); 
+             sidebar.classList.toggle('expanded'); 
         }
     }
 
@@ -695,11 +712,16 @@
 
         if (isMobile) {
             sidebar.classList.remove('expanded'); 
+            if (mainContentWrapper) mainContentWrapper.style.marginLeft = '0px';
             if (desktopToggleButton) desktopToggleButton.style.display = 'none';
             if (mobileToggleButton) mobileToggleButton.style.display = 'block';
         } else { 
             const savedState = localStorage.getItem('sidebarDesktopExpanded');
-            isDesktopSidebarManuallyExpanded = savedState === 'true';
+            if (savedState !== null) {
+                isDesktopSidebarManuallyExpanded = (savedState === 'true');
+            } else {
+                isDesktopSidebarManuallyExpanded = false; 
+            }
             setDesktopSidebarState(isDesktopSidebarManuallyExpanded);
             
             if (desktopToggleButton) desktopToggleButton.style.display = 'flex';
@@ -717,16 +739,21 @@
             };
         }
     }
-    
-    // Simplified toggle button logic
+
     if (desktopToggleButton) {
-        desktopToggleButton.addEventListener('click', handleDesktopToggle);
-    }
-    if (mobileToggleButton) {
-        mobileToggleButton.addEventListener('click', handleMobileToggle);
+        desktopToggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth > 768) handleDesktopToggle();
+        });
     }
 
-    // Close mobile sidebar when clicking outside
+    if (mobileToggleButton) {
+        mobileToggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handleMobileToggle();
+        });
+    }
+
     document.addEventListener('click', function(event) {
         if (!sidebar) return; 
         const isMobile = window.innerWidth <= 768;
@@ -739,7 +766,6 @@
         }
     });
     
-    // Close mobile sidebar after clicking a link
     if(sidebar){
         const sidebarLinks = sidebar.querySelectorAll('a');
         sidebarLinks.forEach(link => {
@@ -750,9 +776,10 @@
             });
         });
     }
-    
-    // --- Alert Messages Logic --- //
-    function initializeAlerts() {
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeSidebar();
+
         const alertContainer = document.querySelector('.alert-messages-container');
         if (alertContainer) {
             setTimeout(() => {
@@ -763,17 +790,14 @@
                         if (alertNode.parentNode) { 
                            alertNode.parentNode.removeChild(alertNode); 
                         }
-                    }, 500); // Match this with fade-out transition time
+                        if (alertContainer.children.length === 0) {
+                        }
+                    }, 500); 
                 });
-            }, 7000); // Time before alerts start to fade
+            }, 7000); 
         }
-    }
-
-    // --- Initial Load and Resizing --- //
-    document.addEventListener('DOMContentLoaded', () => {
-        initializeSidebar();
-        initializeAlerts();
     });
+
     window.addEventListener('resize', initializeSidebar);
 
   </script>

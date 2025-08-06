@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating and Sending...';
-        showFeedback(document.getElementById('share-plan-feedback'), "Generating plan image...", "proceso");
+        showFeedback(document.getElementById('share-plan-feedback'), "Generating plan image...", "processing");
 
         // Generate the image and then send it
         generateImage({ type: 'share' });
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
             image_data: imageDataBase64 // <-- The Base64 image
         };
 
-        showFeedback(feedbackDiv, "Sending email...", "proceso");
+        showFeedback(feedbackDiv, "Sending email...", "processing");
 
         fetch(`/api/nutritional_plan/{{ plan.id }}/share_email`, { 
             method: 'POST',
@@ -517,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {
             if (!ok) throw new Error(data.error || 'Unknown server error.');
-            showFeedback(feedbackDiv, data.message || "Sent successfully", "exito");
+            showFeedback(feedbackDiv, data.message || "Sent successfully", "success");
             setTimeout(() => { sharePlanModal.style.display = 'none'; }, 2500);
         })
         .catch(error => {
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
         divElement.style.textAlign = 'center';
         divElement.style.border = '1px solid transparent';
 
-        if (type === 'exito') {
+        if (type === 'success') {
             divElement.style.backgroundColor = '#d4edda';
             divElement.style.color = '#155724';
             divElement.style.borderColor = '#c3e6cb';
@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
             divElement.style.backgroundColor = '#f8d7da';
             divElement.style.color = '#721c24';
             divElement.style.borderColor = '#f5c6cb';
-        } else if (type === 'proceso') {
+        } else if (type === 'processing') {
             divElement.style.backgroundColor = '#cce5ff';
             divElement.style.color = '#004085';
             divElement.style.borderColor = '#b8daff';
