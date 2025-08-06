@@ -230,40 +230,48 @@ else:
     logging.warning("⚠️ Biblioteca 'cryptography' no disponible. El cifrado de archivos a nivel de aplicación está DESHABILITADO.")
 
 
-# Database Configuration
-DATABASE_URL_LOCAL = os.environ.get('DATABASE_URL_LOCAL', 'postgresql+psycopg2://whatsapp_user:securepassword@postgres-db:5432/whatsapp_project')
-# Para producción, se recomienda enfáticamente que la base de datos (PostgreSQL en este caso)
-# esté configurada para cifrado en reposo a nivel de proveedor (ej. DigitalOcean Managed DB).
-# La cadena de conexión ya incluye `?sslmode=require` para cifrado en tránsito (TLS).
-DATABASE_URL_PROD = os.environ.get('DATABASE_URL', 'postgresql+psycopg2://doadmin:AVNS_zRk7-87CB8FurBYkWFN@vitta-db-cluster-do-user-22731081-0.k.db.ondigitalocean.com:25060/vitta_db?sslmode=require')
+@app.# --- INICIO DE LA CORRECCIÓN ---
 
-# Configuración de correo electrónico
+# Importar la utilidad para parsear URLs de forma segura
+from urllib.parse import urlparse
+
+# Database Configuration
+# Usa la variable de entorno `DATABASE_URL` que DigitalOcean provee.
+# Si no la encuentra, usa una URL local por defecto para desarrollo.
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL:
+    logging.warning("DATABASE_URL no encontrada en el entorno. Usando base de datos local por defecto.")
+    DATABASE_URL = 'postgresql+psycopg2://whatsapp_user:securepassword@postgres-db:5432/whatsapp_project'
+
+# --- CONFIGURACIÓN DE LA APLICACIÓN (app.config) ---
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+
+# Loguear a qué base de datos nos conectamos sin exponer la contraseña
+try:
+    parsed_uri = urlparse(DATABASE_URL)
+    logging.info(f"Conectando a la base de datos en host: {parsed_uri.hostname}")
+except Exception as e:
+    logging.error(f"No se pudo parsear la DATABASE_URL: {e}")
+
+# --- FIN DE LA CORRECCIÓN ---
+
+
+# Configuración de correo electrónico (este bloque no cambia)
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 MAIL_PORT = int(os.environ.get('MAIL_PORT', 465))
-# TLS/SSL para correo ya está manejado por estas variables para cifrado en tránsito.
 MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'false').lower() in ('true', '1', 't')
 MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'true').lower() in ('true', '1', 't')
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'info@vitta.health')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'duzo nztm nfst flnr')
 MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'info@vitta.health')
 
-# Configuración de Redis para SocketIO y Flask-Session
+# Configuración de Redis para SocketIO y Flask-Session (este bloque no cambia)
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
-REDIS_USE_SSL = os.environ.get('REDIS_USE_SSL', 'false').lower() == 'true' # Para conexiones TLS a Redis
-redis_url_for_socketio = os.environ.get("REDIS_URL_SOCKETIO")
-
-
-# --- CONFIGURACIÓN DE LA APLICACIÓN (app.config) ---
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-if FLASK_ENV == 'development':
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL_LOCAL")
-    logging.info(f"Configured PostgreSQL for development: {DATABASE_URL_LOCAL}")
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL_PROD
-    logging.info(f"Configured PostgreSQL for production: {DATABASE_URL_PROD}")
+REDIS_USE_SSL = os.environ.get('REDIS_USE_SSL', 'false').lower() == 'true'
+redis_url_for_socketio = os.environ.get("REDIS_URL_SOCKETIO")('/grabar_cita')def subir_audio():
     # En producción, se asume que un proxy inverso (Nginx, Caddy) maneja TLS 1.3 para HTTPS.
     # La aplicación Flask en sí no necesita manejar certificados SSL directamente en este caso.
 
@@ -1900,22 +1908,24 @@ def register_route():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_route():
-    # ALL the code inside this function needs to be indented
     if current_user.is_authenticated:
         if not current_user.is_verified:
             flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
             logout_user()
             return redirect(url_for('login_route'))
 
-        # Lógica para usuarios ya autenticados (antes de intentar login de nuevo)
         if current_user.role == 'admin_super':
             return redirect(url_for('super_admin_dashboard'))
         elif current_user.role == 'admin_nutricion':
             return redirect(url_for('nutricion_admin_dashboard'))
-        else: # Medicos o cualquier otro rol
+        else:
             return redirect(url_for('dashboard'))
 
-    email_from_form = request.form.get('email', '') if request.method == 'POST' else request.args.get('email', '')
+    # Define las credenciales de demostración que se mostrarán en el formulario
+    demo_credentials = {
+        "email": "demo@vitta.health",
+        "password": "vittademo"
+    }
 
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
@@ -1924,11 +1934,10 @@ def login_route():
 
         if not email or not password:
             flash('Email y contraseña son requeridos.', 'danger')
-            return render_template('login.html', email=email, css_file="css/auth_form.css")
+            return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 
         user = User.query.filter_by(email=email).first()
 
-        # This 'if' block also needs to be indented correctly under the previous 'if request.method == 'POST':'
         if user and user.check_password(password):
             if not user.is_verified:
                 flash('Su perfil aún no ha sido verificado.', 'warning')
@@ -1936,7 +1945,6 @@ def login_route():
 
             login_user(user, remember=remember)
 
-            # Lógica para usuarios recién autenticados
             if user.role == 'admin_super':
                 flash('Inicio de sesión como Super Administrador exitoso!', 'success')
                 return redirect(url_for('super_admin_dashboard'))
@@ -1946,14 +1954,16 @@ def login_route():
             elif user.role == 'admin_nutricion':
                 flash('Inicio de sesión como Administrador de Nutrición exitoso!', 'success')
                 return redirect(url_for('nutricion_admin_dashboard'))
-            else: # Medicos o cualquier otro rol
+            else:
                 flash('Inicio de sesión exitoso!', 'success')
                 return redirect(url_for('dashboard'))
 
         flash('Credenciales incorrectas. Por favor, intenta de nuevo.', 'danger')
-        return redirect(url_for('login_route'))
+        # Si el login falla, vuelve a mostrar la página con las credenciales demo
+        return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 
-    return render_template('login.html', email=email_from_form, css_file="css/auth_form.css")
+    # Para solicitudes GET, simplemente muestra la página de login con los datos demo
+    return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 @app.route('/logout')
 @login_required
 def logout_route():
@@ -4532,3 +4542,38 @@ def admin_delete_prospect(prospect_id):
 @app.route("/vitta-health-pitch.html")
 def pitch_deck_route():
     return render_template("vitta-health-pitch.html")
+
+@app.cli.command("create-demo-user")
+def create_demo_user():
+    """Crea un usuario de demostración verificado en la base de datos."""
+    demo_email = "demo@vitta.health"
+    demo_password = "vittademo"
+    
+    if User.query.filter_by(email=demo_email).first():
+        print(f"El usuario de demostración con email '{demo_email}' ya existe.")
+        return
+
+    try:
+        demo_user = User(
+            nombre="Dr. Demo Vitta",
+            email=demo_email,
+            role="medico",          
+            is_verified=True,       
+            especialidad="Medicina General",
+            licencia_profesional="DEMO-12345",
+            telefono_profesional="+5068888DEMO",
+            biografia="Este es un perfil de demostración para explorar las funcionalidades de Vitta Health Scribe.",
+            clinica_nombre="Centro Médico Vitta Demo"
+        )
+        demo_user.set_password(demo_password) 
+        
+        db.session.add(demo_user)
+        db.session.commit()
+        
+        print("¡Usuario de demostración creado exitosamente!")
+        print(f"  Email: {demo_email}")
+        print(f"  Password: {demo_password}")
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al crear el usuario de demostración: {e}")
