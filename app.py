@@ -1937,12 +1937,20 @@ def grabar_cita():
     if 'visita_actual_id' in session:
         session.pop('visita_actual_id', None)
         logging.info("ID de visita actual eliminado de la sesión al entrar a /grabar_cita.")
-    usuario_simulado = MockUser(is_authenticated=True, role='medico')
+
+    # --- INICIO DEL CÓDIGO CORREGIDO ---
+    # 1. Se crea la instancia de MockUser con los parámetros correctos (id, email, nombre).
+    usuario_simulado = MockUser(id=1, email="demo@example.com", nombre="Usuario de Demostración")
+    # 2. Se añaden los atributos adicionales después de la creación.
+    usuario_simulado.is_authenticated = True
+    usuario_simulado.role = 'medico'
+    # --- FIN DEL CÓDIGO CORREGIDO ---
+    
     return render_template('grabar_cita.html',
                            css_file="css/grabar_cita.css",
                            plantillas=plantillas,
                            pacientes=pacientes_activos,
-                           current_user=usuario_simulado) # <-- Se añade aquí
+                           current_user=usuario_simulado)
 @app.route('/resumir_registros')
 def resumir_registros_page():
     plantillas_resumen = ["Resumen de Registros", "Resumen General", "Puntos Clave"]
