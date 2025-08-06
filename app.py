@@ -340,32 +340,7 @@ else:
 Session(app)
 
 db = SQLAlchemy(app)
-with app.app_context():
-
-    usuario_demo = db.session.get(User, 1)
-    
-    if not usuario_demo:
-        print("INFO: Usuario de demostración (ID=1) no encontrado. Creándolo ahora...")
-        
-        usuario_demo = User(
-            id=1, 
-            nombre="Usuario de Demostración",
-            email="demo@vitta.health",
-            role="medico",
-            is_verified=True,
-            especialidad="Nutrición"
-        )
-        usuario_demo.set_password("una_contraseña_segura_para_la_demo")
-        
-        try:
-            db.session.add(usuario_demo)
-            db.session.commit()
-            print("✅ ÉXITO: Usuario de demostración creado y guardado en la base de datos.")
-        except Exception as e:
-            print(f"🚨 ERROR: No se pudo crear el usuario de demostración: {e}")
-            db.session.rollback()
-with app.app_context():
-    db.create_all()
+migrate = Migrate(app, db)
 socketio_kwargs = {
     "cors_allowed_origins": "*",
     "async_mode": 'eventlet'
@@ -594,7 +569,38 @@ class ProspectoInteres(db.Model):
 
     def __repr__(self):
         return f'<ProspectoInteres {self.id} - {self.nombre} {self.apellidos}>'
-
+# --- INICIO: CÓDIGO PARA CREAR USUARIO DE DEMO ---
+# Este bloque se asegura de que el usuario principal para la demo exista.
+with app.app_context():
+    # Verificar si el usuario demo con id=1 ya existe.
+    usuario_demo = db.session.get(User, 1)
+    
+    if not usuario_demo:
+        print("INFO: Usuario de demostración (ID=1) no encontrado. Creándolo ahora...")
+        
+        # Si no existe, lo creamos
+        usuario_demo = User(
+            id=1,  # Asignamos explícitamente el ID 1
+            nombre="Usuario de Demostración",
+            email="demo@vitta.health",
+            role="medico",
+            is_verified=True,
+            especialidad="Nutrición"
+        )
+        # Es crucial establecer una contraseña, aunque no se use para iniciar sesión
+        usuario_demo.set_password("una_contraseña_segura_para_la_demo")
+        
+        try:
+            db.session.add(usuario_demo)
+            db.session.commit()
+            print("✅ ÉXITO: Usuario de demostración creado y guardado en la base de datos.")
+        except Exception as e:
+            print(f"🚨 ERROR: No se pudo crear el usuario de demostración: {e}")
+            db.session.rollback()
+    
+    # Esta línea es importante, asegura que todas las tablas se creen
+    db.create_all()
+# --- FIN: CÓDIGO PARA CREAR USUARIO DE DEMO ---
 
 # --- CONSOLIDATED FILE HANDLING FUNCTIONS ---
 def guardar_archivo_subido(archivo_request_file, subcarpeta_config_key):
