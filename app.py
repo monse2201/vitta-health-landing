@@ -2978,7 +2978,8 @@ def iniciar_visita():
         logging.error(f"Error al iniciar una nueva visita para el usuario {current_user.id}: {e}", exc_info=True)
         return jsonify({"error": "Error interno al iniciar la visita."}), 500
 
-@app.route('/api/subir_audio', methods=['POST'])def subir_audio():
+@app.route('/api/subir_audio', methods=['POST'])
+def subir_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa. Por favor, inicie una nueva visita primero."}), 400
 
