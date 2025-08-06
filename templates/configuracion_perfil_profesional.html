@@ -196,7 +196,7 @@
 {% endfor %}
 
 <div class="account-settings-container">
-    <form id="profileSettingsForm" method="POST" action="{{ url_for('profile_settings') }}" enctype="multipart/form-data">
+    <form id="profileSettingsForm" method="POST" action="{{ url_for('configuracion_perfil_profesional') }}" enctype="multipart/form-data">
         {{ form.csrf_token if form and form.csrf_token }}
 
         <div class="settings-card">

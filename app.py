@@ -2516,10 +2516,10 @@ def nueva_receta_para_visita(visita_id):
         flash('La visita seleccionada no tiene un paciente asociado.', 'danger')
         return redirect(url_for('historial_visitas'))
 
-    # --- Lógica para la solicitud POST (cuando el usuario envía el formulario) ---
     if request.method == 'POST':
-        form_data_repost = request.form.copy() # Usar para repoblar el formulario en caso de error
-        medicamentos_json_str = request.form.get('medicamentos_json_str')
+        form_data_repost = request.form.copy()
+        # <-- CORRECCIÓN 1: Usar 'medications_json_str' en lugar de 'medicamentos_json_str'
+        medicamentos_json_str = request.form.get('medications_json_str')
 
         if not medicamentos_json_str:
             flash('Debe agregar al menos un medicamento a la receta.', 'danger')
@@ -2536,9 +2536,12 @@ def nueva_receta_para_visita(visita_id):
                 paciente_id=visita.paciente_id,
                 medico_id=current_user.id,
                 medicamentos_json=medicamentos_json_str,
-                diagnostico_relacionado=request.form.get('diagnostico_relacionado'),
-                validez_dias=request.form.get('validez_dias', type=int, default=30),
-                notas_adicionales_receta=request.form.get('notas_adicionales_receta'),
+                # <-- CORRECCIÓN 2: Usar 'related_diagnosis' en lugar de 'diagnostico_relacionado'
+                diagnostico_relacionado=request.form.get('related_diagnosis'),
+                # <-- CORRECCIÓN 3: Usar 'validity_days' en lugar de 'validez_dias'
+                validez_dias=request.form.get('validity_days', type=int, default=30),
+                # <-- CORRECCIÓN 4: Usar 'additional_notes_prescription' en lugar de 'notas_adicionales_receta'
+                notas_adicionales_receta=request.form.get('additional_notes_prescription'),
                 estado="activa"
             )
             db.session.add(nueva_receta_db)
@@ -2563,10 +2566,8 @@ def nueva_receta_para_visita(visita_id):
             logging.error(f"Error al crear receta para visita {visita_id}: {e}", exc_info=True)
             flash(f'Error al crear la receta: {str(e)}', 'danger')
         
-        # Si ocurre un error, volver a renderizar el formulario con los datos que el usuario ya ingresó
         return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_repost)
 
-    # --- Lógica para la solicitud GET (carga inicial de la página) ---
     form_data_initial = {}
     if visita.transcripcion and visita.transcripcion.strip() and client_openai and not visita.transcripcion.startswith("[Error"):
         datos_ia = extraer_medicamentos_con_ia(visita.transcripcion, visita.idioma_detectado)
@@ -2574,9 +2575,10 @@ def nueva_receta_para_visita(visita_id):
             form_data_initial['medicamentos_sugeridos_json'] = json.dumps(datos_ia["medicamentos"])
             flash(f"Se han sugerido {len(datos_ia['medicamentos'])} medicamento(s) basados en la transcripción. Por favor, revísalos y ajústalos.", 'info')
         if datos_ia and datos_ia.get("diagnostico_sugerido") and not datos_ia.get("diagnostico_sugerido","").startswith("[Error"):
-            form_data_initial['diagnostico_relacionado'] = datos_ia["diagnostico_sugerido"]
+            # <-- CORRECCIÓN 5: Usar la clave correcta para el prellenado del formulario
+            form_data_initial['related_diagnosis'] = datos_ia["diagnostico_sugerido"]
             
-    form_data_initial.setdefault('validez_dias', '30')
+    form_data_initial.setdefault('validity_days', '30')
 
     return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_initial)
 
@@ -2639,18 +2641,28 @@ def nueva_referencia_para_visita(visita_id):
             resumen_clinico_prefill = visita.notas_ai
         if resumen_clinico_prefill and not form_data_to_pass.get('resumen_clinico_relevante'):
             form_data_to_pass['resumen_clinico_relevante'] = resumen_clinico_prefill
+            
     if request.method == 'POST':
         especialidad = request.form.get('especialidad_referida','').strip()
-        if not especialidad:
-            flash('La especialidad referida es obligatoria.', 'danger')
-            # --- CORRECCIÓN AQUÍ ---
+        # <-- CORRECCIÓN 1: Capturar el motivo de la referencia del formulario
+        motivo = request.form.get('motivo_referencia', '').strip()
+
+        # <-- CORRECCIÓN 2: Validar que ambos campos obligatorios no estén vacíos
+        if not especialidad or not motivo:
+            if not especialidad:
+                flash('La especialidad referida es obligatoria.', 'danger')
+            if not motivo:
+                flash('El motivo de la referencia es obligatorio.', 'danger')
             return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+        
         try:
             nueva_referencia_db = ReferenciaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
                 medico_referente_id=current_user.id,
                 especialidad_referida=especialidad,
+                # <-- CORRECCIÓN 3: Guardar el motivo en la base de datos
+                motivo_referencia=motivo,
                 medico_referido_nombre=request.form.get('medico_referido_nombre', '').strip() or None,
                 institucion_referida=request.form.get('institucion_referida', '').strip() or None,
                 resumen_clinico_relevante=request.form.get('resumen_clinico_relevante', '').strip() or None, 
@@ -2672,12 +2684,9 @@ def nueva_referencia_para_visita(visita_id):
             db.session.rollback()
             logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
             flash('Error al crear la referencia médica.', 'danger')
-            # --- Y CORRECCIÓN AQUÍ ---
             return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
     
-    # --- Y CORRECCIÓN FINAL AQUÍ ---
     return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
-
 @app.route('/referencia/<int:referencia_id>')
 @login_required
 def ver_referencia(referencia_id):
@@ -2764,43 +2773,50 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
         if visita.transcripcion and visita.transcripcion.strip() and client_openai and not visita.transcripcion.startswith("[Error"):
             datos_ia_plan = generar_contenido_plan_nutricional_con_ia(visita.transcripcion, visita.idioma_detectado)
             if datos_ia_plan and not datos_ia_plan.get("error"):
-                contenido_sugerido_json_str = json.dumps(datos_ia_plan, indent=2, ensure_ascii=False)
-                form_data_dict['contenido_json_sugerido'] = contenido_sugerido_json_str
-                flash("Se ha sugerido un borrador del plan nutricional basado en la transcripción. Por favor, revísalo y ajústalos.", 'info')
+                # <-- CORRECCIÓN 1: Cambiado el nombre de la clave para que coincida con el JS del template.
+                form_data_dict['suggested_json_content'] = json.dumps(datos_ia_plan, indent=2, ensure_ascii=False)
+                flash("Se ha sugerido un borrador del plan nutricional basado en la transcripción. Por favor, revísalo y ajústalo.", 'info')
             elif datos_ia_plan and datos_ia_plan.get("error"):
                 flash(f"Error al sugerir plan desde IA: {datos_ia_plan.get('error')}", "warning")
-        form_data_dict.setdefault('notas_adicionales', request.form.get('notas_adicionales', ''))
-        if request.form.get('contenido_json_final_str'):
-             form_data_dict['contenido_json_final_str'] = request.form.get('contenido_json_final_str')
+
     if request.method == 'POST':
         form_data_dict = request.form.copy()
-        contenido_json_final_str = request.form.get('contenido_json_final_str')
-        notas_adicionales_form = request.form.get('notas_adicionales', '').strip()
+        # <-- CORRECCIÓN 2: Usar el nombre correcto del campo que viene del formulario HTML.
+        contenido_json_final_str = request.form.get('final_json_content_str')
+        # <-- CORRECCIÓN 3: Usar el nombre correcto para las notas generales.
+        notas_adicionales_form = request.form.get('general_notes', '').strip()
+        
         if not contenido_json_final_str:
             flash('El contenido del plan nutricional (JSON) es obligatorio.', 'danger')
-            return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
+            return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
+        
         try:
             parsed_contenido = json.loads(contenido_json_final_str)
-            if not isinstance(parsed_contenido, dict) or not all(k in parsed_contenido for k in ['objetivo_principal', 'recomendaciones_generales', 'plan_diario_tipo']):
-                flash('El JSON del plan nutricional no tiene la estructura requerida. Debe incluir al menos: objetivo_principal, recomendaciones_generales, plan_diario_tipo.', 'danger')
-                raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
+            # Validar que el plan tenga una estructura mínima.
+            if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('main_goal') or not parsed_contenido.get('daily_meal_plan'):
+                 flash('El JSON del plan nutricional no tiene la estructura requerida.', 'danger')
+                 raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
+
             nuevo_plan_db = PlanNutricional(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
                 medico_id=current_user.id,
-                contenido_json=contenido_json_final_str, # Considerar cifrar este JSON
-                notas_adicionales=notas_adicionales_form or None, # Considerar cifrar
+                contenido_json=contenido_json_final_str,
+                notas_adicionales=notas_adicionales_form or None,
                 estado="activo"
             )
             db.session.add(nuevo_plan_db)
-            db.session.flush() # Para obtener el ID del plan para el nombre del PDF
+            db.session.flush()
+            
             ruta_pdf = generar_y_guardar_pdf_plan_nutricional(nuevo_plan_db, current_user, visita.paciente)
-            if ruta_pdf: # ruta_pdf ya incluirá .enc si está cifrado
+            if ruta_pdf:
                 nuevo_plan_db.ruta_pdf_almacenada = ruta_pdf
                 flash('Plan Nutricional creado y PDF generado exitosamente.', 'success')
             else:
-                flash('Plan Nutricional creado, pero hubo un error al generar o guardar el PDF. Revise los logs.', 'warning')
+                flash('Plan Nutricional creado, pero hubo un error al generar o guardar el PDF.', 'warning')
+
             db.session.commit()
+            
             reg_act = RegistroActividad(
                 visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="plan_nutricional_creado",
@@ -2809,15 +2825,19 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             db.session.add(reg_act)
             db.session.commit()
             return redirect(url_for('ver_plan_nutricional', plan_id=nuevo_plan_db.id))
+
         except json.JSONDecodeError as je:
-            flash(f'Error en el formato JSON del plan nutricional: {je}. Por favor, verifique la estructura.', 'danger')
+            flash(f'Error en el formato JSON del plan nutricional: {je}.', 'danger')
             db.session.rollback()
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al crear Plan Nutricional para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
+            logging.error(f"Error al crear Plan Nutricional para visita {visita_id}: {e}", exc_info=True)
             flash(f'Error al crear el Plan Nutricional: {str(e)}', 'danger')
-        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
-    return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
+        
+        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
+
+    # Para la solicitud GET, también pasamos el form_data
+    return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
 
 @app.route('/plan_nutricional/<int:plan_id>')
 @login_required
