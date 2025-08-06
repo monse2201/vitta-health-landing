@@ -3,7 +3,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    /* ... (your existing styles without changes) ... */
+    /* ... (your existing styles remain unchanged) ... */
     body {
         background-color: #f0f2f5;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -157,15 +157,14 @@
     }
 </style>
 
-{# Data definition for dropdowns #}
+{# Data definitions for dropdowns #}
 {% set medical_specialties = [
-    "Anesthesiology", "Cardiology", "General Surgery", "Pediatric Surgery", "Plastic Surgery",
-    "Dermatology", "Endocrinology", "Gastroenterology", "Geriatrics", "Gynecology and Obstetrics",
-    "Hematology", "Infectiology", "Emergency Medicine", "Family Medicine",
-    "Physical Medicine and Rehabilitation", "General Medicine", "Internal Medicine", "Nephrology",
-    "Pulmonology", "Neurosurgery", "Neurology", "Nutrition", "Ophthalmology", "Medical Oncology",
-    "Radiation Oncology", "Orthopedics and Traumatology", "Otolaryngology",
-    "Clinical Pathology", "Pediatrics", "Psychiatry", "Radiology", "Rheumatology", "Urology"
+    "Anesthesiology", "Cardiology", "Dermatology", "Emergency Medicine", "Endocrinology",
+    "Family Medicine", "Gastroenterology", "General Surgery", "Geriatrics", "Gynecology and Obstetrics",
+    "Hematology", "Infectious Disease", "Internal Medicine", "Nephrology", "Neurology", "Neurosurgery",
+    "Nutrition", "Oncology (Medical)", "Oncology (Radiation)", "Ophthalmology", "Orthopedics and Traumatology",
+    "Otolaryngology (ENT)", "Pathology", "Pediatrics", "Pediatric Surgery", "Physical Medicine and Rehabilitation",
+    "Plastic Surgery", "Psychiatry", "Pulmonology", "Radiology", "Rheumatology", "Urology"
 ] %}
 
 {% set country_codes = [
@@ -177,29 +176,27 @@
     {"code": "+54", "name": "Argentina", "flag": "🇦🇷"}
 ] %}
 
-{# Logic to pre-select specialty and phone number #}
-{% set current_specialty = current_user.especialidad if current_user and current_user.especialidad else '' %}
+{# Logic to pre-select specialty and phone #}
+{% set current_specialty = current_user.specialty if current_user and current_user.specialty else '' %}
 {% set is_other_specialty = current_specialty and current_specialty not in medical_specialties %}
 
-{% set current_prof_phone = current_user.telefono_profesional if current_user and current_user.telefono_profesional else '' %}
+{% set current_prof_phone = current_user.professional_phone if current_user and current_user.professional_phone else '' %}
 {% set current_prefix = '' %}
 {% set current_number = current_prof_phone %}
-{% set prefix_found = false %} {# MODIFIED: Flag to simulate break #}
+{% set prefix_found = false %}
 
 {% for country in country_codes %}
-    {% if not prefix_found %} {# MODIFIED: Only process if not found #}
-        {% if current_prof_phone and current_prof_phone.startswith(country.code) %} {# Added check for current_prof_phone #}
+    {% if not prefix_found %}
+        {% if current_prof_phone and current_prof_phone.startswith(country.code) %}
             {% set current_prefix = country.code %}
             {% set current_number = current_prof_phone[current_prefix|length:] %}
-            {% set prefix_found = true %} {# MODIFIED: Set flag instead of break #}
+            {% set prefix_found = true %}
         {% endif %}
     {% endif %}
 {% endfor %}
 
-
 <div class="account-settings-container">
-
-    <form id="professionalProfileForm" method="POST" action="{{ url_for('configuracion_perfil_profesional') }}" enctype="multipart/form-data">
+    <form id="profileSettingsForm" method="POST" action="{{ url_for('profile_settings') }}" enctype="multipart/form-data">
         {{ form.csrf_token if form and form.csrf_token }}
 
         <div class="settings-card">
@@ -210,7 +207,7 @@
                 <div class="form-grid">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="prof_full_name">Full Name <span class="required-indicator">*</span></label>
-                        <input type="text" id="prof_full_name" name="prof_full_name" value="{{ current_user.nombre if current_user and current_user.nombre else '' }}" required placeholder="Ex: Dr. Ana Maria Solano Rojas">
+                        <input type="text" id="prof_full_name" name="prof_full_name" value="{{ current_user.name if current_user and current_user.name else '' }}" required placeholder="e.g., Dr. Jane M. Doe">
                     </div>
 
                     <div class="form-group">
@@ -225,17 +222,17 @@
                         <input type="text" id="prof_specialty_other" name="prof_specialty_other"
                                class="form-control hidden-field"
                                value="{{ current_specialty if is_other_specialty else '' }}"
-                               placeholder="Type your specialty"
+                               placeholder="Enter your specialty"
                                style="{{ 'display: block;' if is_other_specialty else 'display: none;' }}">
                     </div>
 
                     <div class="form-group">
-                        <label for="prof_license">Collegiate / Professional License Nº <span class="required-indicator">*</span></label>
-                        <input type="text" id="prof_license" name="prof_license" value="{{ current_user.licencia_profesional if current_user and current_user.licencia_profesional else '' }}" required placeholder="Ex: MED-12345">
+                        <label for="prof_license">License Number / Professional ID <span class="required-indicator">*</span></label>
+                        <input type="text" id="prof_license" name="prof_license" value="{{ current_user.professional_license if current_user and current_user.professional_license else '' }}" required placeholder="e.g., MED-12345">
                     </div>
                     <div class="form-group">
                         <label for="prof_email">Contact Email <span class="required-indicator">*</span></label>
-                        <input type="email" id="prof_email" name="prof_email" value="{{ current_user.email if current_user and current_user.email else '' }}" required placeholder="your.email@professional.com">
+                        <input type="email" id="prof_email" name="prof_email" value="{{ current_user.email if current_user and current_user.email else '' }}" required placeholder="your.professional@email.com">
                     </div>
 
                     <div class="form-group">
@@ -247,20 +244,20 @@
                                 <option value="{{ country.code }}" {{ 'selected' if country.code == current_prefix }}>{{ country.flag }} {{ country.code }}</option>
                                 {% endfor %}
                             </select>
-                            <input type="tel" id="prof_phone_number" name="prof_phone_number" value="{{ current_number }}" placeholder="Ex: 88887777">
+                            <input type="tel" id="prof_phone_number" name="prof_phone_number" value="{{ current_number }}" placeholder="e.g., 88887777">
                         </div>
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label for="prof_bio">Short Bio / About me (Optional)</label>
-                        <textarea id="prof_bio" name="prof_bio" placeholder="A brief description of your professional profile, experience, etc.">{{ current_user.biografia if current_user and current_user.biografia else '' }}</textarea>
+                        <label for="prof_biography">Short Biography / About Me (Optional)</label>
+                        <textarea id="prof_biography" name="prof_biography" placeholder="A brief description of your professional profile, experience, etc.">{{ current_user.biography if current_user and current_user.biography else '' }}</textarea>
                     </div>
                     <div class="form-group">
-                        <label for="prof_profile_photo">Profile Photo (Optional)</label>
+                        <label for="prof_profile_photo">Profile Picture (Optional)</label>
                         <input type="file" id="prof_profile_photo" name="prof_profile_photo" accept="image/png, image/jpeg, image/gif">
                         <div class="profile-picture-preview" id="photoPreview">
-                            {% if current_user and current_user.url_foto_perfil %}
-                                <img src="{{ url_for('static', filename=current_user.url_foto_perfil) }}" alt="Current profile photo">
+                            {% if current_user and current_user.profile_photo_url %}
+                                <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Current profile picture">
                             {% else %}
                                 <span><i class="fas fa-camera"></i><br>Preview</span>
                             {% endif %}
@@ -278,26 +275,26 @@
                 <div class="form-grid">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="clinic_name">Clinic or Office Name</label>
-                        <input type="text" id="clinic_name" name="clinic_name" value="{{ current_user.clinica_nombre if current_user and current_user.clinica_nombre else '' }}" placeholder="Ex: Comprehensive Wellness Clinic">
+                        <input type="text" id="clinic_name" name="clinic_name" value="{{ current_user.clinic_name if current_user and current_user.clinic_name else '' }}" placeholder="e.g., Wellness Integral Clinic">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="clinic_address">Clinic Address</label>
-                        <textarea id="clinic_address" name="clinic_address" placeholder="Ex: Central Street, Medical Building, Office #3, San José">{{ current_user.clinica_direccion if current_user and current_user.clinica_direccion else '' }}</textarea>
+                        <textarea id="clinic_address" name="clinic_address" placeholder="e.g., 123 Main Street, Medical Building, Suite #3, Anytown">{{ current_user.clinic_address if current_user and current_user.clinic_address else '' }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="clinic_phone">Clinic Phone</label>
-                        <input type="tel" id="clinic_phone" name="clinic_phone" value="{{ current_user.clinica_telefono if current_user and current_user.clinica_telefono else '' }}" placeholder="Ex: +506 22554433">
+                        <input type="tel" id="clinic_phone" name="clinic_phone" value="{{ current_user.clinic_phone if current_user and current_user.clinic_phone else '' }}" placeholder="e.g., +1 555-123-4567">
                     </div>
                     <div class="form-group">
                         <label for="clinic_website">Clinic Website</label>
-                        <input type="url" id="clinic_website" name="clinic_website" value="{{ current_user.clinica_website if current_user and current_user.clinica_website else '' }}" placeholder="https://www.yourclinic.com">
+                        <input type="url" id="clinic_website" name="clinic_website" value="{{ current_user.clinic_website if current_user and current_user.clinic_website else '' }}" placeholder="https://www.yourclinic.com">
                     </div>
                      <div class="form-group">
                         <label for="clinic_logo">Clinic Logo (Optional)</label>
                         <input type="file" id="clinic_logo" name="clinic_logo" accept="image/png, image/jpeg, image/svg">
                          <div class="clinic-logo-preview" id="logoPreview">
-                            {% if current_user and current_user.url_logo_clinica %}
-                                <img src="{{ url_for('static', filename=current_user.url_logo_clinica) }}" alt="Current clinic logo">
+                            {% if current_user and current_user.clinic_logo_url %}
+                                <img src="{{ url_for('static', filename=current_user.clinic_logo_url) }}" alt="Current clinic logo">
                             {% else %}
                                 <span><i class="fas fa-image"></i><br>Preview</span>
                             {% endif %}
@@ -307,7 +304,6 @@
             </div>
         </div>
 
-        
         <div class="settings-card">
             <div class="settings-card-header">
                 <h2><i class="fas fa-shield-alt"></i> Account Security</h2>
@@ -315,15 +311,15 @@
             <div class="settings-card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <p style="margin: 0; font-weight: 500; color: #344054;">Change Password</p>
-                    <p style="margin: 0; font-size: 14px; color: #6b7280;">It is recommended to update your password periodically or if you suspect it has been compromised.</p>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280;">It's recommended to update your password periodically or if you suspect it has been compromised.</p>
                 </div>
-                <a href="{{ url_for('cambiar_contrasena_route') }}" class="btn" style="background-color: #f0f2f5; border: 1px solid #d0d5dd; color: #344054; padding: 10px 20px;">
+                <a href="{{ url_for('change_password_route') }}" class="btn" style="background-color: #f0f2f5; border: 1px solid #d0d5dd; color: #344054; padding: 10px 20px;">
                     <i class="fas fa-key"></i> Go to Change Password
                 </a>
             </div>
         </div>
 
-<div class="form-actions">
+        <div class="form-actions">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
         </div>
     </form>
@@ -331,7 +327,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('professionalProfileForm');
+    const form = document.getElementById('profileSettingsForm');
     const profilePhotoInput = document.getElementById('prof_profile_photo');
     const photoPreview = document.getElementById('photoPreview');
     const clinicLogoInput = document.getElementById('clinic_logo');
@@ -354,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         if (specialtySelect.value === 'other') {
              specialtyOtherInput.setAttribute('required', 'required');
-        } else { // Ensure it's not required if it's not "other" on load
+        } else { // Ensure it's not required if not "other" on load
             specialtyOtherInput.removeAttribute('required');
         }
     }
@@ -403,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!finalSpecialtyValue) {
                      alert('Please specify your specialty in the "Other" field.');
                      event.preventDefault();
-                     if(specialtyOtherInput) specialtyOtherInput.focus(); // Check just in case
+                     if(specialtyOtherInput) specialtyOtherInput.focus();
                      return;
                 }
             } else {
@@ -413,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!finalSpecialtyValue && specialtySelect && specialtySelect.hasAttribute('required') && specialtySelect.value === "") {
                  alert('Please select or specify your medical specialty.');
                  event.preventDefault();
-                 if(specialtySelect) specialtySelect.focus(); // Check just in case
+                 if(specialtySelect) specialtySelect.focus();
                  return;
             }
 
@@ -421,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = document.getElementById('prof_email').value.trim();
 
             if (!fullName || !license || !email) {
-                alert('Please complete all required fields (*) in Professional Information, besides the specialty.');
+                alert('Please complete all required fields (*) in Professional Information, in addition to the specialty.');
                 event.preventDefault();
                 return;
             }

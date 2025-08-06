@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - VittaHealth</title>
+    <title>Log In - VittaHealth</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -23,7 +23,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 420px;
+            max-width: 420px; /* A bit narrower is common for login forms */
             text-align: center;
         }
         .vittahealth-logo {
@@ -91,12 +91,12 @@
         }
         .form-options .remember-me input[type="checkbox"] {
             margin-right: 8px;
-            width: 16px;
-            height: 16px;
-            accent-color: #1c64f2;
+            width: 16px; /* Checkbox size */
+            height: 16px; /* Checkbox size */
+            accent-color: #1c64f2; /* Check color */
         }
         .form-options .remember-me label {
-            margin-bottom: 0;
+            margin-bottom: 0; /* Reset margin from .form-group label */
             color: #344054;
             font-weight: normal;
         }
@@ -119,7 +119,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            margin-top: 10px;
+            margin-top: 10px; /* Space if there's no .form-options before it */
         }
         .auth-button:hover {
             background-color: #1a56db;
@@ -148,7 +148,7 @@
         .signup-link a:hover {
             text-decoration: underline;
         }
-        .required-indicator {
+        .required-indicator { /* Although not explicitly used in login, it's good to have if needed */
             color: #d92d20;
             margin-left: 2px;
         }
@@ -157,8 +157,8 @@
 <body>
     <div class="auth-container">
         <div class="vittahealth-logo">VittaHealth</div>
-        <h2>Iniciar Sesión</h2>
-        <p class="subtitle">Bienvenido de nuevo. Ingresa tus credenciales.</p>
+        <h2>Log In</h2>
+        <p class="subtitle">Welcome back. Please enter your credentials.</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -170,26 +170,26 @@
 
         <form method="POST" action="{{ url_for('login_route') }}">
             <div class="form-group">
-                <label for="email">Correo Electrónico</label>
+                <label for="email">Email</label>
                 <input type="email" id="email" name="email" value="{{ email or '' }}" required>
             </div>
             <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" value="{{ password or '' }}" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
             </div>
 
             <div class="form-options">
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Recordarme</label>
+                    <label for="remember">Remember me</label>
                 </div>
-                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                <a href="#" class="forgot-password">Forgot your password?</a>
             </div>
 
-            <button type="submit" class="auth-button">Iniciar Sesión</button>
+            <button type="submit" class="auth-button">Log In</button>
         </form>
 
-        <p class="signup-link">¿No tienes una cuenta? <a href="{{ url_for('register_route') }}">Regístrate Aquí</a></p>
+        <p class="signup-link">Don't have an account? <a href="{{ url_for('register_route') }}">Sign Up Here</a></p>
     </div>
 </body>
 </html>

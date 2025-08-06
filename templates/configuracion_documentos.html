@@ -10,7 +10,7 @@
         background-color: #f4f7f6;
         color: #333;
     }
-    .container-doc-config {
+    .doc-config-container {
         max-width: 1000px; /* A bit wider for the preview */
         margin: 40px auto;
         background-color: #ffffff;
@@ -161,9 +161,9 @@
     }
 </style>
 
-<div class="container-doc-config">
+<div class="doc-config-container">
     <div class="config-form-section">
-        <h2><i class="fas fa-file-invoice"></i> Document Configuration</h2>
+        <h2><i class="fas fa-file-invoice"></i> Document Settings</h2>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -171,9 +171,9 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <form action="{{ url_for('configuracion_documentos') }}" method="POST" id="documentConfigForm">
+        <form action="{{ url_for('document_settings') }}" method="POST" id="documentSettingsForm">
             <h3>Information to Display on Documents</h3>
-            <p class="text-muted">Select which information from your profile should appear on the generated documents. You can edit your profile information in the "My Profile" section.</p>
+            <p class="text-muted">Select which information from your profile should appear on generated documents. You can edit your profile information in the "My Profile" section.</p>
             <div class="checkbox-group">
                 <div>
                     <input type="checkbox" id="show_clinic_name_pdf" name="show_clinic_name_pdf" value="true" {% if user.show_clinic_name_pdf %}checked{% endif %}>
@@ -191,7 +191,7 @@
                     <input type="checkbox" id="show_clinic_website_pdf" name="show_clinic_website_pdf" value="true" {% if user.show_clinic_website_pdf %}checked{% endif %}>
                     <label for="show_clinic_website_pdf">Clinic Website</label>
                 </div>
-                {# NEW CHECKBOX FOR THE LOGO #}
+                {# NEW CHECKBOX FOR LOGO #}
                 <div>
                     <input type="checkbox" id="show_clinic_logo_pdf" name="show_clinic_logo_pdf" value="true" {% if user.show_clinic_logo_pdf %}checked{% endif %}>
                     <label for="show_clinic_logo_pdf">Clinic Logo</label>
@@ -210,7 +210,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Configuration</button>
+            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Settings</button>
         </form>
     </div>
 
@@ -219,45 +219,45 @@
         <div class="preview-document">
             <div class="preview-header">
                 <div class="preview-clinic-info">
-                    {# The logo is loaded from 'logo_clinica_base64' which comes from the backend #}
-                    {# The visibility now also depends on the show_clinic_logo_pdf checkbox #}
-                    {% if logo_clinica_base64 %}
-                        <img src="{{ logo_clinica_base64 }}" alt="Clinic Logo" class="preview-logo" id="preview_logo" style="display: {{ 'block' if user.show_clinic_logo_pdf else 'none' }};">
+                    {# The logo is loaded from 'clinic_logo_base64' which comes from the backend #}
+                    {# Visibility now also depends on the show_clinic_logo_pdf checkbox #}
+                    {% if clinic_logo_base64 %}
+                        <img src="{{ clinic_logo_base64 }}" alt="Clinic Logo" class="preview-logo" id="preview_logo" style="display: {{ 'block' if user.show_clinic_logo_pdf else 'none' }};">
                     {% else %}
-                        <div class="preview-logo-placeholder" id="preview_logo_placeholder" style="display: {{ 'flex' if not logo_clinica_base64 or not user.show_clinic_logo_pdf else 'none' }};">
+                        <div class="preview-logo-placeholder" id="preview_logo_placeholder" style="display: {{ 'flex' if not clinic_logo_base64 or not user.show_clinic_logo_pdf else 'none' }};">
                             No Logo
                         </div>
                     {% endif %}
-                    {# The text values here will be read from the span/strong elements and their visibility controlled by JS #}
+                    {# The text values here will be read from span/strong elements and their visibility controlled by JS #}
                     <p id="p_clinic_name" style="display: {{ 'block' if user.show_clinic_name_pdf else 'none' }};">
-                        <strong id="preview_clinic_name_val">{{ user.clinica_nombre or 'Clinic Name' }}</strong>
+                        <strong id="preview_clinic_name_val">{{ user.clinic_name or 'Clinic Name' }}</strong>
                     </p>
                     <p id="preview_clinic_address_p" style="display: {{ 'block' if user.show_clinic_address_pdf else 'none' }};">
-                        {{ user.clinica_direccion or 'Clinic Address' }}
+                        {{ user.clinic_address or 'Clinic Address' }}
                     </p>
                     <p id="preview_clinic_phone_p" style="display: {{ 'block' if user.show_clinic_phone_pdf else 'none' }};">
-                        Tel: <span id="preview_clinic_phone_val">{{ user.clinica_telefono or '0000-0000' }}</span>
+                        Tel: <span id="preview_clinic_phone_val">{{ user.clinic_phone or '0000-0000' }}</span>
                     </p>
                     <p id="preview_clinic_website_p" style="display: {{ 'block' if user.show_clinic_website_pdf else 'none' }};">
-                        Web: <span id="preview_clinic_website_val">{{ user.clinica_website or 'www.example.com' }}</span>
+                        Web: <span id="preview_clinic_website_val">{{ user.clinic_website or 'www.example.com' }}</span>
                     </p>
                 </div>
                 <div class="preview-doctor-info">
-                    <p><strong>Dr. <span id="preview_doctor_name">{{ user.nombre or 'Doctor Name' }}</span></strong></p>
-                    <p><span id="preview_doctor_specialty">{{ user.especialidad or 'Medical Specialty' }}</span></p>
+                    <p><strong>Dr. <span id="preview_doctor_name">{{ user.name or "Doctor's Name" }}</span></strong></p>
+                    <p><span id="preview_doctor_specialty">{{ user.specialty or 'Medical Specialty' }}</span></p>
                     <p id="preview_doctor_license_p" style="display: {{ 'block' if user.show_doctor_license_pdf else 'none' }};">
-                        License: <span id="preview_doctor_license_val">{{ user.licencia_profesional or 'XXXX-XXXX' }}</span>
+                        License: <span id="preview_doctor_license_val">{{ user.professional_license or 'XXXX-XXXX' }}</span>
                     </p>
                     <p id="preview_doctor_phone_p" style="display: {{ 'block' if user.show_doctor_phone_pdf else 'none' }};">
-                        Tel: <span id="preview_doctor_phone_val">{{ user.telefono_profesional or '0000-0000' }}</span>
+                        Tel: <span id="preview_doctor_phone_val">{{ user.professional_phone or '0000-0000' }}</span>
                     </p>
                     <p id="preview_doctor_bio_p" style="display: {{ 'block' if user.show_doctor_bio_pdf else 'none' }};">
-                        Biography: <span id="preview_doctor_bio_val">{{ user.biografia or 'Personal biography' }}</span>
+                        Bio: <span id="preview_doctor_bio_val">{{ user.biography or 'Personal biography' }}</span>
                     </p>
                 </div>
             </div>
             <div class="preview-title" id="preview_document_title">
-                EXAMPLE DOCUMENT
+                SAMPLE DOCUMENT
             </div>
             <div class="preview-content">
                 <div class="preview-section-title" id="preview_section_title_1">Patient Information</div>
@@ -265,8 +265,8 @@
                 <p><strong>Date:</strong> July 18, 2025</p>
                 <br>
                 <div class="preview-section-title" id="preview_section_title_2">Consultation Details</div>
-                <p>This is example text to show how the details of a consultation or AI-generated notes would look. The goal is to provide a clear idea of the final document design with the provided information.</p>
-                <p>A summary of the visit, the doctor's notes, or any other relevant content generated for the patient can be included.</p>
+                <p>This is sample text to show how consultation details or AI-generated notes would look. The goal is to provide a clear idea of the final document design with the provided information.</p>
+                <p>A summary of the visit, doctor's notes, or any other relevant content generated for the patient can be included here.</p>
             </div>
         </div>
     </div>
@@ -274,7 +274,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // References to the preview elements
+        // References to preview elements
         const previewLogo = document.getElementById('preview_logo');
         const previewLogoPlaceholder = document.getElementById('preview_logo_placeholder');
 
@@ -287,7 +287,7 @@
         const previewDoctorPhoneP = document.getElementById('preview_doctor_phone_p');
         const previewDoctorBioP = document.getElementById('preview_doctor_bio_p');
 
-        // Form inputs for document configuration (checkboxes)
+        // Form inputs for document settings (checkboxes)
         const checkboxes = {
             show_clinic_name_pdf: document.getElementById('show_clinic_name_pdf'),
             show_clinic_address_pdf: document.getElementById('show_clinic_address_pdf'),
@@ -299,43 +299,44 @@
             show_clinic_logo_pdf: document.getElementById('show_clinic_logo_pdf')
         };
 
-        // User data is obtained from Jinja when the page loads
-        // This is the user data AS IT IS RENDERED IN THE INITIAL HTML.
-        // After a POST and redirection, this will be the updated data from the DB.
+        // userData is obtained from Jinja when the page loads.
+        // These are the user's data AS RENDERED IN THE INITIAL HTML.
+        // After a POST and redirect, this will be the updated data from the DB.
+        // IMPORTANT: The backend must pass these variables with English names.
         const userData = {
-            name: {{ user.nombre | tojson }},
-            specialty: {{ user.especialidad | tojson }},
-            professional_license: {{ user.licencia_profesional | tojson }},
-            professional_phone: {{ user.telefono_profesional | tojson }},
-            biography: {{ user.biografia | tojson }},
-            clinic_name: {{ user.clinica_nombre | tojson }},
-            clinic_address: {{ user.clinica_direccion | tojson }},
-            clinic_phone: {{ user.clinica_telefono | tojson }},
-            clinic_website: {{ user.clinica_website | tojson }},
-            clinic_logo_base64: {{ logo_clinica_base64 | tojson }}
+            name: {{ user.name | tojson }},
+            specialty: {{ user.specialty | tojson }},
+            professional_license: {{ user.professional_license | tojson }},
+            professional_phone: {{ user.professional_phone | tojson }},
+            biography: {{ user.biography | tojson }},
+            clinic_name: {{ user.clinic_name | tojson }},
+            clinic_address: {{ user.clinic_address | tojson }},
+            clinic_phone: {{ user.clinic_phone | tojson }},
+            clinic_website: {{ user.clinic_website | tojson }},
+            clinic_logo_base64: {{ clinic_logo_base64 | tojson }}
         };
 
         function updatePreview() {
-            // Clinic logo
-            // Ensure the image src is only updated if there is a logo
+            // Clinic Logo
+            // Make sure the image src is updated only if there is a logo
             if (checkboxes.show_clinic_logo_pdf.checked && userData.clinic_logo_base64) {
                 previewLogo.src = userData.clinic_logo_base64;
                 previewLogo.style.display = 'block';
                 previewLogoPlaceholder.style.display = 'none';
             } else {
-                // If the checkbox is unchecked or there is no logo, hide the image and show the placeholder
-                previewLogo.src = ""; // Clear the src to prevent broken image errors
+                // If checkbox is unchecked or there's no logo, hide the image and show the placeholder
+                previewLogo.src = ""; // Clear src to prevent broken image errors
                 previewLogo.style.display = 'none';
                 previewLogoPlaceholder.style.display = 'flex'; 
             }
 
-            // Clinic information
+            // Clinic Information
             pClinicName.style.display = checkboxes.show_clinic_name_pdf.checked ? 'block' : 'none';
             previewClinicAddressP.style.display = checkboxes.show_clinic_address_pdf.checked ? 'block' : 'none';
             previewClinicPhoneP.style.display = checkboxes.show_clinic_phone_pdf.checked ? 'block' : 'none';
             previewClinicWebsiteP.style.display = checkboxes.show_clinic_website_pdf.checked ? 'block' : 'none';
 
-            // Doctor information
+            // Doctor Information
             previewDoctorLicenseP.style.display = checkboxes.show_doctor_license_pdf.checked ? 'block' : 'none';
             previewDoctorPhoneP.style.display = checkboxes.show_doctor_phone_pdf.checked ? 'block' : 'none';
             previewDoctorBioP.style.display = checkboxes.show_doctor_bio_pdf.checked ? 'block' : 'none';
@@ -348,8 +349,8 @@
             }
         }
 
-        // Call updatePreview initially to load the default state and the logo
-        // This is crucial for the preview to reflect the initial state (or the post-POST state)
+        // Call updatePreview initially to load the default state and logo
+        // This is crucial for the preview to reflect the initial state (or post-POST state)
         updatePreview();
     });
 </script>
