@@ -40,16 +40,16 @@
     color: var(--text-primary);
     margin: 0;
     line-height: 1.6;
-    font-size: 15px; /* A bit larger for the base */
+    font-size: 15px; /* A bit larger for base */
   }
 
-  .patients-page-container {
+  .patient-page-container {
     max-width: 1200px; /* Wider for large screens */
     margin: var(--spacing-xl) auto;
     padding: var(--spacing-lg);
   }
 
-  .patients-page-header {
+  .patient-page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -58,13 +58,13 @@
     border-bottom: 1px solid var(--border-color);
   }
 
-  .patients-page-header h2 {
+  .patient-page-header h2 {
     font-size: 28px; /* More prominent */
     color: var(--text-primary);
     font-weight: 600;
     margin: 0;
   }
-  .patients-page-header h2 i {
+  .patient-page-header h2 i {
     margin-right: var(--spacing-sm);
     color: var(--accent-color);
   }
@@ -74,7 +74,7 @@
     background-color: var(--card-background);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem; /* Adjust to rems */
+    padding: 0.5rem 1rem; /* Adjusted to rems */
     border-radius: var(--border-radius);
     font-size: 0.9rem; /* Slightly smaller */
     font-weight: 500;
@@ -112,22 +112,21 @@
     color: white;
   }
 
-
-  .patients-search-actions {
+  .patient-search-actions {
     display: flex;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
     flex-wrap: wrap;
-    align-items: flex-end; /* Align elements to the end */
+    align-items: flex-end; /* Align items to the end */
   }
 
-  .patients-search-actions .search-input-group {
+  .patient-search-actions .search-input-group {
     flex-grow: 1;
     display: flex;
-    position: relative; /* For the inner icon */
+    position: relative; /* For the icon inside */
   }
 
-  .patients-search-actions input[type="text"] {
+  .patient-search-actions input[type="text"] {
     padding: 0.6rem 0.9rem; /* More padding */
     padding-left: 2.5rem; /* Space for the icon */
     border: 1px solid var(--border-color);
@@ -137,7 +136,7 @@
     flex-grow: 1;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .patients-search-actions input[type="text"]:focus {
+  .patient-search-actions input[type="text"]:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     outline: none;
@@ -148,12 +147,12 @@
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    pointer-events: none; /* So it doesn't interfere with clicking the input */
+    pointer-events: none; /* So it doesn't interfere with clicks on the input */
   }
 
-  /* Search button removed, icon is integrated */
+  /* .btn-search-paciente removed, icon is integrated */
 
-  .patients-grid-list {
+  .patient-list-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* A bit smaller for more cards */
     gap: var(--spacing-lg);
@@ -162,7 +161,7 @@
   .patient-card {
     background-color: var(--card-background);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg); /* More rounded corners */
+    border-radius: var(--border-radius-lg); /* More rounded borders */
     padding: var(--spacing-md);
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.25s ease-out, transform 0.25s ease-out;
@@ -171,7 +170,7 @@
   }
   .patient-card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-3px); /* Subtle lift effect */
+    transform: translateY(-3px); /* Subtle lifting effect */
   }
 
   .patient-card-header {
@@ -182,7 +181,7 @@
   .patient-card-avatar {
     width: 48px; /* Slightly larger */
     height: 48px;
-    background-color: #e7f3ff; /* Softer background color */
+    background-color: var(--accent-color-light); /* Softer background color */
     color: var(--accent-color-darker); /* Darker text for contrast */
     border-radius: 50%;
     display: flex;
@@ -206,7 +205,6 @@
     display: block;
     margin-top: var(--spacing-xs);
   }
-
 
   .patient-card-info {
     font-size: 0.9rem;
@@ -247,7 +245,6 @@
   .status-follow-up { background-color: #fff3cd; color: #856404; border: 1px solid #ffda6a;}
   .status-inactive { background-color: #f8f9fa; color: var(--text-muted); border: 1px solid #ced4da;}
 
-
   .patient-card-actions {
     margin-top: var(--spacing-md);
     padding-top: var(--spacing-md);
@@ -256,14 +253,13 @@
   }
   /* The "View Profile" button will use .action-btn and .action-btn-primary or .action-btn-success */
 
-
   .global-patient-actions {
     margin-top: var(--spacing-xl);
     padding-top: var(--spacing-lg);
     border-top: 1px solid var(--border-color);
     display: flex;
     gap: var(--spacing-md);
-    justify-content: flex-start; /* Or center/flex-end depending on preference */
+    justify-content: flex-start; /* Or center/flex-end as preferred */
   }
 
   .no-patients {
@@ -308,7 +304,7 @@
 
 </style>
 
-<div class="patients-page-container">
+<div class="patient-page-container">
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -328,33 +324,33 @@
       {% endif %}
     {% endwith %}
 
-
-    <div class="patients-page-header">
-        <h2><i class="fas fa-users"></i> Patient Management</h2>
-        <a href="{{ url_for('agregar_paciente') }}" class="action-btn action-btn-primary" id="btnAddPatient">
+    <div class="patient-page-header">
+        <h2><i class="fas fa-users"></i> Patient Management</h2> {# Slightly modified title #}
+        <a href="{{ url_for('add_patient') }}" class="action-btn action-btn-primary" id="addPatientBtn"> {# Use <a> for semantic navigation #}
             <i class="fas fa-user-plus"></i> Add New Patient
         </a>
     </div>
 
-    <div class="patients-search-actions">
+    <div class="patient-search-actions">
         <div class="search-input-group">
-            <i class="fas fa-search search-icon"></i>
+            <i class="fas fa-search search-icon"></i> {# Icon inside the input #}
             <input type="text" id="patientSearchInput" placeholder="Search by name, email..." />
+            {# Explicit search button removed, search can be automatic upon typing #}
         </div>
         {# <button class="action-btn"> <i class="fas fa-filter"></i> Advanced Filters </button> #}
     </div>
 
     {% if patients %}
-    <div class="patients-grid-list" id="patientListGrid">
+    <div class="patient-list-grid" id="patientListGrid">
         {% for patient_item in patients %}
-        <div class="patient-card" data-name="{{ patient_item.nombre.lower() }}" data-email="{{ patient_item.email.lower() if patient_item.email else '' }}">
+        <div class="patient-card" data-name="{{ patient_item.name.lower() }}" data-email="{{ patient_item.email.lower() if patient_item.email else '' }}">
             <div class="patient-card-header">
                 <div class="patient-card-avatar">
-                    {{ patient_item.nombre[0]|upper if patient_item.nombre else 'P' }}
+                    {{ patient_item.name[0]|upper if patient_item.name else 'P' }}
                 </div>
-                <div>
-                    <h3 class="patient-card-name">{{ patient_item.nombre }}</h3>
-                    {# Optional: Show patient ID here if useful and short #}
+                <div> {# Container for name and ID if added #}
+                    <h3 class="patient-card-name">{{ patient_item.name }}</h3>
+                    {# Optional: Display patient ID here if it's useful and short #}
                     {# <span class="patient-card-id">ID: {{ patient_item.id }}</span> #}
                 </div>
             </div>
@@ -362,24 +358,24 @@
                 {% if patient_item.email and patient_item.email != 'N/A' %}
                 <p><i class="fas fa-envelope"></i>{{ patient_item.email }}</p>
                 {% endif %}
-                {% if patient_item.telefono and patient_item.telefono != 'N/A' %}
-                <p><i class="fas fa-phone"></i>{{ patient_item.telefono }}</p>
+                {% if patient_item.phone and patient_item.phone != 'N/A' %}
+                <p><i class="fas fa-phone"></i>{{ patient_item.phone }}</p>
                 {% endif %}
-                {% if patient_item.estado_tratamiento %}
+                {% if patient_item.treatment_status %}
                 <p><i class="fas fa-notes-medical"></i>Status:
                     <span class="patient-card-status
-                        {% set status_lower = patient_item.estado_tratamiento.lower() %}
-                        {% if 'activo' in status_lower %}status-active
-                        {% elif 'seguimiento' in status_lower %}status-follow-up
-                        {% elif 'inactivo' in status_lower %}status-inactive
+                        {% set status_lower = patient_item.treatment_status.lower() %}
+                        {% if 'active' in status_lower %}status-active
+                        {% elif 'follow-up' in status_lower %}status-follow-up
+                        {% elif 'inactive' in status_lower %}status-inactive
                         {% else %}status-inactive{% endif %}">
-                        {{ patient_item.estado_tratamiento }}
+                        {{ patient_item.treatment_status }}
                     </span>
                 </p>
                 {% endif %}
             </div>
             <div class="patient-card-actions">
-                <a href="{{ url_for('perfil_paciente', paciente_id=patient_item.id) }}" class="action-btn action-btn-success">
+                <a href="{{ url_for('patient_profile', patient_id=patient_item.id) }}" class="action-btn action-btn-success"> {# Changed to success for profile #}
                     <i class="fas fa-address-card"></i> View Profile
                 </a>
             </div>
@@ -388,26 +384,35 @@
     </div>
     {% else %}
     <div class="no-patients">
-        <i class="fas fa-user-md"></i>
-        <p>You do not have any registered patients yet.</p>
-        <p>Start by clicking "Add New Patient".</p>
+        <i class="fas fa-user-md"></i> {# More thematic icon #}
+        <p>You don't have any registered patients yet.</p>
+        <p>Get started by clicking "Add New Patient".</p>
     </div>
     {% endif %}
 
     <div class="global-patient-actions">
-        <button class="action-btn" id="btnImportPatients"><i class="fas fa-file-import"></i> Import</button>
-        <button class="action-btn" id="btnDownloadPatients"><i class="fas fa-file-download"></i> Download</button>
+        {# These buttons might need more styling or specific functionality #}
+        <button class="action-btn" id="importPatientsBtn"><i class="fas fa-file-import"></i> Import</button>
+        <button class="action-btn" id="downloadPatientsBtn"><i class="fas fa-file-download"></i> Download</button>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // The "Add Patient" button is now an <a> link, no JS needed for navigation.
+    // If it's kept as a button and JS is needed, the previous logic is correct.
+    // const addPatientBtn = document.getElementById('addPatientBtn');
+    // if (addPatientBtn) {
+    //     addPatientBtn.addEventListener('click', function() {
+    //         window.location.href = "{{ url_for('add_patient') }}";
+    //     });
+    // }
 
     const patientSearchInput = document.getElementById('patientSearchInput');
     const patientListGrid = document.getElementById('patientListGrid');
 
     function filterPatients() {
-        if (!patientListGrid) return;
+        if (!patientListGrid) return; // Exit if the list doesn't exist (e.g., no patients)
         
         const searchTerm = patientSearchInput.value.toLowerCase().trim();
         const cards = patientListGrid.querySelectorAll('.patient-card');
@@ -416,6 +421,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cards.forEach(card => {
             const name = card.dataset.name || '';
             const email = card.dataset.email || '';
+            // To search by ID, if you add it to the data-attribute:
+            // const id = card.dataset.id || ''; 
+            // if (name.includes(searchTerm) || email.includes(searchTerm) || id.includes(searchTerm)) {
             
             if (name.includes(searchTerm) || email.includes(searchTerm)) {
                 card.style.display = '';
@@ -425,12 +433,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Optional: Show message if the search yields no results
         let noResultsMsg = document.getElementById('noSearchResults');
         if (!hasResults && searchTerm !== '') {
             if (!noResultsMsg) {
                 noResultsMsg = document.createElement('p');
                 noResultsMsg.id = 'noSearchResults';
-                noResultsMsg.className = 'no-patients';
+                noResultsMsg.className = 'no-patients'; // Reuse style or create a new one
                 noResultsMsg.innerHTML = '<i class="fas fa-search-minus"></i> No patients were found matching your search.';
                 patientListGrid.parentNode.insertBefore(noResultsMsg, patientListGrid.nextSibling);
             }
@@ -440,26 +449,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if(patientSearchInput) {
+    if(patientSearchInput) { // No search button needed for real-time search
         patientSearchInput.addEventListener('keyup', filterPatients);
     }
 
-    const btnImportPatients = document.getElementById('btnImportPatients');
-    if(btnImportPatients) {
-        btnImportPatients.addEventListener('click', function() {
-            alert('The "Import Patients" functionality is pending implementation.');
+    // Placeholder functionality for import/download buttons
+    const importPatientsBtn = document.getElementById('importPatientsBtn');
+    if(importPatientsBtn) {
+        importPatientsBtn.addEventListener('click', function() {
+            alert('Functionality "Import Patients" is pending implementation.');
         });
     }
 
-    const btnDownloadPatients = document.getElementById('btnDownloadPatients');
-    if(btnDownloadPatients) {
-        btnDownloadPatients.addEventListener('click', function() {
-            alert('The "Download List" functionality is pending implementation.');
+    const downloadPatientsBtn = document.getElementById('downloadPatientsBtn');
+    if(downloadPatientsBtn) {
+        downloadPatientsBtn.addEventListener('click', function() {
+            alert('Functionality "Download List" is pending implementation.');
         });
     }
 });
 </script>
 
 {% endblock %}
-
-
