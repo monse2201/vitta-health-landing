@@ -4566,3 +4566,22 @@ def create_demo_user():
     except Exception as e:
         db.session.rollback()
         print(f"Error al crear el usuario de demostración: {e}")
+@app.cli.command("reset-password")
+@click.argument("email")
+@click.argument("new_password")
+def reset_password(email, new_password):
+    """Resetea la contraseña para un usuario específico."""
+    # Busca al usuario por su correo electrónico
+    user = User.query.filter_by(email=email).first()
+    
+    if user:
+        try:
+            # Establece y hashea la nueva contraseña
+            user.set_password(new_password)
+            db.session.commit()
+            print(f"La contraseña para '{email}' ha sido reseteada exitosamente.")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error reseteando la contraseña: {e}")
+    else:
+        print(f"Error: No se encontró un usuario con el correo '{email}'.")
