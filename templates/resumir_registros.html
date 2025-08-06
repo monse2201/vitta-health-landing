@@ -573,14 +573,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const formData = new FormData();
 
-      // The backend must be prepared to receive 'patient_id' (if it exists)
-      // and 'patient_name' and 'patient_identification' to search/create.
+      // --- START CORRECTION ---
+      // The backend must be prepared to receive 'paciente_id' (if it exists)
+      // and 'paciente_nombre' and 'paciente_identificacion_documento' to search/create.
       if (selectedId) {
-          formData.append('patient_id', selectedId);
+          // ✅ CORRECTED: Key changed from 'patient_id' to 'paciente_id'
+          formData.append('paciente_id', selectedId);
       }
-      // Always send name and identification, the backend will decide whether to use them to create or if the ID takes precedence.
-      formData.append('patient_nombre', patientName);
-      formData.append('patient_identification_documento', identification);
+      // Always send name and identification, the backend will decide whether to use them.
+      // ✅ CORRECTED: Key changed from 'patient_nombre' to 'paciente_nombre'
+      formData.append('paciente_nombre', patientName);
+      formData.append('paciente_identificacion_documento', identification);
+      // --- END CORRECTION ---
+      
       formData.append('plantilla', template);
       selectedFiles.forEach((file) => formData.append('documentos', file, file.name));
 
@@ -600,8 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
       let data;
 
       try {
-        console.log("LOG: Attempting fetch to /api/summarize_documents_and_start_visit");
-        response = await fetch('/api/resumir_documentos_e_iniciar_visita', { // URL remains in Spanish as it's a backend endpoint
+        console.log("LOG: Attempting fetch to /api/resumir_documentos_e_iniciar_visita");
+        response = await fetch('/api/resumir_documentos_e_iniciar_visita', { 
           method: 'POST',
           body: formData
         });
