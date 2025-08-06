@@ -3753,7 +3753,7 @@ def compartir_plan_nutricional_email(plan_id):
         # Se elimina el db.session.rollback() si no se está haciendo commit dentro del try.
         logging.error(f"Error al enviar email con imagen adjunta para plan {plan.id}: {str(e)}", exc_info=True)
         return jsonify({"error": f"No se pudo enviar el correo con la imagen: {str(e)}"}), 500
- @app.route('/api/referencia/<int:referencia_id>/compartir_email', methods=['POST'])
+@app.route('/api/referencia/<int:referencia_id>/compartir_email', methods=['POST'])
 def compartir_referencia_email(referencia_id):
     data = request.get_json()
     if not data:
@@ -3777,6 +3777,18 @@ def compartir_referencia_email(referencia_id):
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
         logging.error("Configuración de correo incompleta en el servidor.")
         return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
+
+    # --- ADDED THIS PART TO MAKE THE FUNCTION COMPLETE ---
+    # Placeholder for the actual email sending logic which seems to be missing.
+    # This makes the function valid and will resolve the IndentationError.
+    try:
+        # NOTE: The logic to generate the PDF and send the email should go here.
+        # For now, we return a success message to fix the crash.
+        logging.info(f"Received request to share reference {referencia_id} with {email_dest}. Logic to send email is pending.")
+        return jsonify({"message": "Functionality to send reference by email is under development."}), 200
+    except Exception as e:
+        logging.error(f"Error in incomplete function 'compartir_referencia_email': {e}", exc_info=True)
+        return jsonify({"error": "An unexpected error occurred."}), 500
 @app.route('/admin/panel-principal')
 @login_required
 @admin_required(allowed_roles=['admin'])
