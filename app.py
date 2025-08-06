@@ -1980,47 +1980,32 @@ def historial_visitas():
             .order_by(Visita.fecha.desc())
             .all()
         )
-        for v_db in visitas_db:
+for v_db in visitas_db:
             paciente_actual = v_db.paciente
-            if paciente_actual:
-                visitas_data_list.append({
-                    'id': v_db.id,
-                    'fecha_formateada': v_db.fecha.strftime('%d/%m/%Y %H:%M') if v_db.fecha else 'Fecha No Disponible',
-                    'fecha_relativa': calcular_tiempo_transcurrido(v_db.fecha) if v_db.fecha else 'N/A',
-                    'plantilla': v_db.plantilla or "N/E",
-                    'transcripcion': v_db.transcripcion or "",
-                    'resumen_ai': v_db.resumen_ai or "",
-                    'notas_ai': v_db.notas_ai or "",
-                    'idioma_detectado': v_db.idioma_detectado or "N/D",
-                    'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
-                    'ruta_notas_ai_pdf': getattr(v_db, 'ruta_notas_ai_pdf', None), # <-- LÍNEA CORREGIDA
-                    'paciente': {
-                        'id': paciente_actual.id,
-                        'nombre': paciente_actual.nombre,
-                        'identificacion_documento': paciente_actual.identificacion_documento,
-                        'telefono': paciente_actual.telefono,
-                        'email': paciente_actual.email,
-                        'estado_tratamiento': paciente_actual.estado_tratamiento,
-                        'url_avatar': getattr(paciente_actual, 'url_avatar', None)
-                    },
-                    'paciente_nombre': paciente_actual.nombre
-                })
-            else:
-                # Handle cases where patient might be None (shouldn't happen with proper foreign keys)
-                visitas_data_list.append({
-                    'id': v_db.id,
-                    'fecha_formateada': v_db.fecha.strftime('%d/%m/%Y %H:%M') if v_db.fecha else 'Fecha No Disponible',
-                    'fecha_relativa': calcular_tiempo_transcurrido(v_db.fecha) if v_db.fecha else 'N/A',
-                    'plantilla': v_db.plantilla or "N/E",
-                    'transcripcion': v_db.transcripcion or "",
-                    'resumen_ai': v_db.resumen_ai or "",
-                    'notas_ai': v_db.notas_ai or "",
-                    'idioma_detectado': v_db.idioma_detectado or "N/D",
-                    'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
-                    # 'ruta_notas_ai_pdf': v_db.ruta_notas_ai_pdf if hasattr(v_db, 'ruta_notas_ai_pdf') else None, # Removed for client-side PDF
-                    'paciente': {},
-                    'paciente_nombre': "Paciente Desconocido" # Placeholder name
-                })
+            # La condición 'if paciente_actual:' ha sido eliminada para asegurar que todas las visitas se procesen.
+            # Ahora manejamos la posibilidad de un paciente nulo de forma segura dentro del diccionario.
+            visitas_data_list.append({
+                'id': v_db.id,
+                'fecha_formateada': v_db.fecha.strftime('%d/%m/%Y %H:%M') if v_db.fecha else 'Fecha No Disponible',
+                'fecha_relativa': calcular_tiempo_transcurrido(v_db.fecha) if v_db.fecha else 'N/A',
+                'plantilla': v_db.plantilla or "N/E",
+                'transcripcion': v_db.transcripcion or "",
+                'resumen_ai': v_db.resumen_ai or "",
+                'notas_ai': v_db.notas_ai or "",
+                'idioma_detectado': v_db.idioma_detectado or "N/D",
+                'tipo_visita': v_db.tipo_visita.replace('_', ' ').capitalize() if v_db.tipo_visita else "No Especificado",
+                'ruta_notas_ai_pdf': getattr(v_db, 'ruta_notas_ai_pdf', None),
+                'paciente': {
+                    'id': paciente_actual.id if paciente_actual else None,
+                    'nombre': paciente_actual.nombre if paciente_actual else "Paciente Desconocido",
+                    'identificacion_documento': paciente_actual.identificacion_documento if paciente_actual else None,
+                    'telefono': paciente_actual.telefono if paciente_actual else None,
+                    'email': paciente_actual.email if paciente_actual else None,
+                    'estado_tratamiento': paciente_actual.estado_tratamiento if paciente_actual else None,
+                    'url_avatar': getattr(paciente_actual, 'url_avatar', None) if paciente_actual else None
+                },
+                'paciente_nombre': paciente_actual.nombre if paciente_actual else "Paciente Desconocido"
+            })
     except Exception as e:
         logging.error(f"Error obteniendo historial de visitas para usuario {current_user.id}: {e}", exc_info=True)
         flash("Error al cargar el historial de visitas. Intente de nuevo más tarde.", "danger")
