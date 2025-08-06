@@ -342,6 +342,8 @@ Session(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+with app.app_context():
+    db.create_all()
 login_manager = LoginManager()
 
 
