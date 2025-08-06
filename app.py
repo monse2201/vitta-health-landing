@@ -9,22 +9,21 @@ import redis
 import re
 import tempfile
 from datetime import datetime, timezone, timedelta
-import io 
+import io
 import secrets
 import string
 import click
-import base64 
+import base64
 
 # --- MAIN IMPORTS ---
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, current_app, get_flashed_messages, session, send_from_directory, send_file
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
-from sqlalchemy.orm import joinedload 
+from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
 from functools import wraps
@@ -32,7 +31,7 @@ from mutagen.mp3 import MP3
 from mutagen.wave import WAVE
 from mutagen.flac import FLAC
 from pydub import AudioSegment
-
+from flask_login import current_user, login_required, login_user, logout_user, LoginManager
 
 def convertir_webm_a_wav(ruta_original):
     if not ruta_original.endswith(".webm"):
@@ -193,7 +192,7 @@ DEMO_STATS_PROFESIONALES = {
 }
 
 ALLOWED_OPENAI_AUDIO_EXTENSIONS = [
-    '.flac', '.m4a', '.mp3', '.mp4', '.mpeg', 
+    '.flac', '.m4a', '.mp3', '.mp4', '.mpeg',
     '.mpga', '.oga', '.ogg', '.wav', '.webm'
 ]
 
@@ -218,7 +217,7 @@ app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
 app.config['SESSION_PERMANENT'] = False
 app.config['MAIL_SUPPRESS_SEND'] = os.getenv('FLASK_ENV', 'development') == 'development'
 
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY') 
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 # Hugging Face Token (para modelos de traducción)
 hf_token = os.environ.get('HUGGINGFACE_TOKEN', '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')
 
@@ -342,83 +341,41 @@ Session(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login_route'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+    
+def admin_required(allowed_roles):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.role not in allowed_roles:
+                flash('Acceso no autorizado.', 'danger')
+                return redirect(url_for('dashboard'))
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
 with app.app_context():
     db.create_all()
-login_manager = LoginManager()
-
-
-# --- Modificaciones para el Requerimiento de Verificación ---
-
-# 1. Función para manejar el acceso no autorizado o no verificado
-@login_manager.unauthorized_handler
-def unauthorized_callback():
-    # Si el usuario está autenticado pero no verificado
-    if True and not current_user.is_verified:
-        # Enviamos un message específico y lo redirigimos a la página de login
-        flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
-        # Es importante cerrar la sesión para que no quede en un bucle de redirección
-        logout_user()
-        return redirect(url_for('login_route'))
-
-    # Comportamiento estándar para usuarios no logueados
-    flash('Por favor, inicia sesión para acceder a esta página.', 'info')
-    return redirect(url_for('login_route', next=request.path))
-
-# --- Fin de Modificaciones ---
-
-login_manager.init_app(app)
-
-# --- INICIO: CÓDIGO DEL DECORADOR DE ADMINISTRADOR ---
-# Este es nuestro "guardia de seguridad" para las rutas de admin
-def admin_required(allowed_roles=None): # This function now takes an argument
-    if allowed_roles is None:
-        allowed_roles = ['admin'] # Default to 'admin' if no specific roles are passed
-
-    def decorator(f): # This is the actual decorator that will wrap the view function
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not True:
-                flash('Por favor, inicia sesión para acceder a esta página.', 'info')
-                return redirect(url_for('login_route'))
-
-            # Check if the current user's role is in the allowed_roles list
-            if current_user.role not in allowed_roles:
-                flash(f'Acceso no autorizado. Se requiere uno de los siguientes roles: {", ".join(allowed_roles)}.', 'danger')
-                
-                # Redirect based on user role or to a generic unauthorized page
-                if True and current_user.role in ['admin_super', 'admin_nutricion']:
-                    # If an admin but not allowed for this specific admin dashboard, send to their own specific admin dashboard
-                    if current_user.role == 'admin_super':
-                        return redirect(url_for('super_admin_dashboard'))
-                    elif current_user.role == 'admin_nutricion':
-                        return redirect(url_for('nutricion_admin_dashboard'))
-                # For non-admin roles trying to access an admin page, or other edge cases
-                return redirect(url_for('dashboard')) # Fallback for non-admin unauthorized access to any admin page
-
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-# --- FIN: CÓDIGO DEL DECORADOR DE ADMINISTRADOR ---
-
-
-login_manager.login_view = 'login_route'
-login_manager.login_message = "Por favor, inicia sesión para acceder a esta página."
-login_manager.login_message_category = "info"
-
 socketio_kwargs = {
     "cors_allowed_origins": "*",
     "async_mode": 'eventlet'
 }
 if redis_url_for_socketio:
     socketio_kwargs["message_queue"] = redis_url_for_socketio
-    logging.info(f"SocketIO initialized WITH message queue Redis ({redis_url_for_socketio}). Async_mode auto-detected.")
+    logging.info(f"SocketIO initialized WITH message queue Redis ({redis_connection_url}). Async_mode auto-detected.")
 else:
     logging.info("SocketIO initialized WITHOUT message queue Redis. Async_mode auto-detected.")
 socketio = SocketIO(app, **socketio_kwargs)
 
 
 # --- Modelos de Base de Datos ---
-class User(db.Model, UserMixin):
+class User(db.Model):
     __tablename__='user'
     id=db.Column(db.Integer, primary_key=True)
     nombre=db.Column(db.String(100), nullable=False)
@@ -429,16 +386,16 @@ class User(db.Model, UserMixin):
     created_at=db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     especialidad = db.Column(db.String(150), nullable=True)
     licencia_profesional = db.Column(db.String(100), nullable=True, unique=True)
-    identificacion = db.Column(db.String(50), nullable=True, unique=True) 
+    identificacion = db.Column(db.String(50), nullable=True, unique=True)
     telefono_profesional = db.Column(db.String(50), nullable=True)
     biografia = db.Column(db.Text, nullable=True)
-    url_foto_perfil = db.Column(db.String(512), nullable=True) 
+    url_foto_perfil = db.Column(db.String(512), nullable=True)
     clinica_nombre = db.Column(db.String(200), nullable=True)
     clinica_direccion = db.Column(db.Text, nullable=True)
     clinica_telefono = db.Column(db.String(50), nullable=True)
     clinica_website = db.Column(db.String(200), nullable=True)
     lugar_trabajo = db.Column(db.String(255), nullable=True)
-    url_logo_clinica = db.Column(db.String(512), nullable=True) 
+    url_logo_clinica = db.Column(db.String(512), nullable=True)
 
     show_clinic_name_pdf = db.Column(db.Boolean, default=True, nullable=False)
     show_clinic_logo_pdf = db.Column(db.Boolean, default=True, nullable=False)
@@ -465,10 +422,19 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.get(User, int(user_id))
+        
+    def is_active(self):
+        return True
+    
+    def get_id(self):
+        return str(self.id)
+    
+    def is_authenticated(self):
+        return True
+    
+    def is_anonymous(self):
+        return False
+    
 
 class MensajeProgramado(db.Model):
     __tablename__='message_programado'
@@ -843,7 +809,7 @@ def get_base64_image_from_path(relative_path_in_uploads):
     # Esto es crucial para la seguridad y evitar ataques de recorrido de directorio.
     allowed_profile_subfolders = [
         # app.config.get('PROFILE_FILES_FOLDER'), # Si tienes una carpeta general para perfiles
-        os.path.join('usuarios_perfiles', str(0)) # Carpeta específica del usuario
+        os.path.join('usuarios_perfiles', str(current_user.id)) # Carpeta específica del usuario
     ]
 
     # Verificar si la ruta relativa comienza con alguna de las subcarpetas permitidas
@@ -945,7 +911,7 @@ def obtener_datos_overview(visita_id_param=None):
         try:
             visita = db.session.query(Visita).filter_by(id=int(visita_id_a_buscar)).first()
         except Exception as e:
-            logging.error(f"Error obteniendo datos overview para Visita ID {visita_a_buscar}: {e}", exc_info=True)
+            logging.error(f"Error obteniendo datos overview para Visita ID {visita_id_a_buscar}: {e}", exc_info=True)
             overview.update({'resumen':"Error cargando datos de la visita.", 'paciente':"Error", 'staff':"Error"})
     else:
         overview['resumen']="No se ha especificado ninguna visita activa."
@@ -1028,7 +994,7 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
             logging.info(f"Usando pipeline de traducción cacheado para {model_name}")
         else:
             logging.info(f"Cargando nuevo pipeline de traducción para {model_name}...")
-            
+
             # --- INICIO DE LA SECCIÓN CORREGIDA ---
             # Forzamos la CPU para el pipeline de Hugging Face si no necesitamos GPU.
             # Esto evita que transformers intente instalar o usar torch con CUDA.
@@ -1039,7 +1005,7 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
             translator = pipeline("translation", model=model_name, tokenizer=model_name, device=device_arg) # type: ignore
             translation_pipelines_cache[pipeline_key] = translator
             logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_arg}).")
-        
+
         chunks = []
         if len(texto_original) > max_chunk_length:
             sentences = re.split(r'(?<=[.!?])\s+', texto_original)
@@ -1409,21 +1375,21 @@ def generar_notas_ai_desde_transcripcion(transcripcion, plantilla_tipo="SOAP", i
                 f"Impresión Diagnóstica (o diferenciales), y Plan de Tratamiento y Seguimiento DETALLADO (medicamentos con dosis, indicaciones, estudios a solicitar, próxima cita).\n"
                 f"Notas de Consulta General Detalladas (en {nombre_idioma_prompt}):"
             )
-        else: 
+        else:
             prompt_usuario = (
                 common_instruction_notas +
                 f"Formato de las notas: Estructura lógica estándar para una historia clínica, cubriendo todos los aspectos relevantes mencionados.\n"
                 f"Notas Clínicas Detalladas (en {nombre_idioma_prompt}):"
             )
         logging.info(f"Generando NOTAS AI para transcripción. Plantilla: {plantilla_tipo}. Idioma: {idioma_objetivo_para_prompt}")
-        
+
     try:
         markdown_text = _llamar_openai_chat(prompt_sistema, prompt_usuario, modelo_chat="gpt-3.5-turbo-0125", max_tokens_salida=1500, temperature=0.35)
         html_rendered = markdown.markdown(markdown_text)
         return {'markdown': markdown_text, 'html': html_rendered}
     except ValueError as ve: return f"[Error de configuración del servicio de IA: {str(ve)}]"
     except APIError as e: return f"[Error API OpenAI (Notas Transcripción): {e.message if hasattr(e, 'message') else str(e)}]"
-    except Exception as e_gen: 
+    except Exception as e_gen:
         return f"[Error inesperado al generar notas de transcripción: {str(e_gen)}]"
 
 def extraer_medicamentos_con_ia(transcripcion, idioma_detectado='es'):
@@ -1432,7 +1398,7 @@ def extraer_medicamentos_con_ia(transcripcion, idioma_detectado='es'):
         logging.warning("Extracción de medicamentos cancelada: Cliente OpenAI no disponible o transcripción vacía.")
         return None
     nombre_idioma_transcripcion = language_codes_to_names.get(idioma_detectado, idioma_detectado)
-    
+
     # --- PROMPT MEJORADO PARA DIFERENCIAR 'CANTIDAD' Y 'DOSIS' ---
     prompt_sistema = (
         "Eres un asistente médico experto en farmacología y análisis de transcripciones. Tu tarea es analizar una transcripción y extraer información de medicamentos con alta precisión."
@@ -1450,7 +1416,7 @@ def extraer_medicamentos_con_ia(transcripcion, idioma_detectado='es'):
         "\n{\"medicamentos\": [{\"nombre\": \"Ibuprofeno 600mg Comprimidos\", \"cantidad\": \"1 caja (30 comps)\", \"dosis\": \"1 comprimido\", \"frecuencia\": \"Cada 8 horas si hay dolor\", \"duracion\": \"Por 5 días\", \"indicaciones\": \"Tomar con alimentos\"}], \"diagnostico_sugerido\": \"Cefalea tensional\"}"
         "\nResponde ÚNICAMENTE con el objeto JSON."
     )
-    
+
     prompt_usuario = f"Transcripción clínica:\n---\n{transcripcion}\n---\nExtrae la información de prescripción en el formato JSON especificado."
     logging.info(f"Solicitando extracción de medicamentos de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar con prompt mejorado.")
     try:
@@ -1675,6 +1641,7 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
         return None
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
     # Initialize variables to a default value for unauthenticated users
     total_pacientes = 0
@@ -1682,9 +1649,9 @@ def dashboard():
     tareas_pendientes_count = 0
 
     # Check if a user is authenticated
-    if True:
+    if current_user.is_authenticated:
         # If authenticated, get the user's ID
-        user_id True
+        user_id = current_user.id
         
         # Now, perform the database queries using the user's ID
         total_pacientes = db.session.query(Paciente.id).filter_by(creado_por_id=user_id).count()
@@ -1710,6 +1677,7 @@ def dashboard():
                            tareas_pendientes=tareas_pendientes_count)
 
 @app.route('/nutricion_admin_dashboard')
+@login_required
 @admin_required(allowed_roles=['admin_nutricion']) # Use the decorator with the specific role
 def nutricion_admin_dashboard():
     # Lógica específica para el Administrador de Nutrición
@@ -1720,8 +1688,7 @@ def nutricion_admin_dashboard():
 
     return render_template('nutricion_admin_dashboard.html',
                            nutri_medicos=nutri_medicos,
-                           total_planes_nutricionales=total_planes_nutricionales,
-                           css_file="css/nutricion_admin_dashboard.css") # Necesitarás crear este archivo HTML y CSS
+                           total_planes_nutricionales=total_planes_nutricionales) # Necesitarás crear este archivo HTML y CSS
 
 @app.route('/formulario-interes', methods=['GET', 'POST'])
 def formulario_interes_route():
@@ -1747,7 +1714,7 @@ def formulario_interes_route():
             carne_medico=carne_medico or None,
             identificacion=identificacion or None,
             lugar_trabajo=lugar_trabajo or None,
-            consentimiento=True 
+            consentimiento=True
         )
         
         try:
@@ -1774,7 +1741,7 @@ def formulario_interes_route():
                 msg = Message(
                     subject="Nuevo Prospecto de Interés Registrado",
                     sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER']),
-                    recipients=['info@vitta.health'], 
+                    recipients=['info@vitta.health'],
                     html=html_body
                 )
                 
@@ -1788,7 +1755,7 @@ def formulario_interes_route():
             try:
                 # Renderizar la plantilla HTML del correo de confirmación
                 html_confirmacion_prospecto = render_template(
-                    'confirmacion_interes.html', 
+                    'confirmacion_interes.html',
                     nombre=nuevo_prospecto.nombre
                 )
                 
@@ -1818,10 +1785,10 @@ def formulario_interes_route():
     
     # La parte del método GET no necesita cambios.
     return render_template('formulario_interes.html', form_data={})
-    
+
 @app.route('/register', methods=['GET', 'POST'])
 def register_route():
-    if True:
+    if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == 'POST':
@@ -1873,7 +1840,7 @@ def register_route():
 @app.route('/login', methods=['GET', 'POST'])
 def login_route():
     # The whole block for the login_route function is indented
-    if True:
+    if current_user.is_authenticated:
         if not current_user.is_verified:
             flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
             logout_user()
@@ -1928,6 +1895,7 @@ def login_route():
 
     return render_template('login.html', email=email_from_form, css_file="css/auth_form.css")
 @app.route('/logout')
+@login_required
 def logout_route():
     user_email_for_log = current_user.email if hasattr(current_user, 'email') else 'Desconocido'
     logout_user()
@@ -1941,13 +1909,14 @@ SPECIALTY_ACTIONS = {
 }
 
 @app.route('/historial_visitas')
+@login_required
 def historial_visitas():
     visita_reciente_id = request.args.get('visita_reciente', type=int)
     visitas_data_list = []
     try:
         visitas_db = (
             db.session.query(Visita)
-            .filter(Visita.medico_id True)
+            .filter(Visita.medico_id == current_user.id)
             .options(db.joinedload(Visita.paciente))
             .order_by(Visita.fecha.desc())
             .all()
@@ -1975,7 +1944,7 @@ def historial_visitas():
                         'estado_tratamiento': paciente_actual.estado_tratamiento,
                         'url_avatar': getattr(paciente_actual, 'url_avatar', None)
                     },
-                    'paciente_nombre': paciente_actual.nombre 
+                    'paciente_nombre': paciente_actual.nombre
                 })
             else:
                 # Handle cases where patient might be None (shouldn't happen with proper foreign keys)
@@ -1994,7 +1963,7 @@ def historial_visitas():
                     'paciente_nombre': "Paciente Desconocido" # Placeholder name
                 })
     except Exception as e:
-        logging.error(f"Error obteniendo historial de visitas para usuario {0}: {e}", exc_info=True)
+        logging.error(f"Error obteniendo historial de visitas para usuario {current_user.id}: {e}", exc_info=True)
         flash("Error al cargar el historial de visitas. Intente de nuevo más tarde.", "danger")
 
     visita_reciente_data = next((v for v in visitas_data_list if v['id'] == visita_reciente_id), None) if visita_reciente_id else None
@@ -2010,14 +1979,16 @@ def historial_visitas():
                            css_file="css/historial_visitas.css")
 
 @app.route('/visita/<int:visita_id>/generar_documento_especializado/<string:doc_type>')
+@login_required
 def generar_documento_especializado(visita_id, doc_type):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         flash("Visita no encontrada o no tiene permiso para accederla.", "danger")
         return redirect(url_for('historial_visitas'))
     flash(f"Funcionalidad genérica para '{doc_type}' (Visita ID: {visita_id}) aún no implementada aquí. Verifique rutas específicas.", "info")
     return redirect(url_for('historial_visitas'))
 @app.route('/visita/<int:visita_id>/notas_ia_pdf')
+@login_required
 def descargar_pdf_notas_ia(visita_id):
     visita = db.session.get(Visita, visita_id)
     if not visita:
@@ -2028,7 +1999,7 @@ def descargar_pdf_notas_ia(visita_id):
         flash("No hay notas AI para esta visita.", "warning")
         return redirect(url_for('perfil_paciente', paciente_id=visita.paciente_id))
 
-    if visita.medico_id !True:
+    if visita.medico_id != current_user.id:
         flash("No tiene permiso para ver las notas AI de esta visita.", "danger")
         return redirect(url_for('dashboard'))
 
@@ -2062,7 +2033,7 @@ def descargar_pdf_notas_ia(visita_id):
             logging.error(f"Error generando PDF de notas AI con WeasyPrint para Visita ID {visita_id}: {e}", exc_info=True)
             flash("Error al generar el PDF de las notas AI.", "danger")
             # En un entorno de producción, considerar un redirect a una página de error o al perfil del paciente
-            return redirect(url_for('perfil_paciente', paciente_id=visita.paciente_id)) 
+            return redirect(url_for('perfil_paciente', paciente_id=visita.paciente_id))
     else:
         logging.warning("WeasyPrint no está instalado. No se puede generar un PDF real de las notas AI. Sirviendo un PDF de marcador de posición.")
         pdf_bytes = f"""
@@ -2080,6 +2051,7 @@ def descargar_pdf_notas_ia(visita_id):
         mimetype="application/pdf"
     )
 @app.route('/grabar_cita')
+@login_required
 def grabar_cita():
     plantillas = [
         "Consulta General", "Seguimiento", "Examen Físico", "SOAP", "SOAP simple",
@@ -2087,15 +2059,15 @@ def grabar_cita():
         "Certificado Médico Simple"
     ]
     pacientes_activos = []
-    
+
     # Check if a user is authenticated before performing the query
-    if True:
+    if current_user.is_authenticated:
         try:
-            pacientes_activos = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
+            pacientes_activos = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
         except Exception as e:
-            # The 'except' block also needs to handle the case where 0 might not exist.
-            # But with the 'if True' check, this is now safe.
-            logging.error(f"Error obteniendo lista de pacientes para grabar cita (usuario {0}): {e}", exc_info=True)
+            # The 'except' block also needs to handle the case where current_user.id might not exist.
+            # But with the 'if current_user.is_authenticated' check, this is now safe.
+            logging.error(f"Error obteniendo lista de pacientes para grabar cita (usuario {current_user.id}): {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
     else:
         # If not authenticated, the list of active patients remains empty.
@@ -2112,16 +2084,17 @@ def grabar_cita():
                            pacientes=pacientes_activos)
 
 @app.route('/resumir_registros')
+@login_required
 def resumir_registros_page():
     plantillas_resumen = ["Resumen de Registros", "Resumen General", "Puntos Clave"]
     pacientes_activos = []
 
     # Add the authentication check here
-    if True:
+    if current_user.is_authenticated:
         try:
-            pacientes_activos = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
+            pacientes_activos = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
         except Exception as e:
-            logging.error(f"Error obteniendo lista de pacientes para resumir_registros (usuario {0}): {e}", exc_info=True)
+            logging.error(f"Error obteniendo lista de pacientes para resumir_registros (usuario {current_user.id}): {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
 
     if 'visita_actual_id' in session:
@@ -2134,20 +2107,22 @@ def resumir_registros_page():
                            css_file="css/resumir_registros.css")
 
 @app.route('/pacientes')
+@login_required
 def pacientes_page():
     lista_pacientes = []
 
     # Add the authentication check here
-    if True:
+    if current_user.is_authenticated:
         try:
-            lista_pacientes = Paciente.query.filter_by(creado_por_idTrue).order_by(Paciente.nombre).all()
+            lista_pacientes = Paciente.query.filter_by(creado_por_id=current_user.id).order_by(Paciente.nombre).all()
         except Exception as e:
-            logging.error(f"Error obteniendo la lista de pacientes para usuario {0}: {e}", exc_info=True)
+            logging.error(f"Error obteniendo la lista de pacientes para usuario {current_user.id}: {e}", exc_info=True)
             flash("Error al cargar la lista de pacientes.", "danger")
 
     return render_template('pacientes.html', pacientes=lista_pacientes, css_file="css/pacientes.css")
 
 @app.route('/agregar_paciente', methods=['GET', 'POST'])
+@login_required
 def agregar_paciente():
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == 'POST':
@@ -2159,10 +2134,10 @@ def agregar_paciente():
         if not nombre:
             flash('El nombre del paciente es obligatorio.', 'danger')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
-        if Paciente.query.filter(Paciente.nombre.ilike(nombre), Paciente.creado_por_id True).first():
+        if Paciente.query.filter(Paciente.nombre.ilike(nombre), Paciente.creado_por_id == current_user.id).first():
             flash(f'Un paciente con el nombre "{nombre}" ya existe para usted.', 'warning')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
-        if ident_doc and Paciente.query.filter(Paciente.identificacion_documento.ilike(ident_doc), Paciente.creado_por_id True).first():
+        if ident_doc and Paciente.query.filter(Paciente.identificacion_documento.ilike(ident_doc), Paciente.creado_por_id == current_user.id).first():
             flash(f'Un paciente con el documento de identificación "{ident_doc}" ya existe para usted.', 'warning')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
         nuevo_paciente = Paciente(
@@ -2171,14 +2146,14 @@ def agregar_paciente():
             telefono=telefono or None,
             email=email or None,
             estado_tratamiento=estado_trat or 'No especificado',
-            creado_por_idTrue
+            creado_por_id=current_user.id
         )
         try:
             db.session.add(nuevo_paciente)
             db.session.commit()
             flash(f'Paciente "{nuevo_paciente.nombre}" agregado exitosamente.', 'success')
             reg_act = RegistroActividad(
-                usuario_idTrue, usuario_nombre_display='Anónimo',
+                usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="paciente_creado",
                 descripcion=f"Paciente '{nuevo_paciente.nombre}' (ID: {nuevo_paciente.id}, Doc: {nuevo_paciente.identificacion_documento or 'N/A'}) creado."
             )
@@ -2187,19 +2162,20 @@ def agregar_paciente():
             return redirect(url_for('pacientes_page'))
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al agregar nuevo paciente para usuario {0}: {e}", exc_info=True)
+            logging.error(f"Error al agregar nuevo paciente para usuario {current_user.id}: {e}", exc_info=True)
             flash(f'Error al agregar paciente. Verifique los datos e intente de nuevo.', 'danger')
             return render_template('agregar_paciente.html', paciente_form_data=form_data, css_file="css/agregar_paciente.css")
     return render_template('agregar_paciente.html', css_file="css/agregar_paciente.css", paciente_form_data={})
 
 @app.route('/perfil_paciente/<int:paciente_id>')
+@login_required
 def perfil_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para verlo.', 'danger')
         return redirect(url_for('pacientes_page'))
 
-    visitas_paciente_db = (Visita.query.filter_by(paciente_id=paciente.id, medico_idTrue)
+    visitas_paciente_db = (Visita.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id)
                            .order_by(Visita.fecha.desc()).all())
     visitas_data = []
     for v_db in visitas_paciente_db:
@@ -2235,15 +2211,15 @@ def perfil_paciente(paciente_id):
             'archivos_adjuntos_display': archivos_adj_list_display
         })
 
-    notas_paciente_db = (Nota.query.filter_by(paciente_id=paciente.id, usuario_idTrue)
+    notas_paciente_db = (Nota.query.filter_by(paciente_id=paciente.id, usuario_id=current_user.id)
                          .order_by(Nota.fecha.desc()).all())
     notas_data = [{'id': n.id, 'contenido': n.contenido,
                    'fecha_formateada': n.fecha.strftime('%d/%m/%Y %H:%M') if n.fecha else 'N/D',
                    'fecha_relativa': calcular_tiempo_transcurrido(n.fecha) if n.fecha else 'N/A'}
                   for n in notas_paciente_db]
-    recetas_del_paciente = RecetaMedica.query.filter_by(paciente_id=paciente.id, medico_idTrue).order_by(RecetaMedica.fecha_emision.desc()).all()
-    referencias_del_paciente = ReferenciaMedica.query.filter_by(paciente_id=paciente.id, medico_referente_idTrue).order_by(ReferenciaMedica.fecha_emision.desc()).all()
-    planes_nutricionales_del_paciente = PlanNutricional.query.filter_by(paciente_id=paciente.id, medico_idTrue).order_by(PlanNutricional.fecha_emision.desc()).all()
+    recetas_del_paciente = RecetaMedica.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id).order_by(RecetaMedica.fecha_emision.desc()).all()
+    referencias_del_paciente = ReferenciaMedica.query.filter_by(paciente_id=paciente.id, medico_referente_id=current_user.id).order_by(ReferenciaMedica.fecha_emision.desc()).all()
+    planes_nutricionales_del_paciente = PlanNutricional.query.filter_by(paciente_id=paciente.id, medico_id=current_user.id).order_by(PlanNutricional.fecha_emision.desc()).all()
 
     return render_template('perfil_paciente.html',
                            paciente=paciente,
@@ -2255,8 +2231,9 @@ def perfil_paciente(paciente_id):
                            css_file="css/perfil_paciente.css")
 
 @app.route('/perfil_paciente/<int:paciente_id>/guardar', methods=['POST'])
+@login_required
 def guardar_perfil_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para modificarlo.', 'danger')
         return redirect(url_for('pacientes_page'))
@@ -2272,11 +2249,11 @@ def guardar_perfil_paciente(paciente_id):
         flash('El nombre del paciente no puede estar vacío.', 'danger')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
     if nombre_completo != paciente.nombre and \
-       Paciente.query.filter(Paciente.nombre.ilike(nombre_completo), Paciente.id != paciente_id, Paciente.creado_por_id True).first():
+       Paciente.query.filter(Paciente.nombre.ilike(nombre_completo), Paciente.id != paciente_id, Paciente.creado_por_id == current_user.id).first():
         flash(f'Ya existe otro paciente con el nombre "{nombre_completo}" para usted.', 'warning')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
     if nuevo_ident_doc and nuevo_ident_doc != paciente.identificacion_documento and \
-       Paciente.query.filter(Paciente.identificacion_documento.ilike(nuevo_ident_doc), Paciente.id != paciente_id, Paciente.creado_por_id True).first():
+       Paciente.query.filter(Paciente.identificacion_documento.ilike(nuevo_ident_doc), Paciente.id != paciente_id, Paciente.creado_por_id == current_user.id).first():
         flash(f'Ya existe otro paciente con el documento de identificación "{nuevo_ident_doc}" para usted.', 'warning')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
@@ -2289,7 +2266,7 @@ def guardar_perfil_paciente(paciente_id):
         db.session.commit()
         flash('Perfil del paciente actualizado exitosamente.', 'success')
         reg_act = RegistroActividad(
-            usuario_idTrue, usuario_nombre_display='Anónimo',
+            usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
             accion="perfil_paciente_actualizado",
             descripcion=f"Perfil del paciente '{paciente.nombre}' (ID: {paciente.id}) actualizado."
         )
@@ -2297,19 +2274,20 @@ def guardar_perfil_paciente(paciente_id):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al actualizar perfil del paciente ID {paciente_id} (usuario {0}): {e}", exc_info=True)
+        logging.error(f"Error al actualizar perfil del paciente ID {paciente_id} (usuario {current_user.id}): {e}", exc_info=True)
         flash('Error al actualizar el perfil del paciente.', 'danger')
     return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
 @app.route('/paciente/<int:paciente_id>/eliminar', methods=['POST'])
+@login_required
 def eliminar_paciente(paciente_id):
-    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_idTrue).first()
+    paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=current_user.id).first()
     if not paciente:
         flash('Paciente no encontrado o no tiene permiso para eliminarlo.', 'danger')
         return redirect(url_for('pacientes_page'))
     try:
         paciente_nombre_original = paciente.nombre
-        logging.info(f"Iniciando eliminación del Paciente ID: {paciente.id}, Nombre: {paciente_nombre_original} por Usuario ID: {0}")
+        logging.info(f"Iniciando eliminación del Paciente ID: {paciente.id}, Nombre: {paciente_nombre_original} por Usuario ID: {current_user.id}")
         for visita_obj in paciente.visitas.all():
             logging.info(f"Procesando archivos para la visita ID: {visita_obj.id} del paciente a eliminar.")
             _eliminar_archivos_asociados_a_visita(visita_obj)
@@ -2325,7 +2303,7 @@ def eliminar_paciente(paciente_id):
         db.session.delete(paciente)
         db.session.commit()
         reg_act = RegistroActividad(
-            usuario_idTrue, usuario_nombre_display='Anónimo',
+            usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
             accion="paciente_eliminado",
             descripcion=f"Paciente '{paciente_nombre_original}' (ID: {paciente_id}) y todos sus datos asociados han sido eliminados."
         )
@@ -2335,20 +2313,22 @@ def eliminar_paciente(paciente_id):
         return redirect(url_for('pacientes_page'))
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al eliminar el paciente ID {paciente_id} (usuario {0}): {e}", exc_info=True)
+        logging.error(f"Error al eliminar el paciente ID {paciente_id} (usuario {current_user.id}): {e}", exc_info=True)
         flash('Error al eliminar el paciente.', 'danger')
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
 @app.route('/automatizaciones')
+@login_required
 def automatizaciones():
     return render_template('automatizaciones.html', css_file="css/automatizaciones.css")
 
 @app.route('/configuracion-perfil', methods=['GET', 'POST'])
+@login_required
 def configuracion_perfil_profesional():
     usuario_a_actualizar = current_user  # Directamente usar current_user para la sesión
 
     if request.method == 'POST':
-        usuario_a_actualizar = db.session.get(User, 0)
+        usuario_a_actualizar = db.session.get(User, current_user.id)
         if not usuario_a_actualizar:
             flash('Usuario no encontrado para actualizar.', 'danger')
             return redirect(url_for('configuracion_perfil_profesional'))
@@ -2390,7 +2370,7 @@ def configuracion_perfil_profesional():
         usuario_a_actualizar.clinica_telefono = request.form.get('clinica_telefono', usuario_a_actualizar.clinica_telefono).strip()
         usuario_a_actualizar.clinica_website = request.form.get('clinica_website', usuario_a_actualizar.clinica_website).strip()
 
-        usuario_id_str = str(0)
+        usuario_id_str = str(current_user.id)
         base_static_uploads = app.config['UPLOAD_FOLDER']
         usuario_profile_files_subfolder_key = 'PROFILE_FILES_FOLDER'
         app.config[usuario_profile_files_subfolder_key] = os.path.join('usuarios_perfiles', usuario_id_str)
@@ -2434,7 +2414,7 @@ def configuracion_perfil_profesional():
             flash('Tu perfil profesional ha sido actualizado exitosamente.', 'success')
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error guardando perfil profesional para usuario {0}: {e}", exc_info=True)
+            logging.error(f"Error guardando perfil profesional para usuario {current_user.id}: {e}", exc_info=True)
             flash('Error al guardar el perfil. Por favor, intente de nuevo.', 'danger')
         return redirect(url_for('configuracion_perfil_profesional'))
 
@@ -2450,6 +2430,7 @@ def configuracion_perfil_profesional():
     )
 
 @app.route('/cambiar-contrasena', methods=['GET', 'POST'])
+@login_required
 def cambiar_contrasena_route():
     if request.method == 'POST':
         old_password = request.form.get('old_password')
@@ -2481,7 +2462,7 @@ def cambiar_contrasena_route():
             return redirect(url_for('configuracion_perfil_profesional')) # Redirect to profile or dashboard
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error changing password for user {0}: {e}", exc_info=True)
+            logging.error(f"Error changing password for user {current_user.id}: {e}", exc_info=True)
             flash('Ocurrió un error al cambiar la contraseña. Intenta de nuevo.', 'danger')
             return render_template('cambiar_contrasena.html', css_file="css/configuracion_perfil.css")
 
@@ -2489,8 +2470,9 @@ def cambiar_contrasena_route():
     return render_template('cambiar_contrasena.html', css_file="css/configuracion_perfil.css")
     
 @app.route('/visita/<int:visita_id>/receta/nueva', methods=['GET', 'POST'])
+@login_required
 def nueva_receta_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2516,7 +2498,7 @@ def nueva_receta_para_visita(visita_id):
             nueva_receta_db = RecetaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_idTrue,
+                medico_id=current_user.id,
                 medicamentos_json=medicamentos_json_str,
                 diagnostico_relacionado=request.form.get('diagnostico_relacionado'),
                 validez_dias=request.form.get('validez_dias', type=int, default=30),
@@ -2527,7 +2509,7 @@ def nueva_receta_para_visita(visita_id):
             db.session.commit()
 
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
+                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="receta_creada",
                 descripcion=f"Receta (ID: {nueva_receta_db.id}) creada para el paciente '{visita.paciente.nombre}'."
             )
@@ -2563,13 +2545,14 @@ def nueva_receta_para_visita(visita_id):
     return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_initial)
 
 @app.route('/receta/<int:receta_id>')
+@login_required
 def ver_receta(receta_id):
     receta = (db.session.query(RecetaMedica)
               .options(
                   joinedload(RecetaMedica.paciente_receta),
                   joinedload(RecetaMedica.medico_emisor_receta)
               )
-              .filter_by(id=receta_id, medico_idTrue)
+              .filter_by(id=receta_id, medico_id=current_user.id)
               .first())
     if not receta:
         flash('Receta no encontrada o no tiene permiso para verla.', 'danger')
@@ -2585,9 +2568,9 @@ def ver_receta(receta_id):
     medico_for_pdf = receta.medico_emisor_receta
     logo_base64 = get_base64_image_from_path(medico_for_pdf.url_logo_clinica) if medico_for_pdf.url_logo_clinica else None
 
-    return render_template('ver_receta.html', 
-        receta=receta, 
-        medicamentos=medicamentos_lista, 
+    return render_template('ver_receta.html',
+        receta=receta,
+        medicamentos=medicamentos_lista,
         css_file="css/ver_documento.css",
         medico=medico_for_pdf,
         logo_clinica_base64=logo_base64,
@@ -2601,8 +2584,9 @@ def ver_receta(receta_id):
     )
 
 @app.route('/visita/<int:visita_id>/referencia/nueva', methods=['GET', 'POST'])
+@login_required
 def nueva_referencia_para_visita(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2628,7 +2612,7 @@ def nueva_referencia_para_visita(visita_id):
             nueva_referencia_db = ReferenciaMedica(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_referente_idTrue,
+                medico_referente_id=current_user.id,
                 especialidad_referida=especialidad,
                 medico_referido_nombre=request.form.get('medico_referido_nombre', '').strip() or None,
                 institucion_referida=request.form.get('institucion_referida', '').strip() or None,
@@ -2639,7 +2623,7 @@ def nueva_referencia_para_visita(visita_id):
             db.session.add(nueva_referencia_db)
             db.session.commit()
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
+                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="referencia_creada",
                 descripcion=f"Referencia (ID: {nueva_referencia_db.id}) a {especialidad} creada para '{visita.paciente.nombre}'."
             )
@@ -2649,14 +2633,15 @@ def nueva_referencia_para_visita(visita_id):
             return redirect(url_for('ver_referencia', referencia_id=nueva_referencia_db.id))
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {0}): {e}", exc_info=True)
+            logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
             flash('Error al crear la referencia médica.', 'danger')
             return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
     return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
 
 @app.route('/referencia/<int:referencia_id>')
+@login_required
 def ver_referencia(referencia_id):
-    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_idTrue).first()
+    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_id=current_user.id).first()
     if not referencia:
         flash('Referencia médica no encontrada o no tiene permiso para verla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2680,9 +2665,10 @@ def ver_referencia(referencia_id):
     )
 
 @app.route('/configuracion-documentos', methods=['GET', 'POST'])
+@login_required
 def configuracion_documentos():
     if request.method == 'POST':
-        user_db_instance = db.session.get(User, 0)
+        user_db_instance = db.session.get(User, current_user.id)
         if not user_db_instance:
             flash('Error: Usuario no encontrado para actualizar configuración.', 'danger')
             return redirect(url_for('configuracion_documentos'))
@@ -2704,9 +2690,9 @@ def configuracion_documentos():
         except Exception as e:
             db.session.rollback()
             flash('Error al guardar configuración', 'danger')
-            logging.error(f"Error al guardar la configuración de documentos para el usuario {0}: {e}", exc_info=True)
+            logging.error(f"Error al guardar la configuración de documentos para el usuario {current_user.id}: {e}", exc_info=True)
 
-    updated_user = db.session.get(User, 0)
+    updated_user = db.session.get(User, current_user.id)
     if not updated_user:
         flash('Error al cargar la información de tu perfil. Por favor, intenta iniciar sesión de nuevo.', 'danger')
         logout_user()
@@ -2722,8 +2708,9 @@ def configuracion_documentos():
         logo_clinica_base64=logo_base64
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
+@login_required
 def nuevo_plan_nutricional_para_visita_page(visita_id):
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         flash('Visita no encontrada o no tiene permiso para accederla.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2754,13 +2741,13 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
         try:
             parsed_contenido = json.loads(contenido_json_final_str)
-            if not isinstance(parsed_contenido, dict) or not all(k in parsed_contenido for k in ['objetivo_principal', 'recomendaciones_generales', 'plan_diario_tipo']):
-                flash('El JSON del plan nutricional no tiene la estructura requerida. Debe incluir al menos: objetivo_principal, recomendaciones_generales, plan_diario_tipo.', 'danger')
+            if not isinstance(parsed_contenido, dict) or not all(k in parsed_contenido for k in ['objetivo_principal', 'recomendaciones_generales', 'plan_diario_tipo', 'notas_adicionales_plan']):
+                flash('El JSON del plan nutricional no tiene la estructura requerida. Debe incluir al menos: objetivo_principal, recomendaciones_generales, plan_diario_tipo y notas_adicionales_plan.', 'danger')
                 raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
             nuevo_plan_db = PlanNutricional(
                 visita_id=visita.id,
                 paciente_id=visita.paciente_id,
-                medico_idTrue,
+                medico_id=current_user.id,
                 contenido_json=contenido_json_final_str, # Considerar cifrar este JSON
                 notas_adicionales=notas_adicionales_form or None, # Considerar cifrar
                 estado="activo"
@@ -2775,7 +2762,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
                 flash('Plan Nutricional creado, pero hubo un error al generar o guardar el PDF. Revise los logs.', 'warning')
             db.session.commit()
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_idTrue, usuario_nombre_display='Anónimo',
+                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="plan_nutricional_creado",
                 descripcion=f"Plan Nutricional (ID: {nuevo_plan_db.id}) creado para '{visita.paciente.nombre}'. PDF: {'Sí' if ruta_pdf else 'No'}"
             )
@@ -2787,14 +2774,15 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             db.session.rollback()
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al crear Plan Nutricional para visita {visita_id} (usuario {0}): {e}", exc_info=True)
+            logging.error(f"Error al crear Plan Nutricional para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
             flash(f'Error al crear el Plan Nutricional: {str(e)}', 'danger')
         return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
     return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
 
 @app.route('/plan_nutricional/<int:plan_id>')
+@login_required
 def ver_plan_nutricional(plan_id):
-    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_idTrue).first()
+    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=current_user.id).first()
     if not plan:
         flash('Plan Nutricional no encontrado o no tiene permiso para verlo.', 'danger')
         return redirect(url_for('historial_visitas'))
@@ -2826,8 +2814,9 @@ def ver_plan_nutricional(plan_id):
     )
 
 @app.route('/plan_nutricional/<int:plan_id>/pdf')
+@login_required
 def descargar_plan_nutricional_pdf(plan_id):
-    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_idTrue).first()
+    plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=current_user.id).first()
     if not plan or not plan.ruta_pdf_almacenada:
         flash('PDF del Plan Nutricional no encontrado, no generado, o no tiene permiso para accederlo.', 'danger')
         return redirect(url_for('ver_plan_nutricional', plan_id=plan_id) if plan else url_for('historial_visitas'))
@@ -2853,12 +2842,13 @@ def descargar_plan_nutricional_pdf(plan_id):
         logging.error(f"Archivo PDF no encontrado en el servidor al intentar servir: {os.path.join(app.config['UPLOAD_FOLDER'], plan.ruta_pdf_almacenada)}", exc_info=True)
         flash('Archivo PDF del plan no encontrado en el servidor.', 'danger')
     except Exception as e:
-        logging.error(f"Error al intentar servir PDF del plan {plan_id} (usuario {0}): {e}", exc_info=True)
+        logging.error(f"Error al intentar servir PDF del plan {plan_id} (usuario {current_user.id}): {e}", exc_info=True)
         flash('Error al descargar el PDF del plan.', 'danger')
     return redirect(url_for('ver_plan_nutricional', plan_id=plan_id))
 # --- Funciones de la API con los cambios aplicados ---
 
 @app.route('/api/buscar_pacientes', methods=['GET'])
+@login_required
 def buscar_pacientes_api():
     query_str = request.args.get('q', '').strip()
     if not query_str or len(query_str) < 1:
@@ -2871,13 +2861,13 @@ def buscar_pacientes_api():
                 Paciente.nombre.ilike(f'%{query_str}%'),
                 Paciente.identificacion_documento.ilike(f'%{query_str}%')
             )
-        ).limit(10).all()
+        ).filter_by(creado_por_id=current_user.id).limit(10).all()
 
         resultados_json = [
             {"id": p.id, "nombre": p.nombre, "identificacion_documento": p.identificacion_documento}
             for p in pacientes
         ]
-        logging.info(f"Búsqueda de pacientes por '{query_str}': {len(resultados_json)} resultados.")
+        logging.info(f"Búsqueda de pacientes por '{query_str}' para usuario {current_user.id}: {len(resultados_json)} resultados.")
         return jsonify(resultados_json)
 
     except Exception as e:
@@ -2887,6 +2877,7 @@ def buscar_pacientes_api():
 
 
 @app.route('/api/iniciar_visita', methods=['POST'])
+@login_required
 def iniciar_visita():
     try:
         data = request.get_json()
@@ -2904,17 +2895,19 @@ def iniciar_visita():
     paciente_creado_ahora = False
 
     if paciente_id_form:
-        paciente_obj = db.session.query(Paciente).filter_by(id=int(paciente_id_form)).first()
+        paciente_obj = db.session.query(Paciente).filter_by(id=int(paciente_id_form), creado_por_id=current_user.id).first()
         if not paciente_obj:
             return jsonify({"error": "Paciente seleccionado no encontrado."}), 404
     elif paciente_nombre_form:
         paciente_obj = db.session.query(Paciente).filter(
-            Paciente.nombre.ilike(paciente_nombre_form)
+            Paciente.nombre.ilike(paciente_nombre_form),
+            Paciente.creado_por_id == current_user.id
         ).first()
         if not paciente_obj:
-            logging.info(f"Creando nuevo paciente '{paciente_nombre_form}'")
+            logging.info(f"Creando nuevo paciente '{paciente_nombre_form}' para usuario {current_user.id}")
             paciente_obj = Paciente(
-                nombre=paciente_nombre_form
+                nombre=paciente_nombre_form,
+                creado_por_id=current_user.id
             )
             db.session.add(paciente_obj)
             db.session.flush()
@@ -2927,6 +2920,7 @@ def iniciar_visita():
 
     nueva_visita = Visita(
         paciente_id=paciente_obj.id,
+        medico_id=current_user.id,
         plantilla=plantilla_form,
         tipo_visita=tipo_visita_form,
         fecha=datetime.now(timezone.utc)
@@ -2941,8 +2935,8 @@ def iniciar_visita():
 
         reg_act = RegistroActividad(
             visita_id=nueva_visita.id,
-            usuario_id=None,
-            usuario_nombre_display="Sistema anónimo",  # <-- CORRECCIÓN: Usar una cadena de texto en lugar de None
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,  # <-- CORRECCIÓN: Usar una cadena de texto en lugar de None
             accion="visita_creada",
             descripcion=f"Visita de tipo '{tipo_visita_form}' iniciada para el paciente '{paciente_obj.nombre}'."
         )
@@ -2965,6 +2959,7 @@ def iniciar_visita():
         return jsonify({"error": "Error interno al iniciar la visita."}), 500
 
 @app.route('/api/subir_audio', methods=['POST'])
+@login_required
 def subir_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa. Por favor, inicie una nueva visita primero."}), 400
@@ -2972,7 +2967,7 @@ def subir_audio():
     visita_id = session['visita_actual_id']
 
     # Se elimina la validación del medico_id
-    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
 
     if not visita:
         session.pop('visita_actual_id', None)
@@ -2991,7 +2986,7 @@ def subir_audio():
         file_ext = os.path.splitext(original_filename)[1].lower()
 
         if file_ext not in ALLOWED_OPENAI_AUDIO_EXTENSIONS:
-            # Reemplazar 0 con una descripción genérica
+            # Reemplazar current_user.id con una descripción genérica
             logging.warning(f"Intento de subir un archivo con formato no soportado: {original_filename}")
             return jsonify({ "error": f"Formato de archivo no soportado ('{file_ext}')."}), 400
 
@@ -3029,7 +3024,7 @@ def subir_audio():
 
         desc_log_subida = f"Grabación de audio '{original_filename}' ({duracion_seg or 'N/A'}s) subida para la visita."
         # Se reemplaza current_user con valores anónimos
-        reg_act = RegistroActividad(visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo", accion="grabacion_subida", descripcion=desc_log_subida)
+        reg_act = RegistroActividad(visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre, accion="grabacion_subida", descripcion=desc_log_subida)
         db.session.add(reg_act)
         db.session.commit()
 
@@ -3041,6 +3036,7 @@ def subir_audio():
             "ruta_audio_procesable": ruta_relativa_para_db
         })
 @app.route('/api/resumir_documentos_e_iniciar_visita', methods=['POST'])
+@login_required
 def api_resumir_documentos_e_iniciar_visita():
     logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr}")
     if not client_openai:
@@ -3059,7 +3055,7 @@ def api_resumir_documentos_e_iniciar_visita():
     if pac_id_sel:
         try:
             # Eliminar la restricción de `creado_por_id`
-            pac_obj = db.session.query(Paciente).filter_by(id=int(pac_id_sel)).first()
+            pac_obj = db.session.query(Paciente).filter_by(id=int(pac_id_sel), creado_por_id=current_user.id).first()
             if not pac_obj:
                 logging.warning(f"Intento de resumir docs para paciente ID {pac_id_sel} que no pertenece al usuario.")
                 return jsonify({"error": "Paciente seleccionado no encontrado."}), 404
@@ -3069,23 +3065,24 @@ def api_resumir_documentos_e_iniciar_visita():
     if not pac_obj:
         if pac_ident_doc_form:
             # Eliminar la restricción de `creado_por_id`
-            pac_obj = Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form).first()
+            pac_obj = Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form, creado_por_id=current_user.id).first()
 
         if not pac_obj and pac_nom_form:
             # Eliminar la restricción de `creado_por_id`
-            pac_obj = Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form)).first()
+            pac_obj = Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form), creado_por_id=current_user.id).first()
 
         if not pac_obj and pac_nom_form:
-            if pac_ident_doc_form and Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form).first():
+            if pac_ident_doc_form and Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form, creado_por_id=current_user.id).first():
                 return jsonify({"error": f"Documento '{pac_ident_doc_form}' ya pertenece a otro paciente."}), 409
 
-            if Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form)).first():
+            if Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form), creado_por_id=current_user.id).first():
                  return jsonify({"error": f"Ya existe un paciente con el nombre '{pac_nom_form}'."}), 409
             
             # Al crear un nuevo paciente, no se especifica el creador
             pac_obj = Paciente(
                 nombre=pac_nom_form,
                 identificacion_documento=pac_ident_doc_form or None,
+                creado_por_id=current_user.id
             )
             db.session.add(pac_obj)
             pac_nuevo = True
@@ -3155,7 +3152,7 @@ def api_resumir_documentos_e_iniciar_visita():
         })
         n_visita_res = Visita(
             paciente_id=pac_obj.id,
-            # Eliminar la asignación a medico_id
+            medico_id=current_user.id,
             plantilla=plantilla_form or "Resumen Documentos General",
             tipo_visita="resumen_documentos",
             resumen_ai=res_ia_docs,
@@ -3172,8 +3169,8 @@ def api_resumir_documentos_e_iniciar_visita():
         # Registrar actividad sin un usuario específico
         reg_act = RegistroActividad(
             visita_id=n_visita_res.id,
-            usuario_id=None,
-            usuario_nombre_display="Sistema anónimo",
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,
             accion="resumen_registros_generado",
             descripcion=desc_log
         )
@@ -3201,9 +3198,11 @@ def api_resumir_documentos_e_iniciar_visita():
         logging.error(f"Error BD al guardar visita de resumen: {e_db}", exc_info=True)
         return jsonify({"error": "Error de base de datos al guardar la visita de resumen."}), 500
 @app.route('/chat-bot')
+@login_required
 def chat_bot():
     return render_template('chat_bot.html')
 @app.route('/api/actualizar_notas_resumen_ai', methods=['POST'])
+@login_required
 def api_actualizar_notas_resumen_ai():
     """
     Actualiza el contenido de notas_ai y resumen_ai para una visita específica.
@@ -3217,7 +3216,7 @@ def api_actualizar_notas_resumen_ai():
     if not visita_id:
         return jsonify({"error": "ID de visita es requerido."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
 
     if not visita:
         return jsonify({"error": "Visita no encontrada o no tiene permiso para actualizarla."}), 404
@@ -3243,8 +3242,8 @@ def api_actualizar_notas_resumen_ai():
         # Registrar actividad
         reg_act = RegistroActividad(
             visita_id=visita.id,
-            usuario_idTrue,
-            usuario_nombre_display='Anónimo',
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,
             accion="notas_ai_editadas",
             descripcion=f"Contenido de Notas y Resumen AI editado manualmente para la visita ID {visita.id}."
         )
@@ -3259,6 +3258,7 @@ def api_actualizar_notas_resumen_ai():
         return jsonify({"error": f"Error interno al actualizar el contenido AI: {str(e)}"}), 500
 
 @app.route('/api/crear_referencia_desde_chat', methods=['POST'])
+@login_required
 def api_crear_referencia_desde_chat():
     """
     Crea una referencia médica desde el chatbot sin una visita preexistente.
@@ -3280,24 +3280,24 @@ def api_crear_referencia_desde_chat():
     paciente = None
     if patient_id_doc:
         paciente = Paciente.query.filter_by(
-            identificacion_documento=patient_id_doc, 
-            creado_por_idTrue
+            identificacion_documento=patient_id_doc,
+            creado_por_id=current_user.id
         ).first()
     
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            creado_por_idTrue
+            creado_por_id=current_user.id
         ).first()
 
     # Si el paciente no existe, crearlo
     if not paciente:
-        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para usuario {0}")
+        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para usuario {current_user.id}")
         paciente = Paciente(
             nombre=patient_name,
             identificacion_documento=patient_id_doc or None,
             email=patient_email or None,
-            creado_por_idTrue
+            creado_por_id=current_user.id
         )
         db.session.add(paciente)
         db.session.flush() # Para obtener el ID del nuevo paciente
@@ -3306,7 +3306,7 @@ def api_crear_referencia_desde_chat():
         # Crear la referencia médica
         nueva_referencia = ReferenciaMedica(
             paciente_id=paciente.id,
-            medico_referente_idTrue,
+            medico_referente_id=current_user.id,
             especialidad_referida=data.get('specialty'),
             motivo_referencia=data.get('reason'),
             medico_referido_nombre=data.get('doctorName'),
@@ -3320,9 +3320,9 @@ def api_crear_referencia_desde_chat():
 
         # Registrar la actividad (sin asociarla a una visita)
         reg_act = RegistroActividad(
-            visita_id=None, 
-            usuario_idTrue, 
-            usuario_nombre_display='Anónimo',
+            visita_id=None,
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,
             accion="referencia_creada",
             descripcion=f"Referencia (ID: {nueva_referencia.id}) a {nueva_referencia.especialidad_referida} creada para '{paciente.nombre}' desde el Chatbot."
         )
@@ -3343,6 +3343,7 @@ def api_crear_referencia_desde_chat():
         return jsonify({'error': 'Ocurrió un error interno al guardar la referencia.'}), 500
 
 @app.route('/api/crear_receta_desde_chat', methods=['POST'])
+@login_required
 def api_crear_receta_desde_chat():
     """
     Crea una receta médica desde el chatbot sin una visita preexistente.
@@ -3364,24 +3365,24 @@ def api_crear_receta_desde_chat():
     paciente = None
     if patient_id_doc:
         paciente = Paciente.query.filter_by(
-            identificacion_documento=patient_id_doc, 
-            creado_por_idTrue
+            identificacion_documento=patient_id_doc,
+            creado_por_id=current_user.id
         ).first()
     
     if not paciente:
         paciente = Paciente.query.filter(
             Paciente.nombre.ilike(patient_name),
-            creado_por_idTrue
+            creado_por_id=current_user.id
         ).first()
 
     # Si el paciente no existe, crearlo
     if not paciente:
-        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para receta (usuario {0})")
+        logging.info(f"Chatbot: Creando nuevo paciente '{patient_name}' para receta (usuario {current_user.id})")
         paciente = Paciente(
             nombre=patient_name,
             identificacion_documento=patient_id_doc or None,
             email=patient_email or None,
-            creado_por_idTrue
+            creado_por_id=current_user.id
         )
         db.session.add(paciente)
         db.session.flush() # Para obtener el ID del nuevo paciente
@@ -3395,7 +3396,7 @@ def api_crear_receta_desde_chat():
         # Crear la receta médica
         nueva_receta = RecetaMedica(
             paciente_id=paciente.id,
-            medico_idTrue,
+            medico_id=current_user.id,
             medicamentos_json=json.dumps(medicamentos),
             diagnostico_relacionado=data.get('diagnostico_relacionado'),
             validez_dias=data.get('validez_dias', type=int, default=30),
@@ -3408,9 +3409,9 @@ def api_crear_receta_desde_chat():
 
         # Registrar la actividad (sin asociarla a una visita)
         reg_act = RegistroActividad(
-            visita_id=None, 
-            usuario_idTrue, 
-            usuario_nombre_display='Anónimo',
+            visita_id=None,
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,
             accion="receta_creada",
             descripcion=f"Receta (ID: {nueva_receta.id}) creada para '{paciente.nombre}' desde el Chatbot."
         )
@@ -3431,6 +3432,7 @@ def api_crear_receta_desde_chat():
         return jsonify({'error': 'Ocurrió un error interno al guardar la receta.'}), 500
 
 @app.route('/api/transcribir_diarizar', methods=['POST'])
+@login_required
 def transcribir_diarizar_audio():
     global client_openai
     if 'visita_actual_id' not in session:
@@ -3438,7 +3440,7 @@ def transcribir_diarizar_audio():
     visita_id = session['visita_actual_id']
 
     # Se elimina el filtro por 'medico_id'
-    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         session.pop('visita_actual_id', None)
         return jsonify({"error": f"Visita con ID {visita_id} no encontrada."}), 404
@@ -3473,7 +3475,7 @@ def transcribir_diarizar_audio():
         )
         texto_transcrito = respuesta_transcripcion.text
         idioma_detectado_whisper = respuesta_transcripcion.language
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.info(f"Audio transcrito para Visita ID {visita.id}. Idioma: {idioma_detectado_whisper}. Longitud: {len(texto_transcrito)}")
         visita.transcripcion = texto_transcrito
         visita.idioma_detectado = idioma_detectado_whisper
@@ -3481,7 +3483,7 @@ def transcribir_diarizar_audio():
         desc_log = f"Transcripción generada para la visita. Idioma detectado: {str(idioma_detectado_whisper).upper()}."
         # Se reemplaza current_user con valores anónimos
         reg_act = RegistroActividad(
-            visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
+            visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
             accion="transcripcion_generada", descripcion=desc_log
         )
         db.session.add(reg_act); db.session.commit()
@@ -3491,30 +3493,31 @@ def transcribir_diarizar_audio():
             "overview": obtener_datos_overview(visita.id)
         }), 200
     except APIError as e_api:
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Error de API OpenAI durante la transcripción (Visita {visita.id}): {e_api}", exc_info=True)
         error_msg = f"[Error del servicio de OpenAI al transcribir: {e_api.message if hasattr(e_api, 'message') else str(e_api)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), getattr(e_api, 'status_code', 500)
     except BadRequestError as e_bad_req:
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Error de BadRequest OpenAI durante la transcripción (Visita {visita.id}): {e_bad_req}", exc_info=True)
         error_msg = f"[Error en la solicitud de transcripción a OpenAI (ej. archivo no soportado/corrupto): {e_bad_req.message if hasattr(e_bad_req, 'message') else str(e_bad_req)}]"
         visita.transcripcion = error_msg; db.session.commit()
         return jsonify({"error": error_msg}), 400
     except Exception as e_gen:
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Error inesperado durante la transcripción (Visita {visita.id}): {e_gen}", exc_info=True)
         visita.transcripcion = f"[Error inesperado durante la transcripción: {str(e_gen)[:100]}]"; db.session.commit()
         return jsonify({"error": "Ocurrió un error inesperado durante la transcripción."}), 500
 
 @app.route('/api/generar_resumen_ai', methods=['POST'])
+@login_required
 def api_generar_resumen_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     # Se elimina el filtro por medico_id
-    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita: return jsonify({"error": "Visita no encontrada."}), 404
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
         return jsonify({"error": "No hay transcripción válida disponible para generar el resumen."}), 400
@@ -3528,25 +3531,26 @@ def api_generar_resumen_ai():
         desc_log = f"Resumen AI generado/actualizado para la visita. Plantilla: '{visita.plantilla or "General"}'. Idioma: {idioma_prompt.upper()}."
         # Se reemplaza current_user con valores anónimos
         reg_act = RegistroActividad(
-            visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
+            visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
             accion="resumen_generado", descripcion=desc_log
         )
         db.session.add(reg_act); db.session.commit()
         return jsonify({"message": "Resumen AI generado exitosamente.", "resumen_ai": resumen_gen,
                         "overview": obtener_datos_overview(visita_id)}), 200
     else:
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Fallo al generar resumen AI para Visita {visita_id}: {resumen_gen}")
         return jsonify({"error": f"No se pudo generar el resumen AI: {resumen_gen}"}), 500
 
 @app.route('/api/generar_notas_ai', methods=['POST'])
+@login_required
 def api_generar_notas_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
     if not visita_id: return jsonify({"error": "Falta el ID de la visita."}), 400
     
     # Se elimina el filtro por medico_id
-    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita: return jsonify({"error": "Visita no encontrada."}), 404
     
     if not visita.transcripcion or visita.transcripcion.startswith("[Error") or not visita.transcripcion.strip():
@@ -3557,22 +3561,22 @@ def api_generar_notas_ai():
     # Como no hay usuario autenticado, no podemos obtener la especialidad.
     # Por lo tanto, se omite el parámetro 'especialidad_usuario' o se le da un valor por defecto.
     notas_gen_result = generar_notas_ai_desde_transcripcion(
-        visita.transcripcion, 
-        visita.plantilla or "SOAP", 
+        visita.transcripcion,
+        visita.plantilla or "SOAP",
         idioma_prompt,
-        especialidad_usuario=None
+        especialidad_usuario=current_user.especialidad if current_user.is_authenticated else None
     )
 
     if isinstance(notas_gen_result, str) and notas_gen_result.startswith("[Error"):
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Fallo al generar notas AI para Visita {visita_id}: {notas_gen_result}")
         return jsonify({"error": f"No se pudieron generar las notas AI: {notas_gen_result}"}), 500
 
     notas_gen_markdown = notas_gen_result.get('markdown', '')
-    notas_gen_html = notas_gen_result.get('html', '') 
+    notas_gen_html = notas_gen_result.get('html', '')
 
     if not notas_gen_markdown:
-        # Se elimina la referencia a 0
+        # Se elimina la referencia a current_user.id
         logging.error(f"Generación de notas AI exitosa, pero el contenido markdown está vacío para Visita {visita_id}.")
         return jsonify({"error": "Notas AI generadas, pero el contenido markdown está vacío."}), 500
 
@@ -3583,7 +3587,7 @@ def api_generar_notas_ai():
     
     # Se reemplaza current_user con valores anónimos
     reg_act = RegistroActividad(
-        visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
+        visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
         accion="notas_ia_generadas", descripcion=desc_log
     )
     db.session.add(reg_act)
@@ -3598,6 +3602,7 @@ def api_generar_notas_ai():
 
 
 @app.route('/api/generar_plan_alimenticio', methods=['POST'])
+@login_required
 def api_generar_plan_alimenticio():
     data = request.get_json()
     visita_id = data.get('visita_id')
@@ -3605,7 +3610,7 @@ def api_generar_plan_alimenticio():
     if not visita_id:
         return jsonify({"error": "Falta el ID de la visita."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_idTrue).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita:
         return jsonify({"error": "Visita no encontrada o no le pertenece."}), 404
 
@@ -3644,6 +3649,7 @@ def api_traducir_texto():
     return jsonify({"texto_traducido": texto_traducido, "idioma_original_confirmado": idioma_origen})
 
 @app.route('/api/visita_overview/<int:visita_id>')
+@login_required
 def api_visita_overview(visita_id):
     overview_data = obtener_datos_overview(visita_id_param=visita_id)
     if "Error" in overview_data.get('paciente', '') or "Error" in overview_data.get('resumen', '') or "acceso denegado" in overview_data.get('resumen', '').lower():
@@ -3652,8 +3658,9 @@ def api_visita_overview(visita_id):
     return jsonify(overview_data)
 
 @app.route('/api/eliminar_visita/<int:visita_id_param>', methods=['POST'])
+@login_required
 def eliminar_visita_completa(visita_id_param):
-    visita = db.session.query(Visita).filter_by(id=visita_id_param).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id_param, medico_id=current_user.id).first()
     if not visita:
         return jsonify({"error": f"Visita ID {visita_id_param} no encontrada."}), 404
     try:
@@ -3664,8 +3671,8 @@ def eliminar_visita_completa(visita_id_param):
         db.session.commit()
         reg_act = RegistroActividad(
             visita_id=None,
-            usuario_id=None,  # No hay un usuario específico para el registro
-            usuario_nombre_display="Sistema anónimo",
+            usuario_id=current_user.id,
+            usuario_nombre_display=current_user.nombre,
             accion="visita_eliminada",
             descripcion=f"Visita ID {visita_id_param} (Paciente: {pac_nombre}) eliminada."
         )
@@ -3680,6 +3687,7 @@ def eliminar_visita_completa(visita_id_param):
         return jsonify({"error": "Error al eliminar la visita."}), 500
         
 @app.route('/api/compartir_visita_email', methods=['POST'])
+@login_required
 def compartir_visita_email():
     data = request.get_json()
     if not data: return jsonify({"error": "No se recibió payload JSON."}), 400
@@ -3693,7 +3701,7 @@ def compartir_visita_email():
     if not visita_id or not email_dest:
         return jsonify({"error": "Falta ID de visita o email del destinatario."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
     if not visita: return jsonify({"error": "Visita no encontrada."}), 404
 
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
@@ -3736,7 +3744,7 @@ def compartir_visita_email():
 
             desc_log_email = f"Información de la Visita ID {visita_id} (Notas AI como imagen) compartida por email a {email_dest}."
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
+                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="visita_compartida", descripcion=desc_log_email
             )
             db.session.add(reg_act); db.session.commit()
@@ -3841,7 +3849,7 @@ def compartir_visita_email():
             desc_log_email = f"Información de la Visita ID {visita_id} compartida por email a {email_dest}."
             if traducido and idioma_final_email != idioma_orig_vis: desc_log_email += f" (Contenido traducido a {idioma_final_email.upper()})"
             reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=None, usuario_nombre_display="Sistema anónimo",
+                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
                 accion="visita_compartida", descripcion=desc_log_email
             )
             db.session.add(reg_act); db.session.commit()
@@ -3852,6 +3860,7 @@ def compartir_visita_email():
         return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
 
 @app.route('/api/receta/<int:receta_id>/compartir_email', methods=['POST'])
+@login_required
 def compartir_receta_email(receta_id):
     data = request.get_json()
     if not data: return jsonify({"error": "No se recibió payload JSON."}), 400
@@ -3860,7 +3869,7 @@ def compartir_receta_email(receta_id):
     msg_adic_raw = data.get('message_adicional', '')
     idioma_email_sel = data.get('idioma_email', 'es')
     if not email_dest: return jsonify({"error": "Falta email del destinatario."}), 400
-    receta = db.session.query(RecetaMedica).filter_by(id=receta_id).first()
+    receta = db.session.query(RecetaMedica).filter_by(id=receta_id, medico_id=current_user.id).first()
     if not receta: return jsonify({"error": "Receta no encontrada."}), 404
     if not receta.paciente_receta: return jsonify({"error": "Paciente asociado a la receta no encontrado."}), 404
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
@@ -3970,499 +3979,8 @@ body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-col
         mail.send(msg_obj)
         desc_log_email = f"Receta Médica ID {receta_id} compartida por email a {email_dest}."
         if traducido and norm_idioma_deseado != idioma_orig_receta: desc_log_email += f" (Contenido traducido a {norm_idioma_deseado.upper()})"
-        reg_act_data = {"usuario_id": None, "usuario_nombre_display": "Sistema anónimo", "accion": "receta_compartida", "descripcion": desc_log_email}
+        reg_act_data = {"usuario_id": current_user.id, "usuario_nombre_display": current_user.nombre, "accion": "receta_compartida", "descripcion": desc_log_email}
         if receta.visita_id: reg_act_data["visita_id"] = receta.visita_id
         reg_act = RegistroActividad(**reg_act_data)
         db.session.add(reg_act); db.session.commit()
         logging.info(f"Email con receta médica {receta_id} enviado a {email_dest}.")
-        return jsonify({"message": f"Receta médica enviada exitosamente a {email_dest}."}), 200
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error al intentar enviar email para receta {receta_id}: {e}", exc_info=True)
-        return jsonify({"error": f"No se pudo enviar el email de la receta: {str(e)}"}), 500
-
-@app.route('/api/plan_nutricional/<int:plan_id>/compartir_email', methods=['POST'])
-def compartir_plan_nutricional_email(plan_id):
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No se recibió payload JSON."}), 400
-
-    email_dest = data.get('email_destinatario')
-    asunto_opc = data.get('asunto')
-    msg_adic_raw = data.get('message_adicional', '')
-    image_data_b64 = data.get('image_data')
-
-    if not email_dest or not image_data_b64:
-        return jsonify({"error": "Falta email del destinatario o los datos de la imagen."}), 400
-
-    plan = db.session.query(PlanNutricional).options(
-        joinedload(PlanNutricional.paciente_plan),
-        joinedload(PlanNutricional.medico_emisor_plan)
-    ).filter_by(id=plan_id).first()
-
-    if not plan:
-        return jsonify({"error": "Plan nutricional no encontrado."}), 404
-        
-    if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
-        logging.error("Configuración de correo incompleta.")
-        return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
-
-    try:
-        paciente_obj = plan.paciente_plan
-        medico_obj = plan.medico_emisor_plan
-        fecha_em_obj = plan.fecha_emision or datetime.now(timezone.utc)
-        fecha_em_str = fecha_em_obj.strftime('%d/%m/%Y')
-        asunto_final = asunto_opc or f"Plan Nutricional Adjunto para {paciente_obj.nombre} - {fecha_em_str}"
-        nombre_archivo_imagen = f"Plan_Nutricional_{paciente_obj.nombre.replace(' ', '_')}_{plan.id}.png"
-
-        image_bytes = base64.b64decode(image_data_b64.split(',')[1])
-
-        msg_adic_html = f"<p><b>Mensaje adicional:</b><br>{msg_adic_raw.replace(chr(10), '<br>')}</p>" if msg_adic_raw else ''
-        cuerpo_html = f"""
-        <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>{asunto_final}</title></head>
-        <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2>Plan Nutricional Adjunto</h2>
-            <p>Estimado/a,</p>
-            <p>Por favor, encuentre adjunto el plan nutricional para el paciente <strong>{paciente_obj.nombre}</strong>, preparado por el/la <strong>Dr(a). {medico_obj.nombre}</strong>.</p>
-            {msg_adic_html}
-            <p>El documento está en formato de imagen (PNG).</p><br>
-            <p>Saludos cordiales,</p><p><em>Generado por Vitta Health Scribe</em></p>
-        </body></html>
-        """
-
-        msg = Message(asunto_final, recipients=[email_dest], html=cuerpo_html, sender=app.config['MAIL_DEFAULT_SENDER'])
-        msg.attach(
-            filename=nombre_archivo_imagen,
-            content_type='image/png',
-            data=image_bytes
-        )
-        mail.send(msg)
-
-        reg_act_data = {
-            "usuario_id": None, "usuario_nombre_display": "Sistema anónimo",
-            "accion": "plan_nutricional_compartido",
-            "descripcion": f"Plan Nutricional (ID: {plan.id}) compartido como IMAGEN adjunta por email a {email_dest}."}
-        if plan.visita_id:
-            reg_act_data["visita_id"] = plan.visita_id
-        
-        reg_act = RegistroActividad(**reg_act_data)
-        db.session.add(reg_act)
-        db.session.commit()
-
-        logging.info(f"Email con IMAGEN adjunta del plan nutricional {plan.id} enviado a {email_dest}.")
-        return jsonify({"message": f"Plan nutricional enviado como imagen adjunta a {email_dest}."}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error al enviar email con imagen adjunta para plan {plan.id}: {str(e)}", exc_info=True)
-        return jsonify({"error": f"No se pudo enviar el correo con la imagen: {str(e)}"}), 500
-@app.route('/api/referencia/<int:referencia_id>/compartir_email', methods=['POST'])
-def compartir_referencia_email(referencia_id):
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No se recibió payload JSON."}), 400
-
-    email_dest = data.get('email_destinatario')
-    asunto_opc = data.get('asunto')
-    msg_adic_raw = data.get('message_adicional', '')
-
-    if not email_dest:
-        return jsonify({"error": "Falta email del destinatario."}), 400
-
-    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_idTrue).first()
-    if not referencia:
-        return jsonify({"error": "Referencia no encontrada o no tiene permiso para compartirla."}), 404
-
-    # Verificar que las dependencias y la configuración de correo existan
-    if not HTML:
-        logging.error("WeasyPrint no está instalado. No se puede generar el PDF para el correo.")
-        return jsonify({"error": "La función para generar PDF no está disponible en el servidor."}), 500
-
-    if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
-        logging.error("Configuración de correo incompleta en el servidor.")
-        return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
-
-@app.route('/admin/panel-principal')
-@admin_required(allowed_roles=['admin'])
-def admin_dashboard():
-    """
-    Ruta para la página principal del panel de administración.
-    Muestra métricas globales y una lista paginada de doctores y prospectos.
-    """
-    error = None
-    try:
-        # --- 1. Carga de Métricas para Widgets (Modo Demo) ---
-        stats = db.session.query(EstadisticasDemo).filter_by(id=1).first()
-
-        # --- CORRECCIÓN DE INDENTACIÓN AQUÍ ---
-        # El siguiente bloque 'if/else' fue movido para estar correctamente
-        # dentro del bloque 'try'.
-        if stats:
-            total_minutes_recorded = stats.minutos_grabados
-            total_visitas_generadas = stats.visitas_generadas
-            total_pacientes_creados = stats.pacientes_creados
-            total_docs_created = stats.documentos_creados
-            total_docs_resumidos = stats.documentos_resumidos
-        else:
-            # Valores por defecto si la tabla está vacía
-            total_minutes_recorded, total_visitas_generadas, total_pacientes_creados, total_docs_created, total_docs_resumidos = 0, 0, 0, 0, 0
-        # --- FIN DE LA CORRECCIÓN DE INDENTACIÓN ---
-
-        # Los conteos de doctores y prospectos se pueden mantener igual
-        verified_doctors_count = User.query.filter_by(role='medico', is_verified=True).count()
-        unverified_doctors_count = User.query.filter_by(role='medico', is_verified=False).count()
-        prospects_count = ProspectoInteres.query.count()
-
-        # --- 2. Lógica de Búsqueda, Filtro y Unificación ---
-        page = request.args.get('page', 1, type=int)
-        search_query = request.args.get('search', '').strip()
-        status_filter = request.args.get('status_filter', '')
-
-        contactos_unificados = []
-
-        # Añadir doctores a la lista
-        doctors_query = User.query.filter_by(role='medico')
-        for doctor in doctors_query.all():
-            contactos_unificados.append({'type': 'doctor', 'data': doctor, 'date': doctor.created_at})
-
-        # Añadir prospectos a la lista
-        prospects_list = ProspectoInteres.query.all()
-        for prospecto in prospects_list:
-            contactos_unificados.append({'type': 'prospecto', 'data': prospecto, 'date': prospecto.fecha_registro})
-
-        # Ordenar la lista combinada por fecha de creación (los más nuevos primero)
-        contactos_unificados.sort(key=lambda x: x['date'], reverse=True)
-
-        # Aplicar filtros de estado
-        if status_filter == 'verified':
-            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and c['data'].is_verified]
-        elif status_filter == 'not_verified':
-            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and not c['data'].is_verified]
-        elif status_filter == 'prospecto':
-            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'prospecto']
-
-        # Aplicar búsqueda por nombre
-        if search_query:
-            contactos_unificados = [
-                c for c in contactos_unificados
-                if search_query.lower() in f"{c['data'].nombre or ''} {getattr(c['data'], 'apellidos', '')}".lower()
-            ]
-
-        # --- 3. Paginación ---
-        pagination = ListPagination(items_list=contactos_unificados, page=page, per_page=10)
-
-    except Exception as e:
-        error = f"Ocurrió un error al cargar los datos: {str(e)}"
-        logging.error(f"Error en admin_dashboard: {e}", exc_info=True)
-        # Inicializar variables para que la plantilla no falle
-        verified_doctors_count, unverified_doctors_count, prospects_count = 0, 0, 0
-        total_minutes_recorded, total_docs_created, total_pacientes_creados, total_visitas_generadas, total_docs_resumidos = 0, 0, 0, 0, 0
-        pagination = None
-
-    # --- 4. Renderizar Plantilla con Todos los Datos ---
-    return render_template('admin_dashboard.html',
-                           verified_doctors_count=verified_doctors_count,
-                           unverified_doctors_count=unverified_doctors_count,
-                           prospects_count=prospects_count,
-                           total_minutes_recorded=total_minutes_recorded,
-                           total_docs_created=total_docs_created,
-                           total_pacientes_creados=total_pacientes_creados,
-                           total_visitas_generadas=total_visitas_generadas,
-                           total_docs_resumidos=total_docs_resumidos,
-                           pagination=pagination,
-                           error=error)
-
-@app.route('/admin/test-emails')
-@admin_required(allowed_roles=['admin'])
-def admin_test_emails():
-    """
-    Página para que los administradores envíen correos de prueba.
-    GET: Muestra la página con los botones de envío.
-    POST: Envía el correo de prueba seleccionado.
-    """
-    if request.method == 'POST':
-        # Obtener los datos comunes del formulario
-        recipient_email = request.form.get('recipient_email')
-        email_type = request.form.get('email_type')
-
-        if not recipient_email:
-            flash('El correo del destinatario es obligatorio.', 'danger')
-            return redirect(url_for('admin_test_emails'))
-
-        # Lógica para enviar el correo según el tipo seleccionado
-        try:
-            if email_type == 'welcome_doctor':
-                # --- Correo de Bienvenida a Doctor ---
-                # Usamos datos de ejemplo para rellenar la plantilla
-                login_url = url_for('login_route', _external=True)
-                current_year = datetime.now().year
-                
-                html_body = render_template(
-                'bienvenida_doctor.html',                    nombre_doctor="Dr. De Prueba",
-                    email_doctor=recipient_email,
-                    temp_password="password_de_prueba_123",
-                    login_url=login_url,
-                    year=current_year
-                )
-                msg = Message(
-                    subject="[PRUEBA] Bienvenido a Vitta Health Scribe",
-                    recipients=[recipient_email],
-                    html=html_body,
-                    sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER'])
-                )
-                mail.send(msg)
-                flash(f'Correo de bienvenida de doctor enviado a {recipient_email}.', 'success')
-
-            elif email_type == 'interest_confirmation':
-                # --- Correo de Confirmación de Interés ---
-                html_body = render_template(
-                    'confirmacion_interes.html', 
-                    nombre="Prospecto de Prueba"
-                )
-                msg = Message(
-                    subject="[PRUEBA] Confirmación de tu solicitud en Vitta Health",
-                    recipients=[recipient_email],
-                    html=html_body,
-                    sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER'])
-                )
-                mail.send(msg)
-                flash(f'Correo de confirmación de interés enviado a {recipient_email}.', 'success')
-            
-            else:
-                flash('Tipo de correo desconocido.', 'danger')
-
-        except Exception as e:
-            logging.error(f"Error enviando correo de prueba a {recipient_email}: {e}", exc_info=True)
-            flash(f'Error al enviar el correo: {e}', 'danger')
-
-        return redirect(url_for('admin_test_emails'))
-
-    # Para el método GET, simplemente renderiza la página
-    return render_template('admin/admin_test_emails.html')
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/admin/prospect/<int:prospect_id>")
-@admin_required(allowed_roles=['admin']) # Asegúrate de especificar el rol correcto
-def admin_prospect_detail(prospect_id):
-    try:
-        # Se corrige la consulta para que busque en el modelo ProspectoInteres
-        prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
-        
-        if not prospect:
-            flash("Prospecto no encontrado.", "danger")
-            return redirect(url_for('admin_dashboard'))
-            
-        # El nombre del archivo de la plantilla ya es correcto
-        return render_template("admin_prospect_detail.html", prospect=prospect)
-        
-    except Exception as e:
-        logging.exception("❌ Error al mostrar detalles del prospecto:")
-        flash("Error al cargar los detalles del prospecto.", "danger")
-        return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/doctor/<int:doctor_id>', methods=['GET', 'POST'])
-@admin_required(allowed_roles=['admin'])
-def admin_doctor_detail(doctor_id):
-    """ Muestra y actualiza la página de detalles para un doctor específico. """
-    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
-
-    if request.method == 'POST':
-        # Lógica para guardar cambios del formulario (sin cambios)
-        doctor.nombre = request.form.get('nombre')
-        doctor.identificacion = request.form.get('identificacion')
-        doctor.email = request.form.get('email')
-        
-        prefijo = request.form.get('telefono_prefijo')
-        numero = request.form.get('telefono_numero')
-        doctor.telefono_profesional = f"{prefijo}{numero}" if prefijo and numero else None
-        
-        doctor.is_verified = 'is_verified' in request.form
-        
-        try:
-            db.session.commit()
-            flash('Perfil del doctor actualizado exitosamente.', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al actualizar el perfil: {e}', 'danger')
-            logging.error(f"Error actualizando doctor {doctor.id} desde admin: {e}")
-            
-        return redirect(url_for('admin_doctor_detail', doctor_id=doctor.id))
-
-    # --- LÓGICA MODIFICADA PARA MOSTRAR DATOS DE DEMO O REALES ---
-    if doctor.nombre in DEMO_STATS_PROFESIONALES:
-        # Si el doctor está en el diccionario de la demo, usa los datos fijos
-        stats = DEMO_STATS_PROFESIONALES[doctor.nombre]
-        patients_count = stats["pacientes"]
-        visits_count = stats["visitas"]
-        docs_resumidos_count = stats["resumidos"]
-        minutes_recorded = stats["minutos"]
-        documents_created_count = stats["docs_creados"]
-        
-    else:
-        # Si no es un doctor de la demo, calcula los datos reales
-        patients_count = Paciente.query.filter_by(creado_por_id=doctor.id).count()
-        visits_count = Visita.query.filter_by(medico_id=doctor.id).count()
-        docs_resumidos_count = Visita.query.filter_by(medico_id=doctor.id, tipo_visita='resumen_documentos').count()
-        
-        total_seconds = db.session.query(db.func.sum(Visita.duracion_grabacion_segundos)).filter_by(medico_id=doctor.id).scalar() or 0
-        minutes_recorded = round(total_seconds / 60)
-        
-        recetas_count = RecetaMedica.query.filter_by(medico_id=doctor.id).count()
-        referencias_count = ReferenciaMedica.query.filter_by(medico_referente_id=doctor.id).count()
-        planes_count = PlanNutricional.query.filter_by(medico_id=doctor.id).count()
-        documents_created_count = recetas_count + referencias_count + planes_count
-
-    doctor_metrics = {
-        'patients_count': patients_count,
-        'visits_count': visits_count,
-        'minutes_recorded': minutes_recorded,
-        'documents_created_count': documents_created_count,
-        'docs_resumidos_count': docs_resumidos_count
-    }    
-    return render_template('admin_doctor_detail.html', 
-                           doctor=doctor, 
-                           doctor_metrics=doctor_metrics)
-                           # Se ha eliminado 'recent_activity' de aquí
-@app.route('/admin/doctor/<int:doctor_id>/verify', methods=['POST'])
-@admin_required(allowed_roles=['admin'])
-def admin_verify_doctor(doctor_id):
-    """ Verifica la cuenta de un doctor. """
-    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
-    doctor.is_verified = not doctor.is_verified # Cambia el estado (Verificar/Desverificar)
-    db.session.commit()
-    
-    status = "verificado" if doctor.is_verified else "puesto en no verificado"
-    flash(f'El doctor {doctor.nombre} ha sido {status}.', 'success')
-    return redirect(url_for('admin_doctor_detail_route', doctor_id=doctor.id))
-
-@app.route('/admin/doctor/<int:doctor_id>/delete', methods=['POST'])
-@admin_required(allowed_roles=['admin'])
-def admin_delete_doctor(doctor_id):
-    """ Elimina la cuenta de un doctor. """
-    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
-    doctor_name = doctor.nombre
-    
-    # Opcional: Eliminar datos asociados si es necesario (pacientes, visitas, etc.)
-    # Esta es una acción destructiva, úsala con cuidado.
-    # Paciente.query.filter_by(creado_por_id=doctor.id).delete()
-    
-    db.session.delete(doctor)
-    db.session.commit()
-    
-    flash(f'El doctor {doctor_name} y sus datos han sido eliminados permanentemente.', 'success')
-    return redirect(url_for('admin_dashboard'))
-@app.route('/admin/prospect/<int:prospect_id>/convert', methods=['POST'])
-@admin_required(allowed_roles=['admin'])
-def admin_convert_prospect(prospect_id):
-    """
-    Convierte un prospecto en una cuenta de doctor verificada.
-    """
-    prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
-    if not prospect:
-        flash("Prospecto no encontrado.", "danger")
-        return redirect(url_for('admin_dashboard'))
-
-    # 1. Verificar si ya existe un doctor con ese email
-    existing_user = User.query.filter_by(email=prospect.email).first()
-    if existing_user:
-        flash(f"Ya existe un usuario con el correo electrónico {prospect.email}. No se puede convertir el prospecto.", "warning")
-        return redirect(url_for('admin_prospect_detail', prospect_id=prospect.id))
-
-    try:
-        # 2. Generar una contraseña temporal segura
-        temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for i in range(12))
-
-        # 3. Crear el nuevo usuario (doctor) con los datos del prospecto
-        new_doctor = User(
-            nombre=f"{prospect.nombre} {prospect.apellidos}".strip(),
-            email=prospect.email,
-            role='medico',
-            is_verified=True,  # Se crea como verificado
-            especialidad=prospect.especialidad,
-            licencia_profesional=prospect.carne_medico,
-            identificacion=prospect.identificacion,
-            telefono_profesional=prospect.telefono,
-            lugar_trabajo=prospect.lugar_trabajo
-        )
-        new_doctor.set_password(temp_password)
-
-        db.session.add(new_doctor)
-        
-        # 4. (Opcional) Eliminar el prospecto original después de la conversión
-        db.session.delete(prospect)
-        
-        db.session.commit()
-
-        # 5. (Opcional pero recomendado) Enviar un correo de bienvenida al nuevo doctor
-        try:
-            # Renderizar la plantilla del correo de bienvenida
-            html_body = render_template(
-                'bienvenida_doctor.html', # Necesitarás crear esta plantilla de correo
-                nombre_doctor=new_doctor.nombre,
-                email_doctor=new_doctor.email,
-                temp_password=temp_password,
-                login_url=url_for('login_route', _external=True),
-                year=datetime.now().year
-            )
-            
-            msg = Message(
-                subject="¡Bienvenido a Vitta Health Scribe! Tu cuenta ha sido creada.",
-                sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER']),
-                recipients=[new_doctor.email],
-                html=html_body
-            )
-            mail.send(msg)
-            logging.info(f"Correo de bienvenida enviado al nuevo doctor: {new_doctor.email}")
-            flash(f"¡Doctor '{new_doctor.nombre}' creado exitosamente! Se ha enviado un correo de bienvenida con una contraseña temporal.", "success")
-        except Exception as e_mail:
-            logging.error(f"FALLO al enviar el correo de bienvenida para {new_doctor.email}: {e_mail}", exc_info=True)
-            flash("Doctor creado exitosamente, pero falló el envío del correo de bienvenida.", "warning")
-
-        # 6. Redirigir a la página de detalles del nuevo doctor
-        return redirect(url_for('admin_doctor_detail', doctor_id=new_doctor.id))
-
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error al convertir el prospecto ID {prospect_id} a doctor: {e}", exc_info=True)
-        flash("Ocurrió un error inesperado durante la conversión del prospecto.", "danger")
-        return redirect(url_for('admin_prospect_detail', prospect_id=prospect_id))
-@app.route('/admin/prospect/<int:prospect_id>/delete', methods=['POST'])
-@admin_required(allowed_roles=['admin'])
-def admin_delete_prospect(prospect_id):
-    """
-    Elimina un prospecto de interés de la base de datos.
-    """
-    try:
-        # Busca el prospecto en la base de datos
-        prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
-
-        if not prospect:
-            flash("Prospecto no encontrado para eliminar.", "danger")
-            return redirect(url_for('admin_dashboard'))
-
-        prospect_name = prospect.nombre
-        
-        # Elimina el registro del prospecto
-        db.session.delete(prospect)
-        db.session.commit()
-
-        flash(f"El prospecto '{prospect_name}' ha sido eliminado exitosamente.", "success")
-        logging.info(f"Prospecto ID {prospect_id} ({prospect_name}) eliminado por el admin {current_user.email}.")
-
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error al eliminar el prospecto ID {prospect_id}: {e}", exc_info=True)
-        flash("Ocurrió un error al eliminar el prospecto.", "danger")
-
-    return redirect(url_for('admin_dashboard'))
-
-@app.route("/vitta-health-pitch.html")
-def pitch_deck_route():
-    return render_template("vitta-health-pitch.html")
-
-@app.route("/vitta-health-pitch-investors.html")
-def investors_pitch_deck_route():
-    return render_template("vitta-health-pitch-investors.html")
-
