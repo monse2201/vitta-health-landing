@@ -1317,42 +1317,49 @@ def generar_resumen_ai_desde_transcripcion(transcripcion, plantilla_prompt="SOAP
     if not transcripcion or not transcripcion.strip(): return "[No hay transcripción para generar resumen.]"
     global client_openai
     if not client_openai: return "[Error: Servicio IA (OpenAI) no configurado para resumen.]"
-    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"el idioma del texto ({idioma_objetivo_para_prompt})")
+    
+    # <-- INICIO DE LA CORRECCIÓN: Prompts traducidos a Inglés -->
+    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"the text's language ({idioma_objetivo_para_prompt})")
+
     prompt_sistema = (
-        f"Eres un asistente médico experto en extraer información clave de transcripciones y estructurarla CONCISAMENTE para un RESUMEN. "
-        f"Responde en {nombre_idioma_prompt}. La respuesta debe ser ÚNICAMENTE el resumen en Markdown, sin frases introductorias."
+        f"You are an expert medical assistant specializing in extracting key information from transcripts and structuring it into a CONCISE SUMMARY. "
+        f"Respond in {nombre_idioma_prompt}. The response must ONLY be the summary in Markdown, without introductory phrases."
     )
+    
     plantilla_norm = plantilla_prompt.strip().lower() if plantilla_prompt else "general"
     prompt_usuario = ""
     common_instruction = (
-        f"Analiza la siguiente transcripción de una consulta médica. Extrae la información relevante y RESÚMELA. "
-        f"Si alguna sección no tiene información clara, indícalo. Responde en {nombre_idioma_prompt} usando formato Markdown conciso.\n\n"
-        f"Transcripción:\n{transcripcion}\n\n"
+        f"Analyze the following medical consultation transcript. Extract the relevant information and SUMMARIZE it. "
+        f"If any section lacks clear information, indicate it. Respond in {nombre_idioma_prompt} using concise Markdown format.\n\n"
+        f"Transcript:\n{transcripcion}\n\n"
     )
+
     if plantilla_norm == "soap":
         prompt_usuario = (
             common_instruction +
-            f"Formato del resumen: notas SOAP (Subjetivo, Objetivo, Análisis, Plan).\n"
-            f"Resumen en formato SOAP (en {nombre_idioma_prompt}):"
+            f"Summary Format: SOAP notes (Subjective, Objective, Assessment, Plan).\n"
+            f"Summary in SOAP format (in {nombre_idioma_prompt}):"
         )
     elif plantilla_norm == "soap simple":
         prompt_usuario = (
             common_instruction +
-            f"Formato del resumen: SOAP simple (Subjetivo, Objetivo, Análisis, Plan), enfocándote en los puntos más cruciales.\n"
-            f"Resumen SOAP Simple (en {nombre_idioma_prompt}):"
+            f"Summary Format: Simple SOAP (Subjective, Objective, Assessment, Plan), focusing on the most crucial points.\n"
+            f"Simple SOAP Summary (in {nombre_idioma_prompt}):"
         )
     elif plantilla_norm == "consulta general":
         prompt_usuario = (
             common_instruction +
-            f"Formato del resumen: Consulta General. Incluye Motivo de Consulta, Historia, Examen Físico, diagnósticos/impresiones, y plan de tratamiento/seguimiento conciso.\n"
-            f"Resumen de Consulta General (en {nombre_idioma_prompt}):"
+            f"Summary Format: General Consultation. Include Chief Complaint, History, Physical Exam, Diagnosis/Impressions, and a concise Treatment/Follow-up Plan.\n"
+            f"General Consultation Summary (in {nombre_idioma_prompt}):"
         )
     else: # Default or fallback
         prompt_usuario = (
             common_instruction +
-            f"Formato del resumen: Puntos más importantes (problema principal, hallazgos significativos, plan de acción).\n"
-            f"Resumen (en {nombre_idioma_prompt}):"
+            f"Summary Format: Key points (main problem, significant findings, action plan).\n"
+            f"Summary (in {nombre_idioma_prompt}):"
         )
+    # <-- FIN DE LA CORRECCIÓN -->
+
     logging.info(f"Generando RESUMEN AI para transcripción. Plantilla: {plantilla_prompt}. Idioma: {idioma_objetivo_para_prompt}")
     try:
         return _llamar_openai_chat(prompt_sistema, prompt_usuario, modelo_chat="gpt-3.5-turbo-0125", max_tokens_salida=700, temperature=0.3)
@@ -1368,82 +1375,87 @@ def generar_notas_ai_desde_transcripcion(transcripcion, plantilla_tipo="SOAP", i
     if not client_openai:
         return "[Error: Servicio IA (OpenAI) no configurado para notas.]"
     
-    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"el idioma del texto ({idioma_objetivo_para_prompt})")    
+    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"the text's language ({idioma_objetivo_para_prompt})")    
+
+    # <-- INICIO DE LA CORRECCIÓN: Prompts de Nutrición traducidos a Inglés -->
     if especialidad_usuario and especialidad_usuario.strip().lower() == 'nutrición':
         prompt_sistema = (
-            f"Eres un asistente de nutricionistas altamente competente, especializado en generar notas clínicas de nutrición detalladas y estructuradas. "
-            f"Tu tarea es EXTRACTAR información PERTINENTE ÚNICAMENTE de la transcripción proporcionada. "
-            f"NO inventes ni extrapoles información que no esté en la transcripción. "
-            f"Si alguna sección no tiene información, indícalo explícitamente (ej. 'No se menciona en la transcripción'). "
-            f"Tu respuesta debe estar en {nombre_idioma_prompt} y formateada estrictamente en Markdown. "
-            f"La respuesta debe ser ÚNICAMENTE las notas en Markdown, sin frases introductorias."
+            f"You are a highly competent nutritionist's assistant, specialized in generating detailed and structured clinical nutrition notes. "
+            f"Your task is to EXTRACT RELEVANT information SOLELY from the provided transcript. "
+            f"DO NOT invent or extrapolate information that is not in the transcript. "
+            f"If a section has no information, state it explicitly (e.g., 'Not mentioned in the transcript'). "
+            f"Your response must be in {nombre_idioma_prompt} and strictly formatted in Markdown. "
+            f"The response must ONLY be the Markdown notes, without any introductory phrases."
         )
 
         prompt_usuario = (
-            f"A partir de la siguiente transcripción de una consulta nutricional, genera notas clínicas DETALLADAS. "
-            f"Basa tus notas estrictamente en la transcripción. La estructura de las notas debe ser la siguiente:\n"
-            f"- **Motivo de Consulta Nutricional:**\n"
-            f"- **Antecedentes Relevantes:** (Médicos, dietéticos, historial de peso, alergias, intolerancias, preferencias, aversiones)\n"
-            f"- **Evaluación del Estilo de Vida:** (Actividad física, sueño, estrés, consumo de agua/alcohol)\n"
-            f"- **Recordatorio de 24 horas o Patrón Alimentario (si se describe):**\n"
-            f"- **Evaluación Antropométrica (si se menciona):** (Peso, talla, IMC, circunferencias)\n"
-            f"- **Objetivos del Paciente:** (Metas de peso, salud, rendimiento, etc.)\n"
-        f"- **Impresión Diagnóstica Nutricional:** (Basado en la información recabada)\n"
-            f"- **Plan de Intervención y Educación:** (Recomendaciones específicas, pautas dietéticas, suplementación discutida, metas acordadas)\n"
-            f"- **Seguimiento y Próxima Cita:**\n\n"
-            f"Transcripción:\n{transcripcion}\n\n"
-            f"Notas de Consulta Nutricional Detalladas (en {nombre_idioma_prompt}):"
+            f"From the following nutrition consultation transcript, generate DETAILED clinical notes. "
+            f"Base your notes strictly on the transcript. The note structure must be as follows:\n"
+            f"- **Nutritional Chief Complaint:**\n"
+            f"- **Relevant History:** (Medical, dietary, weight history, allergies, intolerances, preferences, aversions)\n"
+            f"- **Lifestyle Assessment:** (Physical activity, sleep, stress, water/alcohol consumption)\n"
+            f"- **24-hour Recall or Dietary Pattern (if described):**\n"
+            f"- **Anthropometric Assessment (if mentioned):** (Weight, height, BMI, circumferences)\n"
+            f"- **Patient's Goals:** (Weight, health, performance goals, etc.)\n"
+            f"- **Nutritional Diagnostic Impression:** (Based on the collected information)\n"
+            f"- **Intervention and Education Plan:** (Specific recommendations, dietary guidelines, discussed supplementation, agreed-upon goals)\n"
+            f"- **Follow-up and Next Appointment:**\n\n"
+            f"Transcript:\n{transcripcion}\n\n"
+            f"Detailed Nutritional Consultation Notes (in {nombre_idioma_prompt}):"
         )
         
         logging.info(f"Generando NOTAS AI para transcripción con plantilla de NUTRICIÓN. Idioma: {idioma_objetivo_para_prompt}")
+    # <-- FIN DE LA CORRECCIÓN de Nutrición -->
 
+    # <-- INICIO DE LA CORRECCIÓN: Prompts Generales traducidos a Inglés -->
     else:
         prompt_sistema = (
-            f"Eres un asistente médico altamente competente, especializado en generar NOTAS CLÍNICAS DETALLADAS y estructuradas. "
-            f"Tu tarea principal es EXTRACTAR información PERTINENTE ÚNICAMENTE de la transcripción proporcionada. "
-            f"NO inventes, extrapoles o añadas información que no esté explícitamente contenida en la transcripción. "
-            f"Si alguna sección no tiene información clara o no se menciona en la transcripción, indícalo explícitamente (ej. 'No se menciona en la transcripción', 'Información no disponible') o omite la sección si no es aplicable. "
-            f"Tu respuesta debe estar en {nombre_idioma_prompt} y formateada estrictamente en Markdown. "
-            f"La respuesta debe ser ÚNICAMENTE las notas en Markdown, sin frases introductorias ni texto adicional fuera de las notas estructuradas."
+            f"You are a highly competent medical assistant, specialized in generating DETAILED and structured CLINICAL NOTES. "
+            f"Your main task is to EXTRACT RELEVANT information SOLELY from the provided transcript. "
+            f"DO NOT invent, extrapolate, or add information that is not explicitly contained in the transcript. "
+            f"If a section lacks clear information or is not mentioned in the transcript, state it explicitly (e.g., 'Not mentioned in the transcript', 'Information not available') or omit the section if not applicable. "
+            f"Your response must be in {nombre_idioma_prompt} and strictly formatted in Markdown. "
+            f"The response must ONLY be the Markdown notes, without introductory phrases or any additional text outside the structured notes."
         )
 
         plantilla_norm = plantilla_tipo.strip().lower() if plantilla_tipo else "general"
         prompt_usuario = ""
         common_instruction_notas = (
-            f"A partir de la siguiente transcripción de una consulta médica, genera notas clínicas DETALLADAS. "
-            f"Sé exhaustivo en cada sección, extrayendo TODA la información pertinente DIRECTAMENTE de la transcripción. "
-            f"Si un dato no está en la transcripción, NO LO INVENTES, indica que no está disponible o es omite esa parte. "
-            f"Responde en {nombre_idioma_prompt} usando formato Markdown. "
-            f"Asegúrate de que cada punto de tus notas esté respaldado por la transcripción.\n\n"
-            f"Transcripción:\n{transcripcion}\n\n"
+            f"From the following medical consultation transcript, generate DETAILED clinical notes. "
+            f"Be exhaustive in each section, extracting ALL pertinent information DIRECTLY from the transcript. "
+            f"If a piece of information is not in the transcript, DO NOT INVENT IT; indicate it's unavailable or omit that part. "
+            f"Respond in {nombre_idioma_prompt} using Markdown format. "
+            f"Ensure every point in your notes is supported by the transcript.\n\n"
+            f"Transcript:\n{transcripcion}\n\n"
         )
         if plantilla_norm == "soap":
             prompt_usuario = (
                 common_instruction_notas +
-                f"Formato de las notas: SOAP (Subjetivo, Objetivo, Análisis, Plan).\n"
-                f"Notas SOAP Detalladas (en {nombre_idioma_prompt}):"
+                f"Note Format: SOAP (Subjective, Objective, Assessment, Plan).\n"
+                f"Detailed SOAP Notes (in {nombre_idioma_prompt}):"
             )
         elif plantilla_norm == "soap simple":
             prompt_usuario = (
                 common_instruction_notas +
-                f"Formato de las notas: SOAP simple. Presenta de forma CONCISA pero COMPLETA la información Subjetiva, Objetiva, el Análisis y el Plan.\n"
-                f"Notas SOAP Simple (en {nombre_idioma_prompt}):"
+                f"Note Format: Simple SOAP. Present the Subjective, Objective, Assessment, and Plan information CONCISELY but COMPLETELY.\n"
+                f"Simple SOAP Notes (in {nombre_idioma_prompt}):"
             )
         elif plantilla_norm == "consulta general":
             prompt_usuario = (
                 common_instruction_notas +
-                f"Formato de las notas: Consulta General. Incluye obligatoriamente: Motivo de Consulta, Historia de la Enfermedad Actual, Antecedentes (Personales Patológicos, Heredofamiliares, No Patológicos), "
-                f"Revisión por Aparatos y Sistemas (si se infiere), Hallazgos DETALLADOS del Examen Físico (si se describen), Resultados de Estudios (si se mencionan), "
-                f"Impresión Diagnóstica (o diferenciales), y Plan de Tratamiento y Seguimiento DETALLADO (medicamentos con dosis, indicaciones, estudios a solicitar, próxima cita).\n"
-                f"Notas de Consulta General Detalladas (en {nombre_idioma_prompt}):"
+                f"Note Format: General Consultation. Must include: Chief Complaint, History of Present Illness, Past Medical History (Personal Pathological, Family, Non-Pathological), "
+                f"Review of Systems (if inferred), DETAILED Physical Exam Findings (if described), Lab/Study Results (if mentioned), "
+                f"Diagnostic Impression (or differentials), and a DETAILED Treatment and Follow-up Plan (medications with dosage, instructions, labs to order, next appointment).\n"
+                f"Detailed General Consultation Notes (in {nombre_idioma_prompt}):"
             )
         else: 
             prompt_usuario = (
                 common_instruction_notas +
-                f"Formato de las notas: Estructura lógica estándar para una historia clínica, cubriendo todos los aspectos relevantes mencionados.\n"
-                f"Notas Clínicas Detalladas (en {nombre_idioma_prompt}):"
+                f"Note Format: Standard logical structure for a clinical history, covering all relevant aspects mentioned.\n"
+                f"Detailed Clinical Notes (in {nombre_idioma_prompt}):"
             )
         logging.info(f"Generando NOTAS AI para transcripción. Plantilla: {plantilla_tipo}. Idioma: {idioma_objetivo_para_prompt}")
+    # <-- FIN DE LA CORRECCIÓN de Prompts Generales -->
         
     try:
         markdown_text = _llamar_openai_chat(prompt_sistema, prompt_usuario, modelo_chat="gpt-3.5-turbo-0125", max_tokens_salida=1500, temperature=0.35)
