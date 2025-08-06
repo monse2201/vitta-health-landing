@@ -118,43 +118,43 @@ class ListPagination:
                 yield num
                 last = num
 
-# Importaciones específicas de la aplicación (asegúrate de que estas bibliotecas estén instaladas)
+# Application-specific imports (ensure these libraries are installed)
 debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
 try:
     import PyPDF2
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca PyPDF2. La extracción de texto de PDFs no estará disponible.")
+    logging.error("🚨 Could not import PyPDF2 library. Text extraction from PDFs will not be available.")
     PyPDF2 = None
 
 try:
     from docx import Document as DocxDocument
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca python-docx. La extracción de texto de DOCX no estará disponible.")
+    logging.error("🚨 Could not import python-docx library. Text extraction from DOCX will not be available.")
     DocxDocument = None
 
 try:
     from PIL import Image
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca Pillow. La extracción de texto de imágenes (OCR) no estará disponible.")
+    logging.error("🚨 Could not import Pillow library. Text extraction from images (OCR) will not be available.")
     Image = None
 
 try:
     import pytesseract
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca pytesseract. La extracción de texto de imágenes (OCR) no estará disponible.")
+    logging.error("🚨 Could not import pytesseract library. Text extraction from images (OCR) will not be available.")
     pytesseract = None
 
 try:
     from openai import OpenAI, APIError, RateLimitError, APIConnectionError, AuthenticationError, BadRequestError
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca OpenAI. Las funcionalidades de IA no estarán disponibles.")
+    logging.error("🚨 Could not import OpenAI library. AI functionalities will not be available.")
     OpenAI = None
     APIError = RateLimitError = APIConnectionError = AuthenticationError = BadRequestError = Exception # type: ignore
 
 try:
     import tiktoken
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca tiktoken. El conteo de tokens para OpenAI no estará disponible.")
+    logging.error("🚨 Could not import tiktoken library. Token counting for OpenAI will not be available.")
     tiktoken = None
 
 try:
@@ -162,22 +162,22 @@ try:
     from transformers import pipeline
     HUGGINGFACE_PIPELINE_AVAILABLE = True
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca 'transformers'. Las funcionalidades de traducción con HF no estarán disponibles.")
+    logging.error("🚨 Could not import the 'transformers' library. Translation features with HF will not be available.")
     HUGGINGFACE_PIPELINE_AVAILABLE = False
     pipeline = None # type: ignore
     login = None # type: ignore
 
 try:
-    from weasyprint import HTML # Descomentar si se usa WeasyPrint para generar PDFs
+    from weasyprint import HTML # Uncomment if using WeasyPrint to generate PDFs
 except ImportError:
-    logging.warning("🚨 WeasyPrint no está instalado. La generación de PDFs desde HTML no estará disponible o usará un método alternativo.")
+    logging.warning("🚨 WeasyPrint is not installed. PDF generation from HTML will be unavailable or will use an alternative method.")
     HTML = None
 
-# --- NUEVA IMPORTACIÓN PARA CIFRADO ---
+# --- NEW IMPORT FOR ENCRYPTION ---
 try:
     from cryptography.fernet import Fernet, InvalidToken
 except ImportError:
-    logging.error("🚨 No se pudo importar la biblioteca 'cryptography'. El cifrado de archivos a nivel de aplicación no estará disponible.")
+    logging.error("🚨 Could not import the 'cryptography' library. Application-level file encryption will be unavailable.")
     Fernet = None
     InvalidToken = Exception # type: ignore
 
@@ -211,43 +211,43 @@ app.secret_key = os.environ.get('SECRET_KEY', '1cc211a1a2357f80fb028885caa21d0e3
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY') 
 # Hugging Face Token (para modelos de traducción)
 hf_token = os.environ.get('HUGGINGFACE_TOKEN', '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')
-# --- NUEVA VARIABLE DE ENTORNO PARA CIFRADO DE ARCHIVOS ---
+# --- NEW ENVIRONMENT VARIABLE FOR FILE ENCRYPTION ---
 FILE_ENCRYPTION_KEY_STR = os.environ.get('FILE_ENCRYPTION_KEY')
 fernet_cipher = None
 if FILE_ENCRYPTION_KEY_STR and Fernet:
     try:
         fernet_cipher = Fernet(FILE_ENCRYPTION_KEY_STR.encode())
-        logging.info("✅ Llave de cifrado de archivos cargada. El cifrado de archivos a nivel de aplicación está HABILITADO.")
+        logging.info("✅ File encryption key loaded. Application-level file encryption is ENABLED.")
     except Exception as e_fernet_init:
-        logging.error(f"🚨 Error al inicializar Fernet con FILE_ENCRYPTION_KEY: {e_fernet_init}. El cifrado de archivos estará DESHABILITADO.")
+        logging.error(f"🚨 Error initializing Fernet with FILE_ENCRYPTION_KEY: {e_fernet_init}. File encryption will be DISABLED.")
         fernet_cipher = None
 elif Fernet:
-    logging.warning("⚠️ FILE_ENCRYPTION_KEY no configurada. El cifrado de archivos a nivel de aplicación está DESHABILITADO.")
+    logging.warning("⚠️ FILE_ENCRYPTION_KEY not set. Application-level file encryption is DISABLED.")
 else:
-    logging.warning("⚠️ Biblioteca 'cryptography' no disponible. El cifrado de archivos a nivel de aplicación está DESHABILITADO.")
+    logging.warning("⚠️ 'cryptography' library not available. Application-level file encryption is DISABLED.")
 
 
-# --- CONFIGURACIÓN DE BASE DE DATOS, CORREO Y REDIS ---
+# --- DATABASE, MAIL, AND REDIS CONFIGURATION ---
 
-# Importar la utilidad para parsear URLs de forma segura
+# Import the utility for safely parsing URLs
 from urllib.parse import urlparse
 
-# Configuración de Base de Datos (Lógica Simplificada y Corregida)
+# Database Configuration (Simplified and Corrected Logic)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
-    logging.warning("DATABASE_URL no encontrada en el entorno. Usando base de datos local por defecto.")
+    logging.warning("DATABASE_URL not found in environment. Using local default database.")
     DATABASE_URL = 'postgresql+psycopg2://whatsapp_user:securepassword@postgres-db:5432/whatsapp_project'
 
-# Asignar la configuración a la aplicación Flask
+# Assign the configuration to the Flask application
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 
-# Registrar a qué base de datos nos conectamos sin exponer la contraseña
+# Log which database we are connecting to without exposing the password
 try:
     parsed_uri = urlparse(DATABASE_URL)
-    logging.info(f"Conectando a la base de datos en host: {parsed_uri.hostname}")
+    logging.info(f"Connecting to database on host: {parsed_uri.hostname}")
 except Exception as e:
-    logging.error(f"No se pudo parsear la DATABASE_URL: {e}")
+    logging.error(f"Could not parse the DATABASE_URL: {e}")
 
 # Configuración de correo electrónico
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -360,24 +360,24 @@ login_manager = LoginManager()
 # 1. Función para manejar el acceso no autorizado o no verificado
 @login_manager.unauthorized_handler
 def unauthorized_callback():
-    # Si el usuario está autenticado pero no verificado
+    # If the user is authenticated but not verified
     if current_user.is_authenticated and not current_user.is_verified:
-        # Enviamos un mensaje específico y lo redirigimos a la página de login
-        flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
-        # Es importante cerrar la sesión para que no quede en un bucle de redirección
+        # Send a specific message and redirect to the login page
+        flash('Your profile has not been verified yet. Please wait for an administrator to approve your account.', 'warning')
+        # It's important to log out so they don't get into a redirect loop
         logout_user()
         return redirect(url_for('login_route'))
 
-    # Comportamiento estándar para usuarios no logueados
-    flash('Por favor, inicia sesión para acceder a esta página.', 'info')
+    # Standard behavior for non-logged-in users
+    flash('Please log in to access this page.', 'info')
     return redirect(url_for('login_route', next=request.path))
 
-# --- Fin de Modificaciones ---
+# --- End of Modifications ---
 
 login_manager.init_app(app)
 
-# --- INICIO: CÓDIGO DEL DECORADOR DE ADMINISTRADOR ---
-# Este es nuestro "guardia de seguridad" para las rutas de admin
+# --- START: ADMIN DECORATOR CODE ---
+# This is our "security guard" for admin routes
 def admin_required(allowed_roles=None): # This function now takes an argument
     if allowed_roles is None:
         allowed_roles = ['admin'] # Default to 'admin' if no specific roles are passed
@@ -386,13 +386,13 @@ def admin_required(allowed_roles=None): # This function now takes an argument
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
-                flash('Por favor, inicia sesión para acceder a esta página.', 'info')
+                flash('Please log in to access this page.', 'info')
                 return redirect(url_for('login_route'))
 
             # Check if the current user's role is in the allowed_roles list
             if current_user.role not in allowed_roles:
-                flash(f'Acceso no autorizado. Se requiere uno de los siguientes roles: {", ".join(allowed_roles)}.', 'danger')
-                
+                flash(f'Unauthorized access. One of the following roles is required: {", ".join(allowed_roles)}.', 'danger')
+
                 # Redirect based on user role or to a generic unauthorized page
                 if current_user.is_authenticated and current_user.role in ['admin_super', 'admin_nutricion']:
                     # If an admin but not allowed for this specific admin dashboard, send to their own specific admin dashboard
@@ -406,11 +406,11 @@ def admin_required(allowed_roles=None): # This function now takes an argument
             return f(*args, **kwargs)
         return decorated_function
     return decorator
-# --- FIN: CÓDIGO DEL DECORADOR DE ADMINISTRADOR ---
+# --- END: ADMIN DECORATOR CODE ---
 
 
 login_manager.login_view = 'login_route'
-login_manager.login_message = "Por favor, inicia sesión para acceder a esta página."
+login_manager.login_message = "Please log in to access this page."
 login_manager.login_message_category = "info"
 
 socketio_kwargs = {
@@ -651,13 +651,13 @@ class ProspectoInteres(db.Model):
 def guardar_archivo_subido(archivo_request_file, subcarpeta_config_key):
     global fernet_cipher
     if not archivo_request_file or not archivo_request_file.filename:
-        logging.error("guardar_archivo_subido: No se proporcionó archivo o nombre de archivo.")
+        logging.error("guardar_archivo_subido: No file or filename provided.")
         return None
-    subcarpeta_destino_nombre = app.config.get(subcarpeta_config_key, "archivos_generales")
+    subcarpeta_destino_nombre = app.config.get(subcarpeta_config_key, "general_files")
     filename_seguro = secure_filename(archivo_request_file.filename)
     nombre_base, extension = os.path.splitext(filename_seguro)
-    # Añadir ".enc" a la extensión si el archivo será cifrado para identificarlo.
-    # Esto es opcional pero puede ser útil.
+    # Add ".enc" to the extension if the file will be encrypted, to identify it.
+    # This is optional but can be useful.
     extension_final = extension + (".enc" if fernet_cipher else "")
     unique_filename = f"{nombre_base}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}{extension_final}"
 
@@ -666,22 +666,22 @@ def guardar_archivo_subido(archivo_request_file, subcarpeta_config_key):
     ruta_guardado_local_completa = os.path.join(directorio_destino_local_completo, unique_filename)
 
     try:
-        file_bytes = archivo_request_file.read() # Leer en memoria
-        archivo_request_file.seek(0) # Resetear puntero si se necesita en otro lugar
+        file_bytes = archivo_request_file.read() # Read into memory
+        archivo_request_file.seek(0) # Reset pointer if needed elsewhere
 
-        if fernet_cipher: # Solo cifrar si la clave y Fernet están disponibles
+        if fernet_cipher: # Only encrypt if the key and Fernet are available
             encrypted_data = fernet_cipher.encrypt(file_bytes)
             with open(ruta_guardado_local_completa, 'wb') as f:
                 f.write(encrypted_data)
-            logging.info(f"Archivo CIFRADO (AES-256) y guardado localmente: {ruta_guardado_local_completa}")
-        else: # Guardar sin cifrar si la clave no está configurada o Fernet no está disponible
+            logging.info(f"File ENCRYPTED (AES-256) and saved locally: {ruta_guardado_local_completa}")
+        else: # Save without encryption if key is not set or Fernet is unavailable
             with open(ruta_guardado_local_completa, 'wb') as f:
-                f.write(file_bytes) # Guardar los bytes originales
-            logging.warning(f"Archivo guardado SIN CIFRAR (clave/Fernet no disponible): {ruta_guardado_local_completa}")
+                f.write(file_bytes) # Save the original bytes
+            logging.warning(f"File saved UNENCRYPTED (key/Fernet not available): {ruta_guardado_local_completa}")
 
         return os.path.join(subcarpeta_destino_nombre, unique_filename).replace('\\', '/')
     except Exception as e_local_save:
-        logging.error(f"Error guardando archivo '{unique_filename}' en '{ruta_guardado_local_completa}': {e_local_save}", exc_info=True)
+        logging.error(f"Error saving file '{unique_filename}' to '{ruta_guardado_local_completa}': {e_local_save}", exc_info=True)
         return None
 
 def leer_y_desencriptar_archivo(ruta_archivo_relativa_en_uploads):
@@ -1228,33 +1228,34 @@ def _llamar_openai_chat(prompt_sistema, prompt_usuario, modelo_chat="gpt-3.5-tur
 
 def resumir_texto_con_openai(texto_completo, modelo_chat="gpt-3.5-turbo-0125", max_tokens_salida=500, max_tokens_contexto_modelo=16000):
     if not texto_completo or not texto_completo.strip():
-        return "No hay contenido textual suficiente para generar un resumen con IA."
+        return "There is not enough textual content to generate an AI summary."
     prompt_sistema = (
-        "Eres un asistente médico virtual altamente especializado en analizar y resumir información clínica compleja "
-        "proveniente de múltiples fuentes (PDFs, DOCX, TXT, imágenes OCR). Tu objetivo es producir un resumen conciso, "
-        "estructurado y clínicamente relevante, ideal para que un profesional de la salud lo revise rápidamente. "
-        "El resumen debe estar en formato Markdown. "
-        "Si el texto contiene errores de OCR o es incoherente, intenta extraer la información más plausible y señala brevemente las áreas problemáticas si es necesario, pero prioriza generar un resumen útil."
-        "Si el contenido es muy escaso o no parece clínico, indícalo."
-        "La respuesta debe ser ÚNICAMENTE el resumen en Markdown, sin frases introductorias como 'Aquí está el resumen:'."
+        "You are a highly specialized virtual medical assistant skilled in analyzing and summarizing complex clinical information "
+        "from multiple sources (PDFs, DOCX, TXT, OCR images). Your goal is to produce a concise, "
+        "structured, and clinically relevant summary, ideal for a healthcare professional to quickly review. "
+        "The summary must be in Markdown format. "
+        "If the text contains OCR errors or is incoherent, try to extract the most plausible information and briefly note problematic areas if necessary, but prioritize generating a useful summary."
+        "If the content is very sparse or does not seem clinical, please indicate so."
+        "The response must ONLY be the summary in Markdown, without introductory phrases like 'Here is the summary:'."
     )
     prompt_usuario_template = (
-        "A partir del siguiente texto concatenado, extraído de varios documentos médicos de un paciente, genera un resumen clínico estructurado. "
-        "El resumen debe incluir (si la información está presente en el texto):\n"
-        "- **Datos del Paciente (si se mencionan explícitamente):** Nombre, edad, etc.\n"
-        "- **Motivo Principal de Consulta/Problemas Activos:**\n"
-        "- **Antecedentes Relevantes (Médicos, Quirúrgicos, Familiares, Sociales):**\n"
-        "- **Hallazgos Clave de Exámenes/Estudios (si se describen):**\n"
-        "- **Diagnósticos (Actuales o Previos mencionados):**\n"
-        "- **Tratamientos (Actuales o Previos mencionados):**\n"
-        "- **Recomendaciones o Planes (si se detallan):**\n"
-        "Si alguna sección no tiene información, puedes omitirla o indicar 'No se encontró información'.\n"
-        "Formatea la salida usando Markdown para una fácil lectura (encabezados, listas, negritas).\n"
-        "--- INICIO DEL TEXTO DE LOS DOCUMENTOS ---\n"
+        "From the following concatenated text, extracted from various medical documents of a patient, generate a structured clinical summary. "
+        "The summary must include (if the information is present in the text):\n"
+        "- **Patient Data (if explicitly mentioned):** Name, age, etc.\n"
+        "- **Chief Complaint/Active Problems:**\n"
+        "- **Relevant History (Medical, Surgical, Family, Social):**\n"
+        "- **Key Findings from Exams/Studies (if described):**\n"
+        "- **Diagnoses (Current or previous mentioned):**\n"
+        "- **Treatments (Current or previous mentioned):**\n"
+        "- **Recommendations or Plans (if detailed):**\n"
+        "If a section has no information, you can omit it or indicate 'No information found'.\n"
+        "Format the output using Markdown for easy readability (headings, lists, bold text).\n"
+        "--- START OF DOCUMENT TEXT ---\n"
         "{TEXTO_DOCUMENTOS}\n"
-        "--- FIN DEL TEXTO DE LOS DOCUMENTOS ---\n\n"
-        "Resumen Clínico Estructurado (en Markdown):"
+        "--- END OF DOCUMENT TEXT ---\n\n"
+        "Structured Clinical Summary (in Markdown):"
     )
+
     tokens_prompt_base = contar_tokens_openai(prompt_sistema + prompt_usuario_template.replace("{TEXTO_DOCUMENTOS}", ""), modelo=modelo_chat)
     buffer_tokens = 250
     limite_tokens_documentos = max_tokens_contexto_modelo - tokens_prompt_base - max_tokens_salida - buffer_tokens
@@ -1475,24 +1476,22 @@ def extraer_medicamentos_con_ia(transcripcion, idioma_detectado='es'):
     
     # --- PROMPT MEJORADO PARA DIFERENCIAR 'CANTIDAD' Y 'DOSIS' ---
     prompt_sistema = (
-        "Eres un asistente médico experto en farmacología y análisis de transcripciones. Tu tarea es analizar una transcripción y extraer información de medicamentos con alta precisión."
-        "\nPara cada medicamento, obtén:"
-        "\n- 'nombre': Nombre completo, concentración y forma farmacéutica (Ej: 'Amoxicilina 500mg Comprimidos')."
-        "\n- 'cantidad': La cantidad TOTAL del producto a despachar en la farmacia. Se refiere al empaque o al número total de unidades (Ej: '1 caja de 20 comprimidos', '2 frascos', 'Suministro para 1 mes')."
-        "\n- 'dosis': La cantidad de medicamento que el paciente toma en CADA TOMA INDIVIDUAL (Ej: '1 comprimido', '5 ml', '2 gotas')."
-        "\n- 'frecuencia': Cada cuánto tiempo se debe tomar la dosis (Ej: 'Cada 8 horas', '3 veces al día')."
-        "\n- 'duracion': Por cuánto tiempo se debe seguir el tratamiento (Ej: 'Por 7 días', 'Durante 1 mes')."
-        "\n- 'indicaciones': Instrucciones adicionales para ese medicamento (Ej: 'Tomar con abundante agua', 'Después de las comidas')."
-        "\n\n**INSTRUCCIÓN CRÍTICA**: No confundas 'cantidad' (el total a despachar, ej: '1 caja') con 'dosis' (la toma individual, ej: '1 tableta'). Son dos conceptos distintos y es vital no mezclarlos."
-        "\n\nAdicionalmente, si se menciona, extrae un 'diagnostico_sugerido' que justifique la prescripción."
-        "\n\nDevuelve la información estrictamente en el siguiente formato JSON. Si no se especifica algún detalle para un medicamento, usa una cadena vacía '' o null. Si no se mencionan medicamentos, devuelve un array 'medicamentos' vacío."
-        "\nEjemplo de formato de salida:"
-        "\n{\"medicamentos\": [{\"nombre\": \"Ibuprofeno 600mg Comprimidos\", \"cantidad\": \"1 caja (30 comps)\", \"dosis\": \"1 comprimido\", \"frecuencia\": \"Cada 8 horas si hay dolor\", \"duracion\": \"Por 5 días\", \"indicaciones\": \"Tomar con alimentos\"}], \"diagnostico_sugerido\": \"Cefalea tensional\"}"
-        "\nResponde ÚNICAMENTE con el objeto JSON."
+        "You are an expert medical assistant specializing in pharmacology and transcript analysis. Your task is to analyze a transcript and extract medication information with high precision."
+        "\nFor each medication, obtain:"
+        "\n- 'nombre' (name): Full name, strength, and dosage form (e.g., 'Amoxicillin 500mg Tablets')."
+        "\n- 'cantidad' (quantity): The TOTAL amount of the product to be dispensed at the pharmacy. This refers to the packaging or total number of units (e.g., '1 box of 20 tablets', '2 bottles', '1-month supply')."
+        "\n- 'dosis' (dose): The amount of medication the patient takes in EACH INDIVIDUAL INTAKE (e.g., '1 tablet', '5 ml', '2 drops')."
+        "\n- 'frecuencia' (frequency): How often the dose should be taken (e.g., 'Every 8 hours', '3 times a day')."
+        "\n- 'duracion' (duration): For how long the treatment should be followed (e.g., 'For 7 days', 'For 1 month')."
+        "\n- 'indicaciones' (instructions): Additional instructions for that medication (e.g., 'Take with plenty of water', 'After meals')."
+        "\n\n**CRITICAL INSTRUCTION**: Do not confuse 'cantidad' (the total to dispense, e.g., '1 box') with 'dosis' (the individual intake, e.g., '1 tablet'). They are two distinct concepts, and it is vital not to mix them up."
+        "\n\nAdditionally, if mentioned, extract a 'diagnostico_sugerido' (suggested_diagnosis) that justifies the prescription."
+        "\n\nReturn the information strictly in the following JSON format. If a detail for a medication is not specified, use an empty string '' or null. If no medications are mentioned, return an empty 'medicamentos' array."
+        "\nExample of output format:"
+        "\n{\"medicamentos\": [{\"nombre\": \"Ibuprofen 600mg Tablets\", \"cantidad\": \"1 box (30 tabs)\", \"dosis\": \"1 tablet\", \"frecuencia\": \"Every 8 hours if pain occurs\", \"duracion\": \"For 5 days\", \"indicaciones\": \"Take with food\"}], \"diagnostico_sugerido\": \"Tension headache\"}"
+        "\nRespond ONLY with the JSON object."
     )
-    
-    prompt_usuario = f"Transcripción clínica:\n---\n{transcripcion}\n---\nExtrae la información de prescripción en el formato JSON especificado."
-    logging.info(f"Solicitando extracción de medicamentos de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar con prompt mejorado.")
+        prompt_usuario = f"Clinical transcript:\n---\n{transcripcion}\n---\nExtract the prescription information in the specified JSON format."    logging.info(f"Solicitando extracción de medicamentos de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar con prompt mejorado.")
     try:
         model_to_use = "gpt-4o"
         datos_extraidos = _llamar_openai_chat(prompt_sistema, prompt_usuario,
@@ -1874,19 +1873,19 @@ def register_route():
         tel_numero = form_data.get('telefono_numero', '').strip()
         telefono_final = f"{tel_prefijo}{tel_numero}" if tel_numero else None
         if especialidad_select == 'otro' and not especialidad_otro:
-            flash('Si selecciona "Otra" especialidad, debe especificarla.', 'danger')
+            flash('If you select "Other" specialty, you must specify it.', 'danger')
             return render_template('register.html', css_file="css/auth_form.css", **form_data)
-        required_fields = {'Nombre': nombre, 'Email': email, 'Contraseña': password,
-                           'Licencia Profesional': licencia, 'Especialidad': especialidad_final}
+        required_fields = {'Name': nombre, 'Email': email, 'Password': password,
+                           'Professional License': licencia, 'Specialty': especialidad_final}
         missing_fields = [name for name, value in required_fields.items() if not value]
         if missing_fields:
-            flash(f'Los campos {", ".join(missing_fields)} son obligatorios.', 'danger')
+            flash(f'The fields {", ".join(missing_fields)} are required.', 'danger')
             return render_template('register.html', css_file="css/auth_form.css", **form_data)
         if User.query.filter_by(email=email).first():
-            flash('Este correo electrónico ya está registrado.', 'warning')
+            flash('This email address is already registered.', 'warning')
             return render_template('register.html', css_file="css/auth_form.css", **form_data)
         if licencia and User.query.filter_by(licencia_profesional=licencia).first():
-            flash('Esta licencia profesional ya está registrada.', 'warning')
+            flash('This professional license is already registered.', 'warning')
             return render_template('register.html', css_file="css/auth_form.css", **form_data)
         nuevo_usuario = User(
             nombre=nombre, email=email, role=role,
@@ -1897,13 +1896,13 @@ def register_route():
         try:
             db.session.add(nuevo_usuario)
             db.session.commit()
-            flash('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success')
-            logging.info(f"Nuevo usuario registrado: {email} con rol {role}")
+            flash('Registration successful! You can now log in.', 'success')
+            logging.info(f"New user registered: {email} with role {role}")
             return redirect(url_for('login_route'))
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Error al registrar usuario {email}: {e}", exc_info=True)
-            flash('Error durante el registro. Por favor, intente de nuevo.', 'danger')
+            logging.error(f"Error registering user {email}: {e}", exc_info=True)
+            flash('Error during registration. Please try again.', 'danger')
             return render_template('register.html', css_file="css/auth_form.css", **form_data)
     return render_template('register.html', css_file="css/auth_form.css", **form_data)
 
@@ -1911,7 +1910,7 @@ def register_route():
 def login_route():
     if current_user.is_authenticated:
         if not current_user.is_verified:
-            flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
+            flash('Your profile has not been verified yet. Please wait for an administrator to approve your account.', 'warning')
             logout_user()
             return redirect(url_for('login_route'))
 
@@ -1922,7 +1921,7 @@ def login_route():
         else:
             return redirect(url_for('dashboard'))
 
-    # Define las credenciales de demostración que se mostrarán en el formulario
+    # Define the demo credentials to be displayed on the form
     demo_credentials = {
         "email": "demo@vitta.health",
         "password": "vittademo"
@@ -1934,36 +1933,36 @@ def login_route():
         remember = True if request.form.get('remember') else False
 
         if not email or not password:
-            flash('Email y contraseña son requeridos.', 'danger')
+            flash('Email and password are required.', 'danger')
             return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
             if not user.is_verified:
-                flash('Su perfil aún no ha sido verificado.', 'warning')
+                flash('Your profile has not been verified yet.', 'warning')
                 return redirect(url_for('login_route'))
 
             login_user(user, remember=remember)
 
             if user.role == 'admin_super':
-                flash('Inicio de sesión como Super Administrador exitoso!', 'success')
+                flash('Logged in successfully as Super Administrator!', 'success')
                 return redirect(url_for('super_admin_dashboard'))
             elif user.role == 'admin':
-                flash('Inicio de sesión como Administrador exitoso!', 'success')
+                flash('Logged in successfully as Administrator!', 'success')
                 return redirect(url_for('admin_dashboard'))
             elif user.role == 'admin_nutricion':
-                flash('Inicio de sesión como Administrador de Nutrición exitoso!', 'success')
+                flash('Logged in successfully as Nutrition Administrator!', 'success')
                 return redirect(url_for('nutricion_admin_dashboard'))
             else:
-                flash('Inicio de sesión exitoso!', 'success')
+                flash('Login successful!', 'success')
                 return redirect(url_for('dashboard'))
 
-        flash('Credenciales incorrectas. Por favor, intenta de nuevo.', 'danger')
-        # Si el login falla, vuelve a mostrar la página con las credenciales demo
+        flash('Incorrect credentials. Please try again.', 'danger')
+        # If login fails, show the page again with the demo credentials
         return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 
-    # Para solicitudes GET, simplemente muestra la página de login con los datos demo
+    # For GET requests, simply show the login page with the demo data
     return render_template('login.html', **demo_credentials, css_file="css/auth_form.css")
 @app.route('/logout')
 @login_required

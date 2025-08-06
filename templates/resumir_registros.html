@@ -46,10 +46,10 @@
 
   .form-row {
     display: flex;
-    flex-wrap: wrap; /* Important for fields to wrap */
+    flex-wrap: wrap; /* Important for field wrapping */
     gap: 20px;
     margin-bottom: 25px;
-    align-items: flex-end; /* Aligns elements to the end, useful if labels have different heights */
+    align-items: flex-end; /* Aligns items at the bottom, useful if labels have different heights */
   }
 
   .form-input {
@@ -63,7 +63,7 @@
     min-width: 220px; /* Minimum width */
     position: relative; /* For the suggestions dropdown */
   }
-  .form-input-id {
+  .form-input-identification {
     flex-grow: 1;
     flex-basis: 180px;
     min-width: 150px;
@@ -119,7 +119,7 @@
     z-index: 1000;
     display: none;
     left: 0;
-    top: 100%; /* Positions it below the input */
+    top: 100%; /* Positioned below the input */
   }
   .suggestion-item { padding: 10px 14px; cursor: pointer; font-size: 14px; color: #101828; }
   .suggestion-item:hover { background-color: #f0f2f5; }
@@ -145,25 +145,25 @@
   #uploaded-files-list li:hover { background-color: #f0f2f5; }
   #uploaded-files-list .file-name { color: #101828; font-weight: 500; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 100px); }
   #uploaded-files-list .file-size { font-size: 0.85em; color: #475467; white-space: nowrap; margin-left: auto; padding-right: 12px; }
-  #uploaded-files-list .btn-remove-file { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1em; padding: 3px; line-height: 1; transition: color 0.2s; }
-  #uploaded-files-list .btn-remove-file:hover { color: #dc2626; }
+  #uploaded-files-list .btn-delete-file { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1em; padding: 3px; line-height: 1; transition: color 0.2s; }
+  #uploaded-files-list .btn-delete-file:hover { color: #dc2626; }
   #uploaded-files-list .no-files { text-align: left; color: #6b7280; padding: 10px 0; font-style: italic; font-size: 14px; border: none; background-color: transparent; }
-  .main-action-btn { background-color: #1c64f2; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; height: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .main-action-btn:hover { background-color: #1a56db; transform: translateY(-1px); }
-  .main-action-btn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
-  .main-action-btn i { font-size: 1.05em; }
+  .btn-primary-action { background-color: #1c64f2; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; height: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .btn-primary-action:hover { background-color: #1a56db; transform: translateY(-1px); }
+  .btn-primary-action:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-primary-action i { font-size: 1.05em; }
   #btn-summarize-visit { width: 100%; }
-  .secondary-action-btn { background-color: #4b5563; color: white; padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; margin-top: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
-  .secondary-action-btn:hover { background-color: #374151; transform: translateY(-1px); }
-  .secondary-action-btn i { margin-right: 4px; }
+  .btn-secondary-action { background-color: #4b5563; color: white; padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; margin-top: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .btn-secondary-action:hover { background-color: #374151; transform: translateY(-1px); }
+  .btn-secondary-action i { margin-right: 4px; }
   .custom-alert { padding: 12px 18px; border-radius: 8px; margin-top: 20px; text-align: left; font-size: 14px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
   .custom-alert i { font-size: 1.2em; }
   .custom-alert-info { background-color: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
   .custom-alert-info i { color: #3b82f6; }
-  .custom-alert-error { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
-  .custom-alert-error i { color: #ef4444; }
-  .custom-alert-success { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
-  .custom-alert-success i { color: #22c55e; }
+  .alert-error { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+  .alert-error i { color: #ef4444; }
+  .alert-success { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+  .alert-success i { color: #22c55e; }
   .visit-id-container { margin-top: 10px; text-align: right; font-size: 13px; color: #667085; }
   .visit-id-container #summary-process-id { font-weight: 600; color: #374151; }
   #generated-summary-area { background-color: #ffffff; border: 1px solid #dfe1e5; border-radius: 10px; padding: 25px 30px; margin-top: 30px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
@@ -184,18 +184,18 @@
   #generated-summary-content li { margin-bottom: 0.6em; line-height: 1.65; }
   #generated-summary-content li > p { margin-bottom: 0.4em; }
   #generated-summary-content li > ul, #generated-summary-content li > ol { margin-top: 0.5em; margin-bottom: 0.5em; }
-  #visit-additional-info { margin-top: 20px; font-size: 13.5px; background-color: #f9fafb; padding: 15px 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
-  #visit-additional-info h4 { font-size: 16px; color: #111827; font-weight: 600; margin-top: 0; margin-bottom: 12px; }
-  #visit-additional-info p { margin-bottom: 8px; color: #374151; line-height: 1.5; }
-  #visit-additional-info p strong { color: #111827; font-weight: 500; min-width: 130px; display: inline-block; }
+  #additional-visit-info { margin-top: 20px; font-size: 13.5px; background-color: #f9fafb; padding: 15px 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
+  #additional-visit-info h4 { font-size: 16px; color: #111827; font-weight: 600; margin-top: 0; margin-bottom: 12px; }
+  #additional-visit-info p { margin-bottom: 8px; color: #374151; line-height: 1.5; }
+  #additional-visit-info p strong { color: #111827; font-weight: 500; min-width: 130px; display: inline-block; }
   .post-summary-actions-container { text-align: center; margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-  .post-summary-actions-container .main-action-btn, .post-summary-actions-container .secondary-action-btn { width: auto; margin-top: 0; margin-bottom: 10px; }
+  .post-summary-actions-container .btn-primary-action, .post-summary-actions-container .btn-secondary-action { width: auto; margin-top: 0; margin-bottom: 10px; }
 </style>
 
 <div class="records-summary-page">
   <div class="header-form">
-    <h1>Smart Records Summary</h1>
-    <p>Optimize your time. Upload a patient's previous documents or records, and Vitta Health will generate a concise summary for your review.</p>
+    <h1>Intelligent Record Summary</h1>
+    <p>Optimize your time. Upload a patient's previous documents or records and Vitta Health will generate a concise summary for your review.</p>
   </div>
 
   <div class="summary-card">
@@ -204,7 +204,7 @@
         <div class="form-row">
           <div class="form-input form-input-name">
             <label for="patient_name_summary">Patient's Full Name (First and Last Names)</label>
-            <input type="text" id="patient_name_summary" name="patient_name" placeholder="Type first and last name, or leave blank">
+            <input type="text" id="patient_name_summary" name="patient_name" placeholder="Enter first and last name, or leave empty">
             <div id="patient-suggestions-container" class="suggestions-dropdown">
               {# Suggestions will be inserted here by JavaScript #}
             </div>
@@ -212,18 +212,18 @@
           <input type="hidden" id="selected_patient_id" name="selected_patient_id" value="">
 
           {# NEW FIELD FOR IDENTIFICATION #}
-          <div class="form-input form-input-id">
+          <div class="form-input form-input-identification">
             <label for="patient_identification">Identification (Optional)</label>
-            <input type="text" id="patient_identification" name="patient_identification_document" placeholder="E.g., ID, Passport">
+            <input type="text" id="patient_identification" name="patient_identification_document" placeholder="e.g., ID Card, Passport">
           </div>
 
           <div class="form-input form-input-template">
             <label for="summary_template">Summary Type (Optional)</label>
             <select id="summary_template" name="template">
               <option value="Records Summary">General Records Summary</option>
-              {% for summary_template in plantillas %}
-                {% if summary_template != "Records Summary" %}
-                  <option value="{{ summary_template }}">{{ summary_template }}</option>
+              {% for s_template in templates %}
+                {% if s_template != "Records Summary" %}
+                  <option value="{{ s_template }}">{{ s_template }}</option>
                 {% endif %}
               {% endfor %}
             </select>
@@ -234,7 +234,7 @@
 
         <div>
           <h2 class="form-section-title">Upload Patient Documents</h2>
-          <p class="form-section-subtitle">Drag and drop or select files. Supported formats: PDF, images (PNG, JPG), Word (DOC, DOCX), and text (TXT, MD).</p>
+          <p class="form-section-subtitle">Drag or select files. Supported formats: PDF, images (PNG, JPG), Word (DOC, DOCX), and text (TXT, MD).</p>
           <div id="file-upload-area" class="file-upload-container">
             <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt,.md">
             <div class="file-upload-icon"> <i class="fas fa-cloud-upload-alt"></i> </div>
@@ -249,7 +249,7 @@
           </div>
         </div>
 
-        <button type="button" id="btn-summarize-visit" class="main-action-btn">
+        <button type="button" id="btn-summarize-visit" class="btn-primary-action">
           <i class="fas fa-file-invoice"></i> Summarize Records & Start
         </button>
       </form>
@@ -260,12 +260,12 @@
     <div id="generated-summary-area" style="display: none;">
       <h2 class="summary-section-title">Generated Summary</h2>
       <div id="generated-summary-content" class="placeholder"> <p>Waiting for summary content...</p> </div>
-      <div id="visit-additional-info" style="display: none;"> <h4>Created Visit Details</h4> </div>
+      <div id="additional-visit-info" style="display: none;"> <h4>Created Visit Details</h4> </div>
       <div class="post-summary-actions-container">
-        <button type="button" id="btn-go-to-patient-profile" class="main-action-btn" style="display: none;">
+        <button type="button" id="btn-go-to-patient-profile" class="btn-primary-action" style="display: none;">
             <i class="fas fa-user"></i> Go to Patient Profile
         </button>
-        <button type="button" id="btn-new-summary" class="secondary-action-btn">
+        <button type="button" id="btn-new-summary" class="btn-secondary-action">
           <i class="fas fa-plus-circle"></i> Generate New Summary
         </button>
       </div>
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryInputFormDiv = document.getElementById('summary-input-form');
     const fileUploadArea = document.getElementById('file-upload-area');
     const fileInput = document.getElementById('file-input');
-    const filesListUl = document.querySelector('#uploaded-files-list ul');
+    const filesUl = document.querySelector('#uploaded-files-list ul');
     const btnSummarizeVisit = document.getElementById('btn-summarize-visit');
 
     const patientNameInput = document.getElementById('patient_name_summary');
@@ -294,24 +294,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const processStatusMessage = document.getElementById('process-status-message');
     const generatedSummaryAreaDiv = document.getElementById('generated-summary-area');
     const generatedSummaryContentDiv = document.getElementById('generated-summary-content');
-    const visitAdditionalInfoDiv = document.getElementById('visit-additional-info');
+    const additionalVisitInfoDiv = document.getElementById('additional-visit-info');
     const btnNewSummary = document.getElementById('btn-new-summary');
     const btnGoToPatientProfile = document.getElementById('btn-go-to-patient-profile');
 
     if (!btnSummarizeVisit) {
-        console.error("LOG CRITICAL: The 'btnSummarizeVisit' button was not found.");
+        console.error("CRITICAL LOG: Button 'btnSummarizeVisit' was not found.");
         return;
     }
-    // ... (other element verifications if you wish) ...
+    // ... (other element checks if you wish) ...
 
     let selectedFiles = [];
     const MAX_FILES = 5;
     const MAX_FILE_SIZE_MB = 10;
-    let autocompleteDebounceTimer; // Changed to avoid conflict with another possible debounceTimer
+    let autocompleteDebounceTimer;
 
     function debounce(func, delay) {
         return function(...args) {
-            clearTimeout(autocompleteDebounceTimer); // Use the specific timer
+            clearTimeout(autocompleteDebounceTimer);
             autocompleteDebounceTimer = setTimeout(() => func.apply(this, args), delay);
         };
     }
@@ -323,24 +323,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            // IMPORTANT: Make sure this endpoint exists and returns {id, nombre, identificacion?}
+            // IMPORTANT: Ensure this endpoint exists and returns {id, name, identification?}
             const response = await fetch(`/api/search_patients?q=${encodeURIComponent(query)}`);
             if (!response.ok) {
                 console.error("Error searching for patients:", response.statusText);
-                suggestionsContainer.innerHTML = '<div class="no-suggestions">Error searching.</div>';
+                suggestionsContainer.innerHTML = '<div class="no-suggestions">Error during search.</div>';
                 suggestionsContainer.style.display = 'block';
                 return;
             }
             const patients = await response.json();
-            showSuggestions(patients);
+            displaySuggestions(patients);
         } catch (error) {
-            console.error("Error in suggestions fetch:", error);
+            console.error("Error in fetch suggestions:", error);
             suggestionsContainer.innerHTML = '<div class="no-suggestions">Connection error.</div>';
             suggestionsContainer.style.display = 'block';
         }
     }
 
-    function showSuggestions(patients) {
+    function displaySuggestions(patients) {
         suggestionsContainer.innerHTML = '';
         if (patients && patients.length > 0) {
             patients.forEach(patient => {
@@ -349,18 +349,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show name and identification (if it exists)
                 item.textContent = patient.nombre + (patient.identificacion_documento ? ` (ID: ${patient.identificacion_documento})` : '');
                 item.dataset.id = patient.id;
-                item.dataset.name = patient.nombre; // Save original name
-                item.dataset.identification = patient.identificacion_documento || ''; // Save identification
+                item.dataset.nombre = patient.nombre; // Save original name
+                item.dataset.identificacion = patient.identificacion_documento || ''; // Save identification
 
                 item.addEventListener('click', () => {
-                    patientNameInput.value = item.dataset.name;
+                    patientNameInput.value = item.dataset.nombre;
                     selectedPatientIdInput.value = item.dataset.id;
                     if(patientIdentificationInput) { // Fill identification field
-                        patientIdentificationInput.value = item.dataset.identification;
+                        patientIdentificationInput.value = item.dataset.identificacion;
                     }
                     suggestionsContainer.innerHTML = '';
                     suggestionsContainer.style.display = 'none';
-                    console.log(`LOG: Patient selected: ${item.dataset.name}, ID: ${item.dataset.id}, Identification: ${item.dataset.identification}`);
+                    console.log(`LOG: Patient selected: ${item.dataset.nombre}, ID: ${item.dataset.id}, Identification: ${item.dataset.identificacion}`);
                 });
                 suggestionsContainer.appendChild(item);
             });
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         patientNameInput.addEventListener('input', debounce(async (event) => {
             const query = event.target.value.trim();
             selectedPatientIdInput.value = '';
-            // We don't clear the identification here, the user can clear it if needed.
+            // We don't clear the identification here, the user can do it if needed.
             if (query) {
                 await getPatientSuggestions(query);
             } else {
@@ -397,28 +397,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeSuggestion.click();
                     event.preventDefault();
                 } else if (suggestionsContainer.children.length > 0 && suggestionsContainer.querySelector('.no-suggestions') === null) {
-                    // Optional: select the first suggestion if none are active
+                    // Optional: select the first suggestion if none is active
                     // suggestionsContainer.children[0].click();
                     event.preventDefault();
                 }
             }
         });
     } else {
-        console.warn("LOG WARNING: Not all elements for patient suggestions were found (name, id, identification, container).");
+        console.warn("WARNING LOG: Not all elements for patient suggestions were found (name, id, identification, container).");
     }
 
-    // --- FILE HANDLING FUNCTIONS (UNCHANGED, MUST BE PRESENT) ---
+    // --- FILE HANDLING FUNCTIONS (NO CHANGES, MUST BE PRESENT) ---
     function addFiles(newFiles) {
       if (newFiles.length === 0) return;
       let filesAddedThisTurn = 0;
       for (let i = 0; i < newFiles.length; i++) {
         const newFile = newFiles[i];
         if (selectedFiles.length >= MAX_FILES) {
-            showStatusMessage(`You cannot upload more than ${MAX_FILES} files.`, "error", false, 5000);
+            displayStatusMessage(`You cannot upload more than ${MAX_FILES} files.`, "error", false, 5000);
             break;
         }
         if (newFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-            showStatusMessage(`The file "${newFile.name}" is too large (max. ${MAX_FILE_SIZE_MB}MB).`, "error", false, 5000);
+            displayStatusMessage(`The file "${newFile.name}" is too large (max. ${MAX_FILE_SIZE_MB}MB).`, "error", false, 5000);
             continue;
         }
         if (!selectedFiles.some(f => f.name === newFile.name && f.size === newFile.size)) {
@@ -426,17 +426,17 @@ document.addEventListener('DOMContentLoaded', () => {
             filesAddedThisTurn++;
         }
       }
-      if (filesAddedThisTurn > 0) { updateFilesListUI(); }
+      if (filesAddedThisTurn > 0) { updateFileUIList(); }
     }
 
-    function updateFilesListUI() {
-      if (!filesListUl) { console.error("LOG CRITICAL: filesListUl is not defined."); return; }
-      filesListUl.innerHTML = '';
+    function updateFileUIList() {
+      if (!filesUl) { console.error("CRITICAL LOG: filesUl is not defined."); return; }
+      filesUl.innerHTML = '';
       if (selectedFiles.length === 0) {
-        const noFilesLi = document.createElement('li');
-        noFilesLi.classList.add('no-files');
-        noFilesLi.textContent = 'No files have been selected yet.';
-        filesListUl.appendChild(noFilesLi);
+        const liNoFiles = document.createElement('li');
+        liNoFiles.classList.add('no-files');
+        liNoFiles.textContent = 'No files have been selected yet.';
+        filesUl.appendChild(liNoFiles);
         if (btnSummarizeVisit) btnSummarizeVisit.disabled = true;
         return;
       }
@@ -451,38 +451,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const sizeSpan = document.createElement('span');
         sizeSpan.classList.add('file-size');
         sizeSpan.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
-        const removeBtn = document.createElement('button');
-        removeBtn.classList.add('btn-remove-file');
-        removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
-        removeBtn.title = 'Remove file';
-        removeBtn.type = 'button';
-        removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(index); };
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('btn-delete-file');
+        deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+        deleteBtn.title = 'Delete file';
+        deleteBtn.type = 'button';
+        deleteBtn.onclick = (e) => { e.stopPropagation(); deleteFile(index); };
         li.appendChild(nameSpan);
         additionalInfoDiv.appendChild(sizeSpan);
-        additionalInfoDiv.appendChild(removeBtn);
+        additionalInfoDiv.appendChild(deleteBtn);
         li.appendChild(additionalInfoDiv);
-        filesListUl.appendChild(li);
+        filesUl.appendChild(li);
       });
       if (btnSummarizeVisit) btnSummarizeVisit.disabled = false;
     }
 
-    function removeFile(index) {
+    function deleteFile(index) {
       selectedFiles.splice(index, 1);
-      updateFilesListUI();
+      updateFileUIList();
     }
 
     let statusMessageTimeoutId = null;
-    function showStatusMessage(message, type = 'info', alwaysVisible = false, durationMs = 0) {
-        if (!processStatusMessage) { console.error("LOG CRITICAL: processStatusMessage is not defined."); return; }
+    function displayStatusMessage(message, type = 'info', alwaysVisible = false, durationMs = 0) {
+        if (!processStatusMessage) { console.error("CRITICAL LOG: processStatusMessage is not defined."); return; }
         clearTimeout(statusMessageTimeoutId);
         processStatusMessage.innerHTML = '';
         const icon = document.createElement('i');
         icon.classList.add('fas');
         if (type === 'error') {
-            processStatusMessage.className = 'custom-alert custom-alert-error';
+            processStatusMessage.className = 'custom-alert alert-error';
             icon.classList.add('fa-exclamation-circle');
         } else if (type === 'success') {
-            processStatusMessage.className = 'custom-alert custom-alert-success';
+            processStatusMessage.className = 'custom-alert alert-success';
             icon.classList.add('fa-check-circle');
         } else {
             processStatusMessage.className = 'custom-alert custom-alert-info';
@@ -502,13 +502,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- END FILE HANDLING FUNCTIONS ---
 
-    function setupViewForNewSummary() {
-        console.log("LOG: Executing setupViewForNewSummary...");
+    function setupForNewSummary() {
+        console.log("LOG: Executing setupForNewSummary...");
         if (!summaryInputFormDiv || !generatedSummaryAreaDiv || !patientNameInput ||
             !templateSelect || !summaryProcessIdSpan || !visitIdContainer ||
-            !generatedSummaryContentDiv || !visitAdditionalInfoDiv || !btnSummarizeVisit ||
+            !generatedSummaryContentDiv || !additionalVisitInfoDiv || !btnSummarizeVisit ||
             !patientIdentificationInput || !selectedPatientIdInput || !suggestionsContainer ) {
-            console.error("LOG CRITICAL: One or more DOM elements are not defined in setupViewForNewSummary.");
+            console.error("CRITICAL LOG: One or more DOM elements are not defined in setupForNewSummary.");
             return;
         }
 
@@ -523,16 +523,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         templateSelect.value = 'Records Summary';
         selectedFiles = [];
-        updateFilesListUI();
+        updateFileUIList();
 
         summaryProcessIdSpan.textContent = "N/A";
         visitIdContainer.style.display = 'none';
-        showStatusMessage("", 'info', false);
+        displayStatusMessage("", 'info', false);
 
         generatedSummaryContentDiv.innerHTML = '<p>Waiting for summary content...</p>';
         generatedSummaryContentDiv.classList.add('placeholder');
-        visitAdditionalInfoDiv.innerHTML = '';
-        visitAdditionalInfoDiv.style.display = 'none';
+        additionalVisitInfoDiv.innerHTML = '';
+        additionalVisitInfoDiv.style.display = 'none';
 
         btnSummarizeVisit.disabled = true;
         btnSummarizeVisit.innerHTML = '<i class="fas fa-file-invoice"></i> Summarize Records & Start';
@@ -555,36 +555,36 @@ document.addEventListener('DOMContentLoaded', () => {
         fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('dragover'));
         fileUploadArea.addEventListener('drop', (event) => { event.preventDefault(); fileUploadArea.classList.remove('dragover'); addFiles(event.dataTransfer.files); });
     } else {
-        console.error("LOG CRITICAL: fileUploadArea or fileInput not found.");
+        console.error("CRITICAL LOG: fileUploadArea or fileInput not found.");
     }
 
     btnSummarizeVisit.addEventListener('click', async () => {
       console.log("LOG: Click on 'Summarize Records' detected.");
 
       if (selectedFiles.length === 0) {
-        showStatusMessage("Please select at least one file to summarize.", "error", false, 4000);
+        displayStatusMessage("Please, select at least one file to summarize.", "error", false, 4000);
         return;
       }
 
       const patientName = patientNameInput.value.trim();
       const identification = patientIdentificationInput.value.trim(); // Get identification
-      const selectedId = selectedPatientIdInput.value; // This is the 'paciente_id' if selected from the list
+      const selectedId = selectedPatientIdInput.value; // This is the 'patient_id' if selected from the list
       const template = templateSelect.value;
 
       const formData = new FormData();
 
-      // The backend must be prepared to receive 'paciente_id' (if it exists)
+      // The backend must be prepared to receive 'patient_id' (if it exists)
       // and 'patient_name' and 'patient_identification' to search/create.
       if (selectedId) {
           formData.append('patient_id', selectedId);
       }
       // Always send name and identification, the backend will decide whether to use them to create or if the ID takes precedence.
-      formData.append('patient_name', patientName);
-      formData.append('patient_identification_document', identification);
-      formData.append('template', template);
-      selectedFiles.forEach((file) => formData.append('documents', file, file.name));
+      formData.append('patient_nombre', patientName);
+      formData.append('patient_identification_documento', identification);
+      formData.append('plantilla', template);
+      selectedFiles.forEach((file) => formData.append('documentos', file, file.name));
 
-      showStatusMessage("Processing and summarizing records...", "info", true);
+      displayStatusMessage("Processing and summarizing records...", "info", true);
       btnSummarizeVisit.disabled = true;
       btnSummarizeVisit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       summaryProcessIdSpan.textContent = "Processing...";
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnGoToPatientProfile) { btnGoToPatientProfile.disabled = true; }
       generatedSummaryContentDiv.innerHTML = '<p>Generating summary...</p>';
       generatedSummaryContentDiv.classList.add('placeholder');
-      visitAdditionalInfoDiv.style.display = 'none';
+      additionalVisitInfoDiv.style.display = 'none';
 
       let response;
       let responseText = "";
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         console.log("LOG: Attempting fetch to /api/summarize_documents_and_start_visit");
-        response = await fetch('/api/summarize_documents_and_start_visit', {
+        response = await fetch('/api/resumir_documentos_e_iniciar_visita', { // URL remains in Spanish as it's a backend endpoint
           method: 'POST',
           body: formData
         });
@@ -617,8 +617,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try { data = JSON.parse(responseText); }
         catch (jsonError) {
-            console.error("LOG CRITICAL: OK response but JSON parsing failed:", jsonError, "Received response:", responseText);
-            throw new Error(`OK server response but not valid JSON: ${responseText.substring(0,100)}...`);
+            console.error("CRITICAL LOG: Response OK but JSON parsing failed:", jsonError, "Received response:", responseText);
+            throw new Error(`OK response from server but not valid JSON: ${responseText.substring(0,100)}...`);
         }
         console.log("LOG: Response OK and parsed as JSON:", data);
 
@@ -632,42 +632,42 @@ document.addEventListener('DOMContentLoaded', () => {
             generatedSummaryContentDiv.innerHTML = DOMPurify.sanitize(rawHtml, {USE_PROFILES: {html: true}});
             generatedSummaryContentDiv.classList.remove('placeholder');
         } else {
-            const fallbackMessage = data.resumen_generado || "The summary could not be generated or there is no content.";
+            const fallbackMessage = data.resumen_generado || "Could not generate the summary or there is no content.";
             if (typeof DOMPurify !== 'undefined') { generatedSummaryContentDiv.innerHTML = DOMPurify.sanitize(`<p>${fallbackMessage}</p>`, {USE_PROFILES: {html: true}}); }
             else { generatedSummaryContentDiv.textContent = fallbackMessage; }
             generatedSummaryContentDiv.classList.add('placeholder');
         }
 
         if (data.overview) {
-            // Make sure the backend sends the 'patient' and 'patient_identification' in the overview
-            let patientDisplay = data.overview.patient || 'N/A (Anonymous/Default)';
-            if(data.overview.patient_identification_document) {
-            patientDisplay += ` (ID: ${data.overview.patient_identification_document})`;
+            // Make sure the backend sends 'paciente' and 'identificacion_paciente' in the overview
+            let patientDisplay = data.overview.paciente || 'N/A (Anonymous/Default)';
+            if(data.overview.paciente_identificacion_documento) {
+            patientDisplay += ` (ID: ${data.overview.paciente_identificacion_documento})`;
              }
-            visitAdditionalInfoDiv.innerHTML = `
+            additionalVisitInfoDiv.innerHTML = `
                 <h4>Created Visit Details</h4>
                 <p><strong>Patient:</strong> ${DOMPurify.sanitize(patientDisplay)}</p>
-                <p><strong>Template Used:</strong> ${DOMPurify.sanitize(data.overview.template || 'N/A')}</p>
-                <p><strong>Visit Type:</strong> ${data.overview.visit_type ? DOMPurify.sanitize(data.overview.visit_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())) : 'N/A'}</p>
-                ${data.processed_files && data.processed_files.length > 0 ? `<p><strong>Processed Files:</strong> ${DOMPurify.sanitize(data.processed_files.join(', '))}</p>` : ''}
-                ${data.omitted_files && data.omitted_files.length > 0 ? `<p><strong>Omitted/Error Files:</strong> ${DOMPurify.sanitize(data.omitted_files.join(', '))}</p>` : ''}
+                <p><strong>Template Used:</strong> ${DOMPurify.sanitize(data.overview.plantilla || 'N/A')}</p>
+                <p><strong>Visit Type:</strong> ${data.overview.tipo_visita ? DOMPurify.sanitize(data.overview.tipo_visita.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())) : 'N/A'}</p>
+                ${data.archivos_procesados && data.archivos_procesados.length > 0 ? `<p><strong>Processed Files:</strong> ${DOMPurify.sanitize(data.archivos_procesados.join(', '))}</p>` : ''}
+                ${data.archivos_omitidos && data.archivos_omitidos.length > 0 ? `<p><strong>Skipped/Error Files:</strong> ${DOMPurify.sanitize(data.archivos_omitidos.join(', '))}</p>` : ''}
             `;
-            visitAdditionalInfoDiv.style.display = 'block';
+            additionalVisitInfoDiv.style.display = 'block';
         }
 
         let messageType = "info";
         if (data.status && data.status.includes("error")) messageType = "error";
-        else if (data.status && data.status.includes("warning")) messageType = "info"; // or "warning" if you have a style for it
-        else if (data.status === "success" || (response.ok && !data.status)) messageType = "success"; // Assume success if OK and no specific status
+        else if (data.status && data.status.includes("advertencia")) messageType = "info"; // or "warning" if you have a style for it
+        else if (data.status === "exito" || (response.ok && !data.status)) messageType = "success"; // Assume success if it's OK and there's no specific status
 
-        showStatusMessage(data.message || "Process completed. Review the summary and details.", messageType, true);
+        displayStatusMessage(data.mensaje || "Process completed. Review the summary and details.", messageType, true);
         generatedSummaryAreaDiv.style.display = 'block';
 
-        // Logic for the "Go to Patient Profile" button
-        console.log("LOG: Setting up 'Go to Patient Profile' button. Received data.patient_id:", data.patient_id);
+        // Logic for "Go to Patient Profile" button
+        console.log("LOG: Configuring 'Go to Patient Profile' button. data.paciente_id received:", data.paciente_id);
         if (btnGoToPatientProfile) {
             btnGoToPatientProfile.style.display = 'inline-flex';
-            // Use data.patient_id (from the top level of the JSON response) or data.overview.patient_id
+            // Use data.paciente_id (from the top level of the JSON response) or data.overview.paciente_id
             const idForProfile = data.paciente_id || (data.overview ? data.overview.paciente_id : null);
 
             if (idForProfile && String(idForProfile).trim() !== "") {
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGoToPatientProfile.disabled = false;
                 btnGoToPatientProfile.removeAttribute('title');
                 btnGoToPatientProfile.onclick = () => {
-                    window.location.href = `/perfil_paciente/${idForProfile}`;
+                    window.location.href = `/perfil_paciente/${idForProfile}`; // URL can remain, as it's a backend route
                 };
             } else {
                 console.warn("LOG: ID for profile is NOT valid or was not provided. Profile button will be disabled.");
@@ -684,18 +684,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGoToPatientProfile.onclick = null;
             }
         } else {
-            console.warn("LOG WARNING: The 'btnGoToPatientProfile' button was not found in the DOM.");
+            console.warn("WARNING LOG: Button 'btnGoToPatientProfile' was not found in the DOM.");
         }
 
       } catch (error) {
-        console.error('LOG: Error in main try/catch block:', error.message, error);
-        showStatusMessage(`Error: ${error.message}`, "error", true);
+        console.error('LOG: Error in the main try/catch block:', error.message, error);
+        displayStatusMessage(`Error: ${error.message}`, "error", true);
         summaryProcessIdSpan.textContent = "Error";
         visitIdContainer.style.display = 'block';
         if(btnGoToPatientProfile) {
             btnGoToPatientProfile.style.display = 'inline-flex';
             btnGoToPatientProfile.disabled = true;
-            btnGoToPatientProfile.setAttribute('title', 'Failed process, cannot go to profile.');
+            btnGoToPatientProfile.setAttribute('title', 'Process failed, cannot go to profile.');
             btnGoToPatientProfile.onclick = null;
         }
       } finally {
@@ -709,14 +709,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnNewSummary) {
         btnNewSummary.addEventListener('click', () => {
-            setupViewForNewSummary();
+            setupForNewSummary();
         });
     } else {
-        console.warn("LOG WARNING: 'btnNewSummary' button not found.");
+        console.warn("WARNING LOG: Button 'btnNewSummary' not found.");
     }
 
-    setupViewForNewSummary();
-    console.log("LOG: Records summary script fully initialized.");
+    setupForNewSummary();
+    console.log("LOG: Record summary script initialized completely.");
   });
 </script>
 
