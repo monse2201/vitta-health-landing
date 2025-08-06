@@ -32,9 +32,6 @@ from mutagen.wave import WAVE
 from mutagen.flac import FLAC
 from pydub import AudioSegment
 
-# Nota: Flask-Login y relacionados se han eliminado
-# from flask_login import current_user, login_required, login_user, logout_user, LoginManager
-
 
 def convertir_webm_a_wav(ruta_original):
     if not ruta_original.endswith(".webm"):
@@ -171,7 +168,7 @@ except ImportError:
 try:
     from weasyprint import HTML # Descomentar si se usa WeasyPrint para generar PDFs
 except ImportError:
-    logging.warning("🚨 WeasyPrint no está instalado. La generación de PDFs desde HTML no estará disponible o usará un método alternativo.")
+    logging.warning("🚨 Weasyprint no está instalado. La generación de PDFs desde HTML no estará disponible o usará un método alternativo.")
     HTML = None
 
 # --- NUEVA IMPORTACIÓN PARA CIFRADO ---
@@ -344,25 +341,6 @@ Session(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-# Flask-Login se ha eliminado
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-# login_manager.login_view = 'login_route'
-
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return User.query.get(int(user_id))
-    
-# def admin_required(allowed_roles):
-#     def wrapper(fn):
-#         @wraps(fn)
-#         def decorated_view(*args, **kwargs):
-#             if not current_user.is_authenticated or current_user.role not in allowed_roles:
-#                 flash('Acceso no autorizado.', 'danger')
-#                 return redirect(url_for('dashboard'))
-#             return fn(*args, **kwargs)
-#         return decorated_view
-#     return wrapper
 
 with app.app_context():
     db.create_all()
@@ -372,7 +350,7 @@ socketio_kwargs = {
 }
 if redis_url_for_socketio:
     socketio_kwargs["message_queue"] = redis_url_for_socketio
-    logging.info(f"SocketIO initialized WITH message queue Redis ({redis_connection_url}). Async_mode auto-detected.")
+    logging.info(f"SocketIO initialized WITH message queue Redis ({redis_url_for_socketio}). Async_mode auto-detected.")
 else:
     logging.info("SocketIO initialized WITHOUT message queue Redis. Async_mode auto-detected.")
 socketio = SocketIO(app, **socketio_kwargs)
@@ -426,19 +404,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-        
-    def is_active(self):
-        return True
-    
-    def get_id(self):
-        return str(self.id)
-    
-    def is_authenticated(self):
-        return True
-    
-    def is_anonymous(self):
-        return False
-    
 
 class MensajeProgramado(db.Model):
     __tablename__='message_programado'
@@ -813,7 +778,7 @@ def get_base64_image_from_path(relative_path_in_uploads):
     # Esto es crucial para la seguridad y evitar ataques de recorrido de directorio.
     allowed_profile_subfolders = [
         # app.config.get('PROFILE_FILES_FOLDER'), # Si tienes una carpeta general para perfiles
-        os.path.join('usuarios_perfiles', str(1)) # Carpeta específica del usuario
+        os.path.join('usuarios_perfiles', str(0)) # Carpeta específica del usuario
     ]
 
     # Verificar si la ruta relativa comienza con alguna de las subcarpetas permitidas
@@ -1310,7 +1275,7 @@ def generar_notas_ai_desde_transcripcion(transcripcion, plantilla_tipo="SOAP", i
     if not client_openai:
         return "[Error: Servicio IA (OpenAI) no configurado para notas.]"
     
-    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"el idioma del texto ({idioma_objetivo_para_prompt})")    
+    nombre_idioma_prompt = language_codes_to_names.get(idioma_objetivo_para_prompt, f"el idioma del texto ({idioma_objetivo_para_prompt})")
     if especialidad_usuario and especialidad_usuario.strip().lower() == 'nutrición':
         prompt_sistema = (
             f"Eres un asistente de nutricionistas altamente competente, especializado en generar notas clínicas de nutrición detalladas y estructuradas. "
@@ -1553,14 +1518,14 @@ def generar_y_guardar_pdf_plan_nutricional(plan_nut_obj, current_user_obj, pacie
 
         pdf_bytes = b""
         if HTML is None:
-            pdf_bytes = f"""PDF Simulado (WeasyPrint no disponible). Contenido HTML:
+            pdf_bytes = f"""PDF Simulado (Weasyprint no disponible). Contenido HTML:
             {html_content}""".encode('utf-8')
 
-            logging.warning(f"WeasyPrint no disponible. PDF simulado generado en memoria para Plan ID {plan_nut_obj.id}.")
+            logging.warning(f"Weasyprint no disponible. PDF simulado generado en memoria para Plan ID {plan_nut_obj.id}.")
         else:
-            # Generar PDF real con WeasyPrint
+            # Generar PDF real con Weasyprint
             pdf_bytes = HTML(string=html_content).write_pdf()
-            logging.info(f"PDF del plan nutricional (ID: {plan_nut_obj.id}) generado con WeasyPrint desde la plantilla 'ver_plan_nutricional.html'.")
+            logging.info(f"PDF del plan nutricional (ID: {plan_nut_obj.id}) generado con Weasyprint desde la plantilla 'ver_plan_nutricional.html'.")
 
     except Exception as e_render:
         logging.error(f"Error crítico al renderizar o generar el PDF para el plan {plan_nut_obj.id}: {e_render}", exc_info=True)
@@ -1602,14 +1567,14 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
     global fernet_cipher
     
     if not HTML:
-        logging.warning(f"WeasyPrint no está instalado. No se puede generar el PDF para {base_filename_prefix}.")
+        logging.warning(f"Weasyprint no está instalado. No se puede generar el PDF para {base_filename_prefix}.")
         return None
 
     try:
         context['now'] = datetime.now
         html_content = render_template(html_template_name, **context)
         pdf_bytes = HTML(string=html_content).write_pdf()
-        logging.info(f"PDF generado para '{base_filename_prefix}' con WeasyPrint desde '{html_template_name}'.")
+        logging.info(f"PDF generado para '{base_filename_prefix}' con Weasyprint desde '{html_template_name}'.")
 
     except Exception as e_render:
         logging.error(f"Error crítico al renderizar o generar el PDF para {base_filename_prefix}: {e_render}", exc_info=True)
@@ -1645,7 +1610,6 @@ def generar_y_guardar_pdf_desde_html(html_template_name, context, subfolder_conf
         return None
 
 @app.route('/dashboard')
-# @login_required # Se elimina el decorador
 def dashboard():
     # Initialize variables to a default value for unauthenticated users
     total_pacientes = 0
@@ -1679,8 +1643,6 @@ def dashboard():
                            tareas_pendientes=tareas_pendientes_count)
 
 @app.route('/nutricion_admin_dashboard')
-# @login_required # Se elimina el decorador
-# @admin_required(allowed_roles=['admin_nutricion']) # Se elimina el decorador
 def nutricion_admin_dashboard():
     # Lógica específica para el Administrador de Nutrición
     # Por ejemplo, podría ver un resumen de todos los planes nutricionales,
@@ -1790,130 +1752,25 @@ def formulario_interes_route():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_route():
-    # Se elimina la autenticación
-    # if current_user.is_authenticated:
-    #     return redirect(url_for('dashboard'))
-    form_data = request.form.to_dict() if request.method == 'POST' else {}
-    if request.method == 'POST':
-        nombre = form_data.get('nombre', '').strip()
-        email = form_data.get('email', '').strip().lower()
-        password = form_data.get('password')
-        role = form_data.get('role', 'medico').strip()
-        licencia = form_data.get('licencia_profesional', '').strip()
-        especialidad_select = form_data.get('especialidad_select', '')
-        especialidad_otro = form_data.get('especialidad_otro', '').strip()
-        especialidad_final = especialidad_otro if especialidad_select == 'otro' else especialidad_select
-        tel_prefijo = form_data.get('telefono_prefijo', '')
-        tel_numero = form_data.get('telefono_numero', '').strip()
-        telefono_final = f"{tel_prefijo}{tel_numero}" if tel_numero else None
-        if especialidad_select == 'otro' and not especialidad_otro:
-            flash('Si selecciona "Otra" especialidad, debe especificarla.', 'danger')
-            return render_template('register.html', css_file="css/auth_form.css", **form_data)
-        required_fields = {'Nombre': nombre, 'Email': email, 'Contraseña': password,
-                           'Licencia Profesional': licencia, 'Especialidad': especialidad_final}
-        missing_fields = [name for name, value in required_fields.items() if not value]
-        if missing_fields:
-            flash(f'Los campos {", ".join(missing_fields)} son obligatorios.', 'danger')
-            return render_template('register.html', css_file="css/auth_form.css", **form_data)
-        if User.query.filter_by(email=email).first():
-            flash('Este correo electrónico ya está registrado.', 'warning')
-            return render_template('register.html', css_file="css/auth_form.css", **form_data)
-        if licencia and User.query.filter_by(licencia_profesional=licencia).first():
-            flash('Esta licencia profesional ya está registrada.', 'warning')
-            return render_template('register.html', css_file="css/auth_form.css", **form_data)
-        nuevo_usuario = User(
-            nombre=nombre, email=email, role=role,
-            licencia_profesional=licencia, especialidad=especialidad_final,
-            telefono_profesional=telefono_final
-        )
-        nuevo_usuario.set_password(password)
-        try:
-            db.session.add(nuevo_usuario)
-            db.session.commit()
-            flash('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success')
-            logging.info(f"Nuevo usuario registrado: {email} con rol {role}")
-            return redirect(url_for('login_route'))
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"Error al registrar usuario {email}: {e}", exc_info=True)
-            flash('Error durante el registro. Por favor, intente de nuevo.', 'danger')
-            return render_template('register.html', css_file="css/auth_form.css", **form_data)
-    return render_template('register.html', css_file="css/auth_form.css", **form_data)
+    # Se elimina la autenticación, se redirige al dashboard por defecto
+    return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_route():
-    # Se elimina la autenticación
-    # if current_user.is_authenticated:
-    #     if not current_user.is_verified:
-    #         flash('Su perfil aún no ha sido verificado. Por favor, espere a que un administrador apruebe su cuenta.', 'warning')
-    #         logout_user()
-    #         return redirect(url_for('login_route'))
-
-    #     # Lógica para usuarios ya autenticados (antes de intentar login de nuevo)
-    #     if current_user.role == 'admin_super':
-    #         return redirect(url_for('super_admin_dashboard'))
-    #     elif current_user.role == 'admin_nutricion':
-    #         return redirect(url_for('nutricion_admin_dashboard'))
-    #     else: # Medicos o cualquier otro rol
-    #         return redirect(url_for('dashboard'))
-
-    # email_from_form = request.form.get('email', '') if request.method == 'POST' else request.args.get('email', '')
-
-    # if request.method == 'POST':
-    #     email = request.form.get('email', '').strip().lower()
-    #     password = request.form.get('password')
-    #     remember = True if request.form.get('remember') else False
-
-    #     if not email or not password:
-    #         flash('Email y contraseña son requeridos.', 'danger')
-    #         return render_template('login.html', email=email, css_file="css/auth_form.css")
-
-    #     user = User.query.filter_by(email=email).first()
-
-    #     if user and user.check_password(password):
-    #         if not user.is_verified:
-    #             flash('Su perfil aún no ha sido verificado.', 'warning')
-    #             return redirect(url_for('login_route'))
-
-    #         login_user(user, remember=remember)
-
-    #         if user.role == 'admin_super':
-    #             flash('Inicio de sesión como Super Administrador exitoso!', 'success')
-    #             return redirect(url_for('super_admin_dashboard'))
-    #         elif user.role == 'admin':
-    #             flash('Inicio de sesión como Administrador exitoso!', 'success')
-    #             return redirect(url_for('admin_dashboard'))
-    #         elif user.role == 'admin_nutricion':
-    #             flash('Inicio de sesión como Administrador de Nutrición exitoso!', 'success')
-    #             return redirect(url_for('nutricion_admin_dashboard'))
-    #         else: # Medicos o cualquier otro rol
-    #             flash('Inicio de sesión exitoso!', 'success')
-    #             return redirect(url_for('dashboard'))
-
-    #     flash('Credenciales incorrectas. Por favor, intenta de nuevo.', 'danger')
-    #     return redirect(url_for('login_route'))
-
-    # return render_template('login.html', email=email_from_form, css_file="css/auth_form.css")
-    # Al eliminar la autenticación, redirigimos a la página principal o una página de acceso
+    # Se elimina la autenticación, se redirige al dashboard por defecto
     return redirect(url_for('dashboard'))
 
 @app.route('/logout')
-# @login_required # Se elimina el decorador
 def logout_route():
-    # Se elimina la autenticación
-    # user_email_for_log = current_user.email if hasattr(current_user, 'email') else 'Desconocido'
-    # logout_user()
-    # flash('Has cerrado sesión exitosamente.', 'info')
-    # logging.info(f"Usuario {user_email_for_log} ha cerrado sesión.")
+    # Se elimina la autenticación, se redirige al dashboard por defecto
     session.pop('visita_actual_id', None)
-    return redirect(url_for('login_route'))
+    return redirect(url_for('dashboard'))
 
 SPECIALTY_ACTIONS = {
     "Nutrición": {"text": "📝 Generar Plan Nutricional", "route_name": "nuevo_plan_nutricional_para_visita_page", "doc_type": "plan_nutricional"},
 }
 
 @app.route('/historial_visitas')
-# @login_required # Se elimina el decorador
 def historial_visitas():
     visita_reciente_id = request.args.get('visita_reciente', type=int)
     visitas_data_list = []
@@ -1984,7 +1841,6 @@ def historial_visitas():
                            css_file="css/historial_visitas.css")
 
 @app.route('/visita/<int:visita_id>/generar_documento_especializado/<string:doc_type>')
-# @login_required # Se elimina el decorador
 def generar_documento_especializado(visita_id, doc_type):
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=1).first() # Se usa un ID fijo
     if not visita:
@@ -1993,7 +1849,6 @@ def generar_documento_especializado(visita_id, doc_type):
     flash(f"Funcionalidad genérica para '{doc_type}' (Visita ID: {visita_id}) aún no implementada aquí. Verifique rutas específicas.", "info")
     return redirect(url_for('historial_visitas'))
 @app.route('/visita/<int:visita_id>/notas_ia_pdf')
-# @login_required # Se elimina el decorador
 def descargar_pdf_notas_ia(visita_id):
     visita = db.session.get(Visita, visita_id)
     if not visita:
@@ -2042,18 +1897,18 @@ def descargar_pdf_notas_ia(visita_id):
     if HTML:
         try:
             pdf_bytes = HTML(string=html_render).write_pdf()
-            logging.info(f"PDF de notas AI para Visita ID {visita_id} generado con WeasyPrint.")
+            logging.info(f"PDF de notas AI para Visita ID {visita_id} generado con Weasyprint.")
         except Exception as e:
-            logging.error(f"Error generando PDF de notas AI con WeasyPrint para Visita ID {visita_id}: {e}", exc_info=True)
+            logging.error(f"Error generando PDF de notas AI con Weasyprint para Visita ID {visita_id}: {e}", exc_info=True)
             flash("Error al generar el PDF de las notas AI.", "danger")
             # En un entorno de producción, considerar un redirect a una página de error o al perfil del paciente
             return redirect(url_for('perfil_paciente', paciente_id=visita.paciente_id))
     else:
-        logging.warning("WeasyPrint no está instalado. No se puede generar un PDF real de las notas AI. Sirviendo un PDF de marcador de posición.")
+        logging.warning("Weasyprint no está instalado. No se puede generar un PDF real de las notas AI. Sirviendo un PDF de marcador de posición.")
         pdf_bytes = f"""
         <html><body>
             <h1>Error: No se pudo generar el PDF de Notas AI</h1>
-            <p>WeasyPrint (o una herramienta similar para generar PDFs desde HTML) no está instalado en el servidor.</p>
+            <p>Weasyprint (o una herramienta similar para generar PDFs desde HTML) no está instalado en el servidor.</p>
             <p>Contenido de las notas:</p>
             <div>{markdown.markdown(visita.notas_ai)}</div>
         </body></html>
@@ -2065,7 +1920,6 @@ def descargar_pdf_notas_ia(visita_id):
         mimetype="application/pdf"
     )
 @app.route('/grabar_cita')
-# @login_required # Se elimina el decorador
 def grabar_cita():
     plantillas = [
         "Consulta General", "Seguimiento", "Examen Físico", "SOAP", "SOAP simple",
@@ -2090,7 +1944,6 @@ def grabar_cita():
                            pacientes=pacientes_activos)
 
 @app.route('/resumir_registros')
-# @login_required # Se elimina el decorador
 def resumir_registros_page():
     plantillas_resumen = ["Resumen de Registros", "Resumen General", "Puntos Clave"]
     pacientes_activos = []
@@ -2111,7 +1964,6 @@ def resumir_registros_page():
                            css_file="css/resumir_registros.css")
 
 @app.route('/pacientes')
-# @login_required # Se elimina el decorador
 def pacientes_page():
     lista_pacientes = []
 
@@ -2124,7 +1976,6 @@ def pacientes_page():
     return render_template('pacientes.html', pacientes=lista_pacientes, css_file="css/pacientes.css")
 
 @app.route('/agregar_paciente', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def agregar_paciente():
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == 'POST':
@@ -2170,7 +2021,6 @@ def agregar_paciente():
     return render_template('agregar_paciente.html', css_file="css/agregar_paciente.css", paciente_form_data={})
 
 @app.route('/perfil_paciente/<int:paciente_id>')
-# @login_required # Se elimina el decorador
 def perfil_paciente(paciente_id):
     paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=1).first()
     if not paciente:
@@ -2233,7 +2083,6 @@ def perfil_paciente(paciente_id):
                            css_file="css/perfil_paciente.css")
 
 @app.route('/perfil_paciente/<int:paciente_id>/guardar', methods=['POST'])
-# @login_required # Se elimina el decorador
 def guardar_perfil_paciente(paciente_id):
     paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=1).first()
     if not paciente:
@@ -2281,7 +2130,6 @@ def guardar_perfil_paciente(paciente_id):
     return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
 @app.route('/paciente/<int:paciente_id>/eliminar', methods=['POST'])
-# @login_required # Se elimina el decorador
 def eliminar_paciente(paciente_id):
     paciente = db.session.query(Paciente).filter_by(id=paciente_id, creado_por_id=1).first()
     if not paciente:
@@ -2320,12 +2168,10 @@ def eliminar_paciente(paciente_id):
         return redirect(url_for('perfil_paciente', paciente_id=paciente_id))
 
 @app.route('/automatizaciones')
-# @login_required # Se elimina el decorador
 def automatizaciones():
     return render_template('automatizaciones.html', css_file="css/automatizaciones.css")
 
 @app.route('/configuracion-perfil', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def configuracion_perfil_profesional():
     # Se simula el usuario actual
     usuario_a_actualizar = User(nombre="Usuario de Demostración", email="demo@example.com", id=1, especialidad="Nutrición")
@@ -2354,13 +2200,11 @@ def configuracion_perfil_profesional():
     )
 
 @app.route('/cambiar-contrasena', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def cambiar_contrasena_route():
     flash("Esta funcionalidad no está disponible sin autenticación de usuario.", "danger")
     return redirect(url_for('dashboard'))
-    
+
 @app.route('/visita/<int:visita_id>/receta/nueva', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def nueva_receta_para_visita(visita_id):
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=1).first() # Se usa un ID fijo
     if not visita:
@@ -2435,7 +2279,6 @@ def nueva_receta_para_visita(visita_id):
     return render_template('crear_receta.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_initial)
 
 @app.route('/receta/<int:receta_id>')
-# @login_required # Se elimina el decorador
 def ver_receta(receta_id):
     receta = (db.session.query(RecetaMedica)
               .options(
@@ -2482,7 +2325,6 @@ def ver_receta(receta_id):
     )
 
 @app.route('/visita/<int:visita_id>/referencia/nueva', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def nueva_referencia_para_visita(visita_id):
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=1).first() # Se usa un ID fijo
     if not visita:
@@ -2537,7 +2379,6 @@ def nueva_referencia_para_visita(visita_id):
     return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
 
 @app.route('/referencia/<int:referencia_id>')
-# @login_required # Se elimina el decorador
 def ver_referencia(referencia_id):
     referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_id=1).first() # Se usa un ID fijo
     if not referencia:
@@ -2571,7 +2412,6 @@ def ver_referencia(referencia_id):
     )
 
 @app.route('/configuracion-documentos', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def configuracion_documentos():
     # Se simula el usuario actual
     updated_user = User(nombre="Usuario de Demostración", email="demo@example.com", id=1, especialidad="Nutrición")
@@ -2597,7 +2437,6 @@ def configuracion_documentos():
         logo_clinica_base64=logo_base64
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
-# @login_required # Se elimina el decorador
 def nuevo_plan_nutricional_para_visita_page(visita_id):
     visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=1).first() # Se usa un ID fijo
     if not visita:
@@ -2670,7 +2509,6 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
     return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_dict)
 
 @app.route('/plan_nutricional/<int:plan_id>')
-# @login_required # Se elimina el decorador
 def ver_plan_nutricional(plan_id):
     plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=1).first() # Se usa un ID fijo
     if not plan:
@@ -2712,7 +2550,6 @@ def ver_plan_nutricional(plan_id):
     )
 
 @app.route('/plan_nutricional/<int:plan_id>/pdf')
-# @login_required # Se elimina el decorador
 def descargar_plan_nutricional_pdf(plan_id):
     plan = db.session.query(PlanNutricional).filter_by(id=plan_id, medico_id=1).first() # Se usa un ID fijo
     if not plan or not plan.ruta_pdf_almacenada:
@@ -2746,7 +2583,6 @@ def descargar_plan_nutricional_pdf(plan_id):
 # --- Funciones de la API con los cambios aplicados ---
 
 @app.route('/api/buscar_pacientes', methods=['GET'])
-# @login_required # Se elimina el decorador
 def buscar_pacientes_api():
     query_str = request.args.get('q', '').strip()
     if not query_str or len(query_str) < 1:
@@ -2774,7 +2610,6 @@ def buscar_pacientes_api():
 
 
 @app.route('/api/iniciar_visita', methods=['POST'])
-# @login_required # Se elimina el decorador
 def iniciar_visita():
     try:
         data = request.get_json()
@@ -2856,7 +2691,6 @@ def iniciar_visita():
         return jsonify({"error": "Error interno al iniciar la visita."}), 500
 
 @app.route('/api/subir_audio', methods=['POST'])
-# @login_required # Se elimina el decorador
 def subir_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa. Por favor, inicie una nueva visita primero."}), 400
@@ -2930,7 +2764,6 @@ def subir_audio():
             "ruta_audio_procesable": ruta_relativa_para_db
         })
 @app.route('/api/resumir_documentos_e_iniciar_visita', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_resumir_documentos_e_iniciar_visita():
     logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr}")
     if not client_openai:
@@ -3086,11 +2919,9 @@ def api_resumir_documentos_e_iniciar_visita():
         logging.error(f"Error BD al guardar visita de resumen: {e_db}", exc_info=True)
         return jsonify({"error": "Error de base de datos al guardar la visita de resumen."}), 500
 @app.route('/chat-bot')
-# @login_required # Se elimina el decorador
 def chat_bot():
     return render_template('chat_bot.html')
 @app.route('/api/actualizar_notas_resumen_ai', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_actualizar_notas_resumen_ai():
     """
     Actualiza el contenido de notas_ai y resumen_ai para una visita específica.
@@ -3146,7 +2977,6 @@ def api_actualizar_notas_resumen_ai():
         return jsonify({"error": f"Error interno al actualizar el contenido AI: {str(e)}"}), 500
 
 @app.route('/api/crear_referencia_desde_chat', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_crear_referencia_desde_chat():
     """
     Crea una referencia médica desde el chatbot sin una visita preexistente.
@@ -3231,7 +3061,6 @@ def api_crear_referencia_desde_chat():
         return jsonify({'error': 'Ocurrió un error interno al guardar la referencia.'}), 500
 
 @app.route('/api/crear_receta_desde_chat', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_crear_receta_desde_chat():
     """
     Crea una receta médica desde el chatbot sin una visita preexistente.
@@ -3320,7 +3149,6 @@ def api_crear_receta_desde_chat():
         return jsonify({'error': 'Ocurrió un error interno al guardar la receta.'}), 500
 
 @app.route('/api/transcribir_diarizar', methods=['POST'])
-# @login_required # Se elimina el decorador
 def transcribir_diarizar_audio():
     global client_openai
     if 'visita_actual_id' not in session:
@@ -3393,7 +3221,6 @@ def transcribir_diarizar_audio():
         return jsonify({"error": "Ocurrió un error inesperado durante la transcripción."}), 500
 
 @app.route('/api/generar_resumen_ai', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_generar_resumen_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
@@ -3422,7 +3249,6 @@ def api_generar_resumen_ai():
         return jsonify({"error": f"No se pudo generar el resumen AI: {resumen_gen}"}), 500
 
 @app.route('/api/generar_notas_ai', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_generar_notas_ai():
     data = request.get_json()
     visita_id = data.get('visita_id')
@@ -3475,7 +3301,6 @@ def api_generar_notas_ai():
 
 
 @app.route('/api/generar_plan_alimenticio', methods=['POST'])
-# @login_required # Se elimina el decorador
 def api_generar_plan_alimenticio():
     data = request.get_json()
     visita_id = data.get('visita_id')
@@ -3520,7 +3345,6 @@ def api_traducir_texto():
     return jsonify({"texto_traducido": texto_traducido, "idioma_original_confirmado": idioma_origen})
 
 @app.route('/api/visita_overview/<int:visita_id>')
-# @login_required # Se elimina el decorador
 def api_visita_overview(visita_id):
     overview_data = obtener_datos_overview(visita_id_param=visita_id)
     if "Error" in overview_data.get('paciente', '') or "Error" in overview_data.get('resumen', '') or "acceso denegado" in overview_data.get('resumen', '').lower():
@@ -3529,7 +3353,6 @@ def api_visita_overview(visita_id):
     return jsonify(overview_data)
 
 @app.route('/api/eliminar_visita/<int:visita_id_param>', methods=['POST'])
-# @login_required # Se elimina el decorador
 def eliminar_visita_completa(visita_id_param):
     visita = db.session.query(Visita).filter_by(id=visita_id_param, medico_id=1).first() # Se usa un ID fijo
     if not visita:
@@ -3558,7 +3381,6 @@ def eliminar_visita_completa(visita_id_param):
         return jsonify({"error": "Error al eliminar la visita."}), 500
         
 @app.route('/api/compartir_visita_email', methods=['POST'])
-# @login_required # Se elimina el decorador
 def compartir_visita_email():
     data = request.get_json()
     if not data: return jsonify({"error": "No se recibió payload JSON."}), 400
@@ -3731,7 +3553,6 @@ def compartir_visita_email():
         return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
 
 @app.route('/api/receta/<int:receta_id>/compartir_email', methods=['POST'])
-# @login_required # Se elimina el decorador
 def compartir_receta_email(receta_id):
     data = request.get_json()
     if not data: return jsonify({"error": "No se recibió payload JSON."}), 400
@@ -3740,7 +3561,7 @@ def compartir_receta_email(receta_id):
     msg_adic_raw = data.get('message_adicional', '')
     idioma_email_sel = data.get('idioma_email', 'es')
     if not email_dest: return jsonify({"error": "Falta email del destinatario."}), 400
-    receta = db.session.query(RecetaMedica).filter_by(id=receta_id, medico_id=1).first() # Se usa un ID fijo
+    receta = db.session.query(RecetaMedica).filter_by(id=receta_id, medico_id=1).first()
     if not receta: return jsonify({"error": "Receta no encontrada."}), 404
     if not receta.paciente_receta: return jsonify({"error": "Paciente asociado a la receta no encontrado."}), 404
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
@@ -3799,7 +3620,7 @@ def compartir_receta_email(receta_id):
         if not meds_lista_email:
             medicamentos_html_items = "<li>No se especificaron medicamentos.</li>"
         for idx, med in enumerate(meds_lista_email):
-            item_html = f"<li style='margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;'>"
+            item_html = f"<li style='margin-bottom: 15px; padding-bottom: 10
             item_html += f"<h4 style='margin: 0 0 8px 0; font-size: 1.1em; color: #333; font-weight: bold;'>{idx+1}. {med.get('nombre','Nombre no especificado')}</h4>"
             if med.get('cantidad'): item_html += f"<p style='margin: 3px 0;'><strong>Cantidad:</strong> {med['cantidad']}</p>"
             if med.get('dosis'): item_html += f"<p style='margin: 3px 0;'><strong>Dosis:</strong> {med['dosis']}</p>"
@@ -3851,14 +3672,477 @@ body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-col
         mail.send(msg_obj)
         desc_log_email = f"Receta Médica ID {receta_id} compartida por email a {email_dest}."
         if traducido and norm_idioma_deseado != idioma_orig_receta: desc_log_email += f" (Contenido traducido a {norm_idioma_deseado.upper()})"
-        reg_act_data = {"usuario_id": 1, "usuario_nombre_display": 'Usuario Anónimo', "accion": "receta_compartida", "descripcion": desc_log_email}
+        reg_act_data = {"usuario_id": current_user.id, "usuario_nombre_display": current_user.nombre, "accion": "receta_compartida", "descripcion": desc_log_email}
         if receta.visita_id: reg_act_data["visita_id"] = receta.visita_id
-        reg_act = RegistroActividad(**reg_act_data)
-        db.session.add(reg_act)
-        db.session.commit()
-        logging.info(f"Email con receta médica {receta_id} enviado a {email_dest}.")
-        return jsonify({"message": f"Información de la receta enviada exitosamente a {email_dest}."}), 200
+        reg_act = RegistroActividad(**reg_act_data) # type: ignore
+        db.session.add(reg_act); db.session.commit()
+        logging.info(f"Email con receta médica {receta_id} enviado a {email_dest} (Usuario {current_user.id}).")
+        return jsonify({"mensaje": f"Receta médica enviada exitosamente a {email_dest}."}), 200
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al intentar enviar email para receta {receta_id}: {e}", exc_info=True)
-        return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
+        logging.error(f"Error al intentar enviar email para receta {receta_id} (Usuario {current_user.id}): {e}", exc_info=True)
+        return jsonify({"error": f"No se pudo enviar el email de la receta: {str(e)}"}), 500
+
+def enviar_mensajes_programados_worker():
+    pass
+@app.route('/api/plan_nutricional/<int:plan_id>/compartir_email', methods=['POST'])
+def compartir_plan_nutricional_email(plan_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se recibió payload JSON."}), 400
+
+    email_dest = data.get('email_destinatario')
+    asunto_opc = data.get('asunto')
+    msg_adic_raw = data.get('mensaje_adicional', '')
+    image_data_b64 = data.get('image_data')
+
+    if not email_dest or not image_data_b64:
+        return jsonify({"error": "Falta email del destinatario o los datos de la imagen."}), 400
+
+    # CAMBIO PRINCIPAL: Buscar el plan solo por su ID, ya que no hay un usuario autenticado.
+    # Se ha eliminado la condición `medico_id=current_user.id`.
+    plan = db.session.query(PlanNutricional).options(
+        joinedload(PlanNutricional.paciente_plan),
+        joinedload(PlanNutricional.medico_emisor_plan)
+    ).filter_by(id=plan_id).first()
+
+    if not plan:
+        return jsonify({"error": "Plan nutricional no encontrado."}), 404
+        
+    if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
+        logging.error("Configuración de correo incompleta.")
+        return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
+
+    try:
+        paciente_obj = plan.paciente_plan
+        medico_obj = plan.medico_emisor_plan
+        fecha_em_obj = plan.fecha_emision or datetime.now(timezone.utc)
+        fecha_em_str = fecha_em_obj.strftime('%d/%m/%Y')
+        asunto_final = asunto_opc or f"Plan Nutricional Adjunto para {paciente_obj.nombre} - {fecha_em_str}"
+        nombre_archivo_imagen = f"Plan_Nutricional_{paciente_obj.nombre.replace(' ', '_')}_{plan.id}.png"
+
+        image_bytes = base64.b64decode(image_data_b64.split(',')[1])
+
+        msg_adic_html = f"<p><b>Mensaje adicional:</b><br>{msg_adic_raw.replace(chr(10), '<br>')}</p>" if msg_adic_raw else ''
+        cuerpo_html = f"""
+        <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>{asunto_final}</title></head>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Plan Nutricional Adjunto</h2>
+            <p>Estimado/a,</p>
+            <p>Por favor, encuentre adjunto el plan nutricional para el paciente <strong>{paciente_obj.nombre}</strong>, preparado por el/la <strong>Dr(a). {medico_obj.nombre}</strong>.</p>
+            {msg_adic_html}
+            <p>El documento está en formato de imagen (PNG).</p><br>
+            <p>Saludos cordiales,</p><p><em>Generado por Vitta Health Scribe</em></p>
+        </body></html>
+        """
+
+        msg = Message(asunto_final, recipients=[email_dest], html=cuerpo_html, sender=app.config['MAIL_DEFAULT_SENDER'])
+        msg.attach(
+            filename=nombre_archivo_imagen,
+            content_type='image/png',
+            data=image_bytes
+        )
+        mail.send(msg)
+        logging.info(f"Email con IMAGEN adjunta del plan nutricional {plan.id} enviado a {email_dest}.")
+        return jsonify({"mensaje": f"Plan nutricional enviado como imagen adjunta a {email_dest}."}), 200
+
+    except Exception as e:
+        # Se elimina el db.session.rollback() si no se está haciendo commit dentro del try.
+        logging.error(f"Error al enviar email con imagen adjunta para plan {plan.id}: {str(e)}", exc_info=True)
+        return jsonify({"error": f"No se pudo enviar el correo con la imagen: {str(e)}"}), 500
+ @app.route('/api/referencia/<int:referencia_id>/compartir_email', methods=['POST'])
+def compartir_referencia_email(referencia_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se recibió payload JSON."}), 400
+
+    email_dest = data.get('email_destinatario')
+    asunto_opc = data.get('asunto')
+    msg_adic_raw = data.get('mensaje_adicional', '')
+
+    if not email_dest:
+        return jsonify({"error": "Falta email del destinatario."}), 400
+
+    referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id).first()
+    if not referencia:
+        return jsonify({"error": "Referencia no encontrada."}), 404
+
+    if not HTML:
+        logging.error("WeasyPrint no está instalado. No se puede generar el PDF para el correo.")
+        return jsonify({"error": "La función para generar PDF no está disponible en el servidor."}), 500
+
+    if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
+        logging.error("Configuración de correo incompleta en el servidor.")
+        return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
+@app.route('/admin/panel-principal')
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_dashboard():
+    error = None
+    try:
+        # 1. Carga de Métricas para Widgets (Modo Demo)
+        stats = db.session.query(EstadisticasDemo).filter_by(id=1).first()
+
+        if stats:
+            total_minutes_recorded = stats.minutos_grabados
+            total_visitas_generadas = stats.visitas_generadas
+            total_pacientes_creados = stats.pacientes_creados
+            total_docs_created = stats.documentos_creados
+            total_docs_resumidos = stats.documentos_resumidos
+        else:
+            total_minutes_recorded, total_visitas_generadas, total_pacientes_creados, total_docs_created, total_docs_resumidos = 0, 0, 0, 0, 0
+
+        verified_doctors_count = User.query.filter_by(role='medico', is_verified=True).count()
+        unverified_doctors_count = User.query.filter_by(role='medico', is_verified=False).count()
+        prospects_count = ProspectoInteres.query.count()
+
+        # 2. Lógica de Búsqueda, Filtro y Unificación
+        page = request.args.get('page', 1, type=int)
+        search_query = request.args.get('search', '').strip().lower()
+        status_filter = request.args.get('status_filter', '')
+
+        contactos_unificados = []
+
+        doctors_query = User.query.filter_by(role='medico').all()
+        contactos_unificados.extend([{'type': 'doctor', 'data': d, 'date': d.created_at} for d in doctors_query])
+
+        prospects_query = ProspectoInteres.query.all()
+        contactos_unificados.extend([{'type': 'prospecto', 'data': p, 'date': p.fecha_registro} for p in prospects_query])
+
+        if search_query:
+            contactos_unificados = [
+                c for c in contactos_unificados
+                if search_query in (c['data'].nombre.lower() if c['data'].nombre else '') or
+                   search_query in (getattr(c['data'], 'apellidos', '').lower() if getattr(c['data'], 'apellidos', '') else '')
+            ]
+
+        if status_filter == 'verified':
+            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and c['data'].is_verified]
+        elif status_filter == 'not_verified':
+            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'doctor' and not c['data'].is_verified]
+        elif status_filter == 'prospecto':
+            contactos_unificados = [c for c in contactos_unificados if c['type'] == 'prospecto']
+
+        contactos_unificados.sort(key=lambda x: x['date'], reverse=True)
+
+        # 3. Paginación
+        pagination = ListPagination(items_list=contactos_unificados, page=page, per_page=10)
+
+    except Exception as e:
+        error = f"Ocurrió un error al cargar los datos: {str(e)}"
+        logging.error(f"Error en admin_dashboard: {e}", exc_info=True)
+        verified_doctors_count, unverified_doctors_count, prospects_count = 0, 0, 0
+        total_minutes_recorded, total_docs_created, total_pacientes_creados, total_visitas_generadas, total_docs_resumidos = 0, 0, 0, 0, 0
+        pagination = None
+
+    # 4. Renderizar Plantilla
+    return render_template('admin_dashboard.html',
+                           verified_doctors_count=verified_doctors_count,
+                           unverified_doctors_count=unverified_doctors_count,
+                           prospects_count=prospects_count,
+                           total_minutes_recorded=total_minutes_recorded,
+                           total_docs_created=total_docs_created,
+                           total_pacientes_creados=total_pacientes_creados,
+                           total_visitas_generadas=total_visitas_generadas,
+                           total_docs_resumidos=total_docs_resumidos,
+                           pagination=pagination,
+                           error=error)
+
+@app.route('/admin/test-emails')
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_test_emails():
+    """
+    Página para que los administradores envíen correos de prueba.
+    GET: Muestra la página con los botones de envío.
+    POST: Envía el correo de prueba seleccionado.
+    """
+    if request.method == 'POST':
+        # Obtener los datos comunes del formulario
+        recipient_email = request.form.get('recipient_email')
+        email_type = request.form.get('email_type')
+
+        if not recipient_email:
+            flash('El correo del destinatario es obligatorio.', 'danger')
+            return redirect(url_for('admin_test_emails'))
+
+        # Lógica para enviar el correo según el tipo seleccionado
+        try:
+            if email_type == 'welcome_doctor':
+                # --- Correo de Bienvenida a Doctor ---
+                # Usamos datos de ejemplo para rellenar la plantilla
+                login_url = url_for('login_route', _external=True)
+                current_year = datetime.now().year
+                
+                html_body = render_template(
+                'bienvenida_doctor.html',                    nombre_doctor="Dr. De Prueba",
+                    email_doctor=recipient_email,
+                    temp_password="password_de_prueba_123",
+                    login_url=login_url,
+                    year=current_year
+                )
+                msg = Message(
+                    subject="[PRUEBA] Bienvenido a Vitta Health Scribe",
+                    recipients=[recipient_email],
+                    html=html_body,
+                    sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER'])
+                )
+                mail.send(msg)
+                flash(f'Correo de bienvenida de doctor enviado a {recipient_email}.', 'success')
+
+            elif email_type == 'interest_confirmation':
+                # --- Correo de Confirmación de Interés ---
+                html_body = render_template(
+                    'confirmacion_interes.html', 
+                    nombre="Prospecto de Prueba"
+                )
+                msg = Message(
+                    subject="[PRUEBA] Confirmación de tu solicitud en Vitta Health",
+                    recipients=[recipient_email],
+                    html=html_body,
+                    sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER'])
+                )
+                mail.send(msg)
+                flash(f'Correo de confirmación de interés enviado a {recipient_email}.', 'success')
+            
+            else:
+                flash('Tipo de correo desconocido.', 'danger')
+
+        except Exception as e:
+            logging.error(f"Error enviando correo de prueba a {recipient_email}: {e}", exc_info=True)
+            flash(f'Error al enviar el correo: {e}', 'danger')
+
+        return redirect(url_for('admin_test_emails'))
+
+    # Para el método GET, simplemente renderiza la página
+    return render_template('admin/admin_test_emails.html')
+@app.route("/")
+def landing_page():
+    return render_template("landing_page.html")
+
+@app.route("/admin/prospect/<int:prospect_id>")
+@login_required
+@admin_required(allowed_roles=['admin']) # Asegúrate de especificar el rol correcto
+def admin_prospect_detail(prospect_id):
+    try:
+        # Se corrige la consulta para que busque en el modelo ProspectoInteres
+        prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
+        
+        if not prospect:
+            flash("Prospecto no encontrado.", "danger")
+            return redirect(url_for('admin_dashboard'))
+            
+        # El nombre del archivo de la plantilla ya es correcto
+        return render_template("admin_prospect_detail.html", prospect=prospect)
+        
+    except Exception as e:
+        logging.exception("❌ Error al mostrar detalles del prospecto:")
+        flash("Error al cargar los detalles del prospecto.", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/doctor/<int:doctor_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_doctor_detail(doctor_id):
+    """ Muestra y actualiza la página de detalles para un doctor específico. """
+    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
+
+    if request.method == 'POST':
+        # Lógica para guardar cambios del formulario (sin cambios)
+        doctor.nombre = request.form.get('nombre')
+        doctor.identificacion = request.form.get('identificacion')
+        doctor.email = request.form.get('email')
+        
+        prefijo = request.form.get('telefono_prefijo')
+        numero = request.form.get('telefono_numero')
+        doctor.telefono_profesional = f"{prefijo}{numero}" if prefijo and numero else None
+        
+        doctor.is_verified = 'is_verified' in request.form
+        
+        try:
+            db.session.commit()
+            flash('Perfil del doctor actualizado exitosamente.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el perfil: {e}', 'danger')
+            logging.error(f"Error actualizando doctor {doctor.id} desde admin: {e}")
+            
+        return redirect(url_for('admin_doctor_detail', doctor_id=doctor.id))
+
+    # --- LÓGICA MODIFICADA PARA MOSTRAR DATOS DE DEMO O REALES ---
+    if doctor.nombre in DEMO_STATS_PROFESIONALES:
+        # Si el doctor está en el diccionario de la demo, usa los datos fijos
+        stats = DEMO_STATS_PROFESIONALES[doctor.nombre]
+        patients_count = stats["pacientes"]
+        visits_count = stats["visitas"]
+        docs_resumidos_count = stats["resumidos"]
+        minutes_recorded = stats["minutos"]
+        documents_created_count = stats["docs_creados"]
+        
+    else:
+        # Si no es un doctor de la demo, calcula los datos reales
+        patients_count = Paciente.query.filter_by(creado_por_id=doctor.id).count()
+        visits_count = Visita.query.filter_by(medico_id=doctor.id).count()
+        docs_resumidos_count = Visita.query.filter_by(medico_id=doctor.id, tipo_visita='resumen_documentos').count()
+        
+        total_seconds = db.session.query(db.func.sum(Visita.duracion_grabacion_segundos)).filter_by(medico_id=doctor.id).scalar() or 0
+        minutes_recorded = round(total_seconds / 60)
+        
+        recetas_count = RecetaMedica.query.filter_by(medico_id=doctor.id).count()
+        referencias_count = ReferenciaMedica.query.filter_by(medico_referente_id=doctor.id).count()
+        planes_count = PlanNutricional.query.filter_by(medico_id=doctor.id).count()
+        documents_created_count = recetas_count + referencias_count + planes_count
+
+    doctor_metrics = {
+        'patients_count': patients_count,
+        'visits_count': visits_count,
+        'minutes_recorded': minutes_recorded,
+        'documents_created_count': documents_created_count,
+        'docs_resumidos_count': docs_resumidos_count
+    }    
+    return render_template('admin_doctor_detail.html', 
+                           doctor=doctor, 
+                           doctor_metrics=doctor_metrics)
+                           # Se ha eliminado 'recent_activity' de aquí
+@app.route('/admin/doctor/<int:doctor_id>/verify', methods=['POST'])
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_verify_doctor(doctor_id):
+    """ Verifica la cuenta de un doctor. """
+    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
+    doctor.is_verified = not doctor.is_verified # Cambia el estado (Verificar/Desverificar)
+    db.session.commit()
+    
+    status = "verificado" if doctor.is_verified else "puesto en no verificado"
+    flash(f'El doctor {doctor.nombre} ha sido {status}.', 'success')
+    return redirect(url_for('admin_doctor_detail_route', doctor_id=doctor.id))
+
+@app.route('/admin/doctor/<int:doctor_id>/delete', methods=['POST'])
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_delete_doctor(doctor_id):
+    """ Elimina la cuenta de un doctor. """
+    doctor = db.session.query(User).filter_by(id=doctor_id, role='medico').first_or_404()
+    doctor_name = doctor.nombre
+    
+    # Opcional: Eliminar datos asociados si es necesario (pacientes, visitas, etc.)
+    # Esta es una acción destructiva, úsala con cuidado.
+    # Paciente.query.filter_by(creado_por_id=doctor.id).delete()
+    
+    db.session.delete(doctor)
+    db.session.commit()
+    
+    flash(f'El doctor {doctor_name} y sus datos han sido eliminados permanentemente.', 'success')
+    return redirect(url_for('admin_dashboard'))
+@app.route('/admin/prospect/<int:prospect_id>/convert', methods=['POST'])
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_convert_prospect(prospect_id):
+    """
+    Convierte un prospecto en una cuenta de doctor verificada.
+    """
+    prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
+    if not prospect:
+        flash("Prospecto no encontrado.", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+    # 1. Verificar si ya existe un doctor con ese email
+    existing_user = User.query.filter_by(email=prospect.email).first()
+    if existing_user:
+        flash(f"Ya existe un usuario con el correo electrónico {prospect.email}. No se puede convertir el prospecto.", "warning")
+        return redirect(url_for('admin_prospect_detail', prospect_id=prospect.id))
+
+    try:
+        # 2. Generar una contraseña temporal segura
+        temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for i in range(12))
+
+        # 3. Crear el nuevo usuario (doctor) con los datos del prospecto
+        new_doctor = User(
+            nombre=f"{prospect.nombre} {prospect.apellidos}".strip(),
+            email=prospect.email,
+            role='medico',
+            is_verified=True,  # Se crea como verificado
+            especialidad=prospect.especialidad,
+            licencia_profesional=prospect.carne_medico,
+            identificacion=prospect.identificacion,
+            telefono_profesional=prospect.telefono,
+            lugar_trabajo=prospect.lugar_trabajo
+        )
+        new_doctor.set_password(temp_password)
+
+        db.session.add(new_doctor)
+        
+        # 4. (Opcional) Eliminar el prospecto original después de la conversión
+        db.session.delete(prospect)
+        
+        db.session.commit()
+
+        # 5. (Opcional pero recomendado) Enviar un correo de bienvenida al nuevo doctor
+        try:
+            # Renderizar la plantilla del correo de bienvenida
+            html_body = render_template(
+                'bienvenida_doctor.html', # Necesitarás crear esta plantilla de correo
+                nombre_doctor=new_doctor.nombre,
+                email_doctor=new_doctor.email,
+                temp_password=temp_password,
+                login_url=url_for('login_route', _external=True),
+                year=datetime.now().year
+            )
+            
+            msg = Message(
+                subject="¡Bienvenido a Vitta Health Scribe! Tu cuenta ha sido creada.",
+                sender=('Vitta Health Scribe', app.config['MAIL_DEFAULT_SENDER']),
+                recipients=[new_doctor.email],
+                html=html_body
+            )
+            mail.send(msg)
+            logging.info(f"Correo de bienvenida enviado al nuevo doctor: {new_doctor.email}")
+            flash(f"¡Doctor '{new_doctor.nombre}' creado exitosamente! Se ha enviado un correo de bienvenida con una contraseña temporal.", "success")
+        except Exception as e_mail:
+            logging.error(f"FALLO al enviar el correo de bienvenida para {new_doctor.email}: {e_mail}", exc_info=True)
+            flash("Doctor creado exitosamente, pero falló el envío del correo de bienvenida.", "warning")
+
+        # 6. Redirigir a la página de detalles del nuevo doctor
+        return redirect(url_for('admin_doctor_detail', doctor_id=new_doctor.id))
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error al convertir el prospecto ID {prospect_id} a doctor: {e}", exc_info=True)
+        flash("Ocurrió un error inesperado durante la conversión del prospecto.", "danger")
+        return redirect(url_for('admin_prospect_detail', prospect_id=prospect_id))
+@app.route('/admin/prospect/<int:prospect_id>/delete', methods=['POST'])
+@login_required
+@admin_required(allowed_roles=['admin'])
+def admin_delete_prospect(prospect_id):
+    """
+    Elimina un prospecto de interés de la base de datos.
+    """
+    try:
+        # Busca el prospecto en la base de datos
+        prospect = db.session.query(ProspectoInteres).filter_by(id=prospect_id).first()
+
+        if not prospect:
+            flash("Prospecto no encontrado para eliminar.", "danger")
+            return redirect(url_for('admin_dashboard'))
+
+        prospect_name = prospect.nombre
+        
+        # Elimina el registro del prospecto
+        db.session.delete(prospect)
+        db.session.commit()
+
+        flash(f"El prospecto '{prospect_name}' ha sido eliminado exitosamente.", "success")
+        logging.info(f"Prospecto ID {prospect_id} ({prospect_name}) eliminado por el admin {current_user.email}.")
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error al eliminar el prospecto ID {prospect_id}: {e}", exc_info=True)
+        flash("Ocurrió un error al eliminar el prospecto.", "danger")
+
+    # Redirige al panel principal de administración
+    return redirect(url_for('admin_dashboard'))
+
+@app.route("/vitta-health-pitch.html")
+def pitch_deck_route():
+    return render_template("vitta-health-pitch.html")
+              
