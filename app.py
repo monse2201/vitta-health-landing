@@ -2888,9 +2888,6 @@ def buscar_pacientes_api():
 
 @app.route('/api/iniciar_visita', methods=['POST'])
 def iniciar_visita():
-    # Eliminar la línea que usa current_user.id
-    # logging.info(f"Solicitud POST a /api/iniciar_visita por Usuario ID: {current_user.id}")
-
     try:
         data = request.get_json()
         if not data:
@@ -2907,12 +2904,10 @@ def iniciar_visita():
     paciente_creado_ahora = False
 
     if paciente_id_form:
-        # Se elimina el filtro por 'creado_por_id'
         paciente_obj = db.session.query(Paciente).filter_by(id=int(paciente_id_form)).first()
         if not paciente_obj:
             return jsonify({"error": "Paciente seleccionado no encontrado."}), 404
     elif paciente_nombre_form:
-        # Se elimina el filtro por 'creado_por_id'
         paciente_obj = db.session.query(Paciente).filter(
             Paciente.nombre.ilike(paciente_nombre_form)
         ).first()
@@ -2920,7 +2915,6 @@ def iniciar_visita():
             logging.info(f"Creando nuevo paciente '{paciente_nombre_form}'")
             paciente_obj = Paciente(
                 nombre=paciente_nombre_form
-                # Se elimina la asignación de 'creado_por_id'
             )
             db.session.add(paciente_obj)
             db.session.flush()
@@ -2933,7 +2927,6 @@ def iniciar_visita():
 
     nueva_visita = Visita(
         paciente_id=paciente_obj.id,
-        # Se elimina la asignación de 'medico_id'
         plantilla=plantilla_form,
         tipo_visita=tipo_visita_form,
         fecha=datetime.now(timezone.utc)
@@ -2948,15 +2941,14 @@ def iniciar_visita():
 
         reg_act = RegistroActividad(
             visita_id=nueva_visita.id,
-            # Se elimina la asignación de 'usuario_id' y 'usuario_nombre_display'
+            usuario_id=None,
+            usuario_nombre_display="Sistema anónimo",  # <-- CORRECCIÓN: Usar una cadena de texto en lugar de None
             accion="visita_creada",
             descripcion=f"Visita de tipo '{tipo_visita_form}' iniciada para el paciente '{paciente_obj.nombre}'."
         )
         db.session.add(reg_act)
         db.session.commit()
         
-        # La función `obtener_datos_overview` también debe ser modificada
-        # para no depender de `current_user`
         overview = obtener_datos_overview(nueva_visita.id)
         return jsonify({
             "message": "Visita iniciada con éxito.",
