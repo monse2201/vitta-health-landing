@@ -2873,14 +2873,13 @@ def buscar_pacientes_api():
     if not query_str or len(query_str) < 1:
         return jsonify([])
 
-    # Búsqueda en tu base de datos real por nombre o documento
+    # Búsqueda en la base de datos por nombre o documento sin filtrar por usuario.
     try:
         pacientes = Paciente.query.filter(
             db.or_(
                 Paciente.nombre.ilike(f'%{query_str}%'),
                 Paciente.identificacion_documento.ilike(f'%{query_str}%')
-            ),
-            Paciente.creado_por_id == current_user.id
+            )
         ).limit(10).all()
 
         resultados_json = [
@@ -2891,12 +2890,12 @@ def buscar_pacientes_api():
         return jsonify(resultados_json)
 
     except Exception as e:
-        logging.error(f"Error en la búsqueda de pacientes para el usuario {current_user.id}: {e}", exc_info=True)
+        # Se elimina el uso de current_user.id en el log, ya que no existe.
+        logging.error(f"Error en la búsqueda de pacientes: {e}", exc_info=True)
         return jsonify({"error": "Error al buscar pacientes."}), 500
 
 
-@app.route('/api/iniciar_visita', methods=['POST'])
-@login_required 
+@app.route('/api/iniciar_visita', methods=['POST']) 
 def iniciar_visita():
     logging.info(f"Solicitud POST a /api/iniciar_visita por Usuario ID: {current_user.id}")
 
@@ -2979,9 +2978,7 @@ def iniciar_visita():
         logging.error(f"Error al iniciar una nueva visita para el usuario {current_user.id}: {e}", exc_info=True)
         return jsonify({"error": "Error interno al iniciar la visita."}), 500
 
-@app.route('/api/subir_audio', methods=['POST'])
-@login_required
-def subir_audio():
+@app.route('/api/subir_audio', methods=['POST'])def subir_audio():
     if 'visita_actual_id' not in session:
         return jsonify({"error": "No hay visita activa. Por favor, inicie una nueva visita primero."}), 400
 
@@ -3055,7 +3052,7 @@ def subir_audio():
         })
 @app.route('/api/resumir_documentos_e_iniciar_visita', methods=['POST'])
 def api_resumir_documentos_e_iniciar_visita():
-    logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr} por Usuario ID: {current_user.id}")
+    logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr}")
     if not client_openai:
         return jsonify({"error": "Servicio IA (OpenAI) no configurado en el servidor.", "status": "error_servicio_ia", "resumen_generado": "IA no disponible."}), 503
 
@@ -3064,51 +3061,63 @@ def api_resumir_documentos_e_iniciar_visita():
     archivos = request.files.getlist('documentos')
     pac_id_sel = request.form.get('paciente_id')
     pac_ident_doc_form = request.form.get('paciente_identificacion_documento','').strip()
+
     if not archivos:
         return jsonify({"error": "No se seleccionaron archivos para resumir.", "status": "warning", "resumen_generado": "No se subieron archivos."}), 400
 
     pac_obj, pac_nuevo = None, False
     if pac_id_sel:
         try:
-            pac_obj = db.session.query(Paciente).filter_by(id=int(pac_id_sel), creado_por_id=current_user.id).first()
+            # Eliminar la restricción de `creado_por_id`
+            pac_obj = db.session.query(Paciente).filter_by(id=int(pac_id_sel)).first()
             if not pac_obj:
-                logging.warning(f"Intento de resumir docs para paciente ID {pac_id_sel} que no pertenece al usuario {current_user.id}.")
-                return jsonify({"error": "Paciente seleccionado no encontrado o no pertenece a este usuario."}), 404
-        except ValueError: 
+                logging.warning(f"Intento de resumir docs para paciente ID {pac_id_sel} que no pertenece al usuario.")
+                return jsonify({"error": "Paciente seleccionado no encontrado."}), 404
+        except ValueError:
             logging.warning(f"ID de paciente '{pac_id_sel}' no válido.")
+
     if not pac_obj:
         if pac_ident_doc_form:
-            pac_obj = Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form, creado_por_id=current_user.id).first()
+            # Eliminar la restricción de `creado_por_id`
+            pac_obj = Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form).first()
+
         if not pac_obj and pac_nom_form:
-            pac_obj = Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form), Paciente.creado_por_id == current_user.id).first()
+            # Eliminar la restricción de `creado_por_id`
+            pac_obj = Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form)).first()
+
         if not pac_obj and pac_nom_form:
-            if pac_ident_doc_form and Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form, creado_por_id=current_user.id).first():
-                return jsonify({"error": f"Documento '{pac_ident_doc_form}' ya pertenece a otro paciente suyo."}), 409
-            if Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form), Paciente.creado_por_id == current_user.id).first():
-                 return jsonify({"error": f"Ya existe un paciente con el nombre '{pac_nom_form}' para usted."}), 409
+            if pac_ident_doc_form and Paciente.query.filter_by(identificacion_documento=pac_ident_doc_form).first():
+                return jsonify({"error": f"Documento '{pac_ident_doc_form}' ya pertenece a otro paciente."}), 409
+
+            if Paciente.query.filter(Paciente.nombre.ilike(pac_nom_form)).first():
+                 return jsonify({"error": f"Ya existe un paciente con el nombre '{pac_nom_form}'."}), 409
+            
+            # Al crear un nuevo paciente, no se especifica el creador
             pac_obj = Paciente(
                 nombre=pac_nom_form,
                 identificacion_documento=pac_ident_doc_form or None,
-                creado_por_id=current_user.id
             )
-            db.session.add(pac_obj); pac_nuevo = True
+            db.session.add(pac_obj)
+            pac_nuevo = True
+
         elif not pac_obj and not pac_nom_form and (pac_ident_doc_form or pac_id_sel):
             return jsonify({"error": f"No se encontró paciente y no se proporcionó nombre para crear uno nuevo."}), 400
         elif not pac_obj and not pac_nom_form and not pac_ident_doc_form and not pac_id_sel:
              return jsonify({"error": "No se proporcionó información suficiente para identificar o crear un paciente."}), 400
-
     if not pac_obj:
-        logging.critical(f"CRITICAL: No patient object could be resolved or created for document summarization (user {current_user.id}).")
+        logging.critical(f"CRITICAL: No patient object could be resolved or created for document summarization.")
         return jsonify({"error": "Error crítico: no se pudo determinar el paciente."}), 500
+
     try:
         if pac_nuevo or db.session.is_modified(pac_obj):
             db.session.flush()
     except Exception as e_flush:
-        db.session.rollback(); logging.error(f"Error BD al hacer flush de paciente para resumen (usuario {current_user.id}): {e_flush}");
+        db.session.rollback()
+        logging.error(f"Error BD al hacer flush de paciente para resumen: {e_flush}")
         return jsonify({"error": "Error de base de datos al preparar paciente."}), 500
 
     textos_concat = f"Documentos para el paciente {pac_obj.nombre} (ID: {pac_obj.identificacion_documento or 'N/A'}):\n\n"
-    rutas_arch_guardados_db = [] # Rutas que se guardarán en la BD (con .enc si aplica)
+    rutas_arch_guardados_db = []
     nombres_arch_originales_procesados = []
     nombres_arch_omitidos = []
     allowed_ext = {'.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx', '.txt', '.md'}
@@ -3123,14 +3132,11 @@ def api_resumir_documentos_e_iniciar_visita():
                 textos_concat += f"[Archivo '{original_fname_secure}' omitido (tipo de archivo '{ext_original}' no soportado)]\n\n"
                 continue
 
-            # guardar_archivo_subido ya maneja el cifrado y la extensión .enc if está activo
             ruta_guardada_con_enc_si_aplica = guardar_archivo_subido(arch_file, 'REGISTROS_FOLDER')
 
             if ruta_guardada_con_enc_si_aplica:
                 rutas_arch_guardados_db.append(ruta_guardada_con_enc_si_aplica)
                 nombres_arch_originales_procesados.append(original_fname_secure)
-                # procesar_archivo_subido se encarga de leer (y desencriptar si es necesario)
-                # y luego extraer texto.
                 texto_extraido_arch = procesar_archivo_subido(ruta_guardada_con_enc_si_aplica, original_fname_secure)
                 textos_concat += f"--- INICIO DEL DOCUMENTO: {original_fname_secure} ---\n{texto_extraido_arch or '[Contenido no pudo ser extraído o está vacío]'}\n--- FIN DEL DOCUMENTO: {original_fname_secure} ---\n\n"
             else:
@@ -3138,7 +3144,7 @@ def api_resumir_documentos_e_iniciar_visita():
                 textos_concat += f"[Error al guardar el archivo '{original_fname_secure}']\n\n"
 
     res_ia_docs, res_ia_docs_status = "No se generó resumen.", "no_generado"
-    if not rutas_arch_guardados_db and not nombres_arch_omitidos: # rutas_arch_guardados_db ahora contiene las rutas con .enc
+    if not rutas_arch_guardados_db and not nombres_arch_omitidos:
         res_ia_docs = "No se proporcionaron archivos válidos para procesar."
         res_ia_docs_status = "error_no_archivos_validos"
     elif client_openai and (textos_concat.strip() and len(textos_concat.strip()) > len(f"Documentos para el paciente {pac_obj.nombre} (ID: {pac_obj.identificacion_documento or 'N/A'}):\n\n".strip())):
@@ -3146,48 +3152,63 @@ def api_resumir_documentos_e_iniciar_visita():
         if any(err_indicator in res_ia_docs for err_indicator in ["[Error API OpenAI", "[Error inesperado", "[Error de configuración", "[Resumen con IA no disponible"]):
             res_ia_docs_status = "error_ia"
         else:
-            res_ia_docs_status = "exito_ia" # Marcar como éxito si no hay error de IA
+            res_ia_docs_status = "exito_ia"
     elif not client_openai:
         res_ia_docs = "[Resumen con IA no disponible (servicio no configurado).]"
         res_ia_docs_status = "error_servicio_ia"
 
     try:
         arch_adj_json_db = json.dumps({
-            "procesados": rutas_arch_guardados_db, # Guardar rutas con .enc si están cifradas
-            "original_filenames": nombres_arch_originales_procesados, # Guardar nombres originales para referencia
+            "procesados": rutas_arch_guardados_db,
+            "original_filenames": nombres_arch_originales_procesados,
             "omitidos": nombres_arch_omitidos
         })
         n_visita_res = Visita(
             paciente_id=pac_obj.id,
-            medico_id=current_user.id,
+            # Eliminar la asignación a medico_id
             plantilla=plantilla_form or "Resumen Documentos General",
             tipo_visita="resumen_documentos",
-            resumen_ai=res_ia_docs, # Considerar cifrar
-            archivos_adjuntos=arch_adj_json_db, # Contiene rutas a archivos (posiblemente cifrados)
+            resumen_ai=res_ia_docs,
+            archivos_adjuntos=arch_adj_json_db,
             fecha=datetime.now(timezone.utc)
         )
         db.session.add(n_visita_res)
         db.session.commit()
         session['visita_actual_id'] = n_visita_res.id
+
         desc_log = f"Resumen de {len(rutas_arch_guardados_db)} documento(s) generado para '{pac_obj.nombre}'. Estado IA: {res_ia_docs_status}."
         if nombres_arch_omitidos: desc_log += f" Omitidos: {len(nombres_arch_omitidos)}."
+
+        # Registrar actividad sin un usuario específico
         reg_act = RegistroActividad(
-            visita_id=n_visita_res.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
-            accion="resumen_registros_generado", descripcion=desc_log
+            visita_id=n_visita_res.id,
+            usuario_id=None,
+            usuario_nombre_display="Sistema anónimo",
+            accion="resumen_registros_generado",
+            descripcion=desc_log
         )
-        db.session.add(reg_act); db.session.commit()
+        db.session.add(reg_act)
+        db.session.commit()
+
         final_msg = f"Proceso de resumen de documentos completado para '{pac_obj.nombre}'. Documentos procesados: {len(rutas_arch_guardados_db)}."
         if nombres_arch_omitidos: final_msg += f" Documentos omitidos: {len(nombres_arch_omitidos)}."
+
+        # Se debe modificar la función `obtener_datos_overview` para que no dependa del `current_user`
         return jsonify({
-            "message": final_msg, "status": res_ia_docs_status, "visita_id": n_visita_res.id,
-            "paciente_id": pac_obj.id, "paciente_nombre": pac_obj.nombre, "paciente_creado_ahora": pac_nuevo,
+            "message": final_msg,
+            "status": res_ia_docs_status,
+            "visita_id": n_visita_res.id,
+            "paciente_id": pac_obj.id,
+            "paciente_nombre": pac_obj.nombre,
+            "paciente_creado_ahora": pac_nuevo,
             "resumen_generado": res_ia_docs,
-            "archivos_procesados_nombres": nombres_arch_originales_procesados, # Mostrar nombres originales en UI
+            "archivos_procesados_nombres": nombres_arch_originales_procesados,
             "archivos_omitidos": nombres_arch_omitidos,
             "overview": obtener_datos_overview(n_visita_res.id)
         }), 200
     except Exception as e_db:
-        db.session.rollback(); logging.error(f"Error BD al guardar visita de resumen (usuario {current_user.id}): {e_db}", exc_info=True)
+        db.session.rollback()
+        logging.error(f"Error BD al guardar visita de resumen: {e_db}", exc_info=True)
         return jsonify({"error": "Error de base de datos al guardar la visita de resumen."}), 500
 @app.route('/chat-bot')
 def chat_bot():
@@ -3639,41 +3660,32 @@ def api_visita_overview(visita_id):
 
 @app.route('/api/eliminar_visita/<int:visita_id_param>', methods=['POST'])
 def eliminar_visita_completa(visita_id_param):
-    visita = db.session.query(Visita).filter_by(id=visita_id_param, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id_param).first()
     if not visita:
-        return jsonify({"error": f"Visita ID {visita_id_param} no encontrada o no tiene permiso para eliminarla."}), 404
+        return jsonify({"error": f"Visita ID {visita_id_param} no encontrada."}), 404
     try:
         pac_nombre = visita.paciente.nombre if visita.paciente else "Desconocido"
-        logging.info(f"Iniciando eliminación de Visita ID {visita_id_param} para el paciente '{pac_nombre}' por Usuario ID: {current_user.id}")
-        _eliminar_archivos_asociados_a_visita(visita) # Esto ya maneja archivos posiblemente cifrados
-        for plan_obj in visita.planes_nutricionales_visita.all():
-            if plan_obj.ruta_pdf_almacenada:
-                ruta_pdf_completa = os.path.join(app.config['UPLOAD_FOLDER'], plan_obj.ruta_pdf_almacenada)
-                if os.path.exists(ruta_pdf_completa):
-                    try:
-                        os.remove(ruta_pdf_completa)
-                        logging.info(f"PDF de Plan Nutricional (asociado a visita, {'CIFRADO' if plan_obj.ruta_pdf_almacenada.endswith('.enc') else 'NO CIFRADO'}) eliminado: {ruta_pdf_completa}")
-                    except Exception as e_del_pdf_plan:
-                        logging.error(f"Error eliminando PDF de Plan Nutricional '{ruta_pdf_completa}' asociado a visita: {e_del_pdf_plan}")
+        logging.info(f"Iniciando eliminación de Visita ID {visita_id_param} para el paciente '{pac_nombre}'")
+        _eliminar_archivos_asociados_a_visita(visita)
         db.session.delete(visita)
         db.session.commit()
         reg_act = RegistroActividad(
             visita_id=None,
-            usuario_id=current_user.id,
-            usuario_nombre_display=current_user.nombre,
+            usuario_id=None,  # No hay un usuario específico para el registro
+            usuario_nombre_display="Sistema anónimo",
             accion="visita_eliminada",
             descripcion=f"Visita ID {visita_id_param} (Paciente: {pac_nombre}) eliminada."
         )
         db.session.add(reg_act)
         db.session.commit()
 
-        logging.info(f"Visita ID {visita_id_param} y sus archivos asociados eliminados exitosamente por Usuario ID: {current_user.id}.")
+        logging.info(f"Visita ID {visita_id_param} y sus archivos asociados eliminados exitosamente.")
         return jsonify({"message": f"Visita ID {visita_id_param} (Paciente: {pac_nombre}) eliminada exitosamente."}), 200
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al eliminar la visita ID {visita_id_param} (Usuario {current_user.id}): {e}", exc_info=True)
+        logging.error(f"Error al eliminar la visita ID {visita_id_param}: {e}", exc_info=True)
         return jsonify({"error": "Error al eliminar la visita."}), 500
-
+        
 @app.route('/api/compartir_visita_email', methods=['POST'])
 def compartir_visita_email():
     data = request.get_json()
@@ -3683,12 +3695,12 @@ def compartir_visita_email():
     asunto_opc = data.get('asunto')
     msg_adic_raw = data.get('message_adicional', '')
     idioma_email_sel = data.get('idioma_email', '')
-    image_data_b64 = data.get('image_data') # <-- NUEVO: Captura la imagen base64
+    image_data_b64 = data.get('image_data')
 
     if not visita_id or not email_dest:
         return jsonify({"error": "Falta ID de visita o email del destinatario."}), 400
 
-    visita = db.session.query(Visita).filter_by(id=visita_id, medico_id=current_user.id).first()
+    visita = db.session.query(Visita).filter_by(id=visita_id).first()
     if not visita: return jsonify({"error": "Visita no encontrada o no tiene permiso para compartirla."}), 404
 
     if not all([app.config.get('MAIL_SERVER'), app.config.get('MAIL_USERNAME'), app.config.get('MAIL_PASSWORD')]):
