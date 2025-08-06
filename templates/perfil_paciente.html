@@ -811,7 +811,7 @@ body {
                                     {% endif %}
                                 </span>
                             </div>
-                             <a href="{{ url_for('historial_visitas', visita_reciente=visita.id) }}" class="timeline-item-details-link" title="View {{ visit.tipo_visita | lower }}">
+                             <a href="{{ url_for('historial_visitas', visita_reciente=visit.id) }}" class="timeline-item-details-link" title="View {{ visit.tipo_visita | lower }}">
                                 <i class="fas fa-external-link-alt"></i> View
                             </a>
                         </div>

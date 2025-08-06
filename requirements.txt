@@ -139,3 +139,4 @@ zopfli==0.2.3
 openai==1.35.13
 tiktoken==0.7.0
 transformers==4.42.1
+sentencepiece
