@@ -3760,9 +3760,6 @@ def compartir_referencia_email(referencia_id):
         return jsonify({"error": "No se recibió payload JSON."}), 400
 
     email_dest = data.get('email_destinatario')
-    asunto_opc = data.get('asunto')
-    msg_adic_raw = data.get('mensaje_adicional', '')
-
     if not email_dest:
         return jsonify({"error": "Falta email del destinatario."}), 400
 
@@ -3778,17 +3775,16 @@ def compartir_referencia_email(referencia_id):
         logging.error("Configuración de correo incompleta en el servidor.")
         return jsonify({"error": "Servicio de correo no configurado en el servidor."}), 503
 
-    # --- ADDED THIS PART TO MAKE THE FUNCTION COMPLETE ---
-    # Placeholder for the actual email sending logic which seems to be missing.
-    # This makes the function valid and will resolve the IndentationError.
+    # --- LÓGICA AGREGADA PARA COMPLETAR LA FUNCIÓN ---
+    # Este bloque hace que la función sea sintácticamente correcta y resuelve el error.
     try:
-        # NOTE: The logic to generate the PDF and send the email should go here.
-        # For now, we return a success message to fix the crash.
-        logging.info(f"Received request to share reference {referencia_id} with {email_dest}. Logic to send email is pending.")
-        return jsonify({"message": "Functionality to send reference by email is under development."}), 200
+        # Aquí iría tu lógica para crear el PDF de la referencia y enviarlo.
+        # Por ahora, se devuelve un mensaje indicando que la función está en desarrollo.
+        logging.info(f"Petición para compartir referencia {referencia_id} con {email_dest}. La lógica de envío está pendiente.")
+        return jsonify({"message": "La funcionalidad para enviar referencias por correo está en desarrollo."}), 200
     except Exception as e:
-        logging.error(f"Error in incomplete function 'compartir_referencia_email': {e}", exc_info=True)
-        return jsonify({"error": "An unexpected error occurred."}), 500
+        logging.error(f"Error en la función incompleta 'compartir_referencia_email': {e}", exc_info=True)
+        return jsonify({"error": "Ocurrió un error inesperado."}), 500
 @app.route('/admin/panel-principal')
 @login_required
 @admin_required(allowed_roles=['admin'])
