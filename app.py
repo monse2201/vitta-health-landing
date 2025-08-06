@@ -2870,106 +2870,93 @@ def buscar_pacientes_api():
     query_str = request.args.get('q', '').strip()
     if not query_str or len(query_str) < 1:
         return jsonify([])
-    try:
-        pacientes_encontrados = Paciente.query.filter(
-            Paciente.creado_por_id == current_user.id,
-            or_(
-                Paciente.nombre.ilike(f"%{query_str}%"),
-                Paciente.identificacion_documento.ilike(f"%{query_str}%")
-            )
-        ).order_by(Paciente.nombre).limit(10).all()
-        resultados_json = [{"id": p.id, "nombre": p.nombre, "identificacion_documento": p.identificacion_documento} for p in pacientes_encontrados]
-        logging.info(f"Búsqueda de pacientes por '{query_str}' (usuario {current_user.id}): {len(resultados_json)} resultados.")
-    except Exception as e:
-        logging.error(f"Error en /api/buscar_pacientes con query '{query_str}' (usuario {current_user.id}): {e}", exc_info=True)
-        return jsonify({"error": "Error interno al buscar pacientes."}), 500
+    
+    # Simulación de una búsqueda en un entorno de demo sin DB
+    pacientes_demo = [
+        {"id": 1, "nombre": "Juan Perez", "identificacion_documento": "12345"},
+        {"id": 2, "nombre": "Ana Garcia", "identificacion_documento": "54321"},
+        {"id": 3, "nombre": "Pedro Rodriguez", "identificacion_documento": "98765"},
+    ]
+    
+    # Filtra los pacientes demo por el query
+    resultados_json = [
+        p for p in pacientes_demo 
+        if query_str.lower() in p['nombre'].lower() or \
+           (p['identificacion_documento'] and query_str.lower() in p['identificacion_documento'].lower())
+    ]
+    
+    logging.info(f"Búsqueda de pacientes por '{query_str}' (demo): {len(resultados_json)} resultados.")
     return jsonify(resultados_json)
 
 @app.route('/api/iniciar_visita', methods=['POST'])
 def iniciar_visita():
-    # Logging with a check for authenticated users
-    user_id_for_log = current_user.id if current_user.is_authenticated else 'Anonymous'
-    logging.info(f"Solicitud POST a /api/iniciar_visita desde IP: {request.remote_addr} por Usuario ID: {user_id_for_log}")
+    logging.info(f"Solicitud POST a /api/iniciar_visita (modo demo)")
 
     try:
         data = request.get_json()
         if not data:
-            logging.warning("/api/iniciar_visita: No se recibió payload JSON.")
             return jsonify({"error": "No se recibió payload JSON."}), 400
     except Exception as e:
-        logging.error(f"Error al parsear JSON en /api/iniciar_visita: {e}. Content-Type: {request.content_type}", exc_info=True)
-        return jsonify({"error": "Solicitud JSON malformada o Content-Type incorrecto."}), 400
+        return jsonify({"error": "Solicitud JSON malformada."}), 400
 
-    paciente_nombre_form = data.get('paciente_nombre','').strip()
+    paciente_nombre_form = data.get('paciente_nombre', '').strip()
     plantilla_form = data.get('plantilla')
     tipo_visita_form = data.get('tipo_visita', 'audio_consulta')
-    
-    paciente_obj = None
-    paciente_fue_creado = False
 
-    # Since the user is not authenticated, we cannot associate the patient with a user ID.
-    # The patient can be a generic "Anonymous" or "Guest" patient, or you can require a name.
     if not paciente_nombre_form:
-        return jsonify({"error": "No se proporcionó información suficiente para identificar o crear un paciente."}), 400
+        return jsonify({"error": "El nombre del paciente es requerido."}), 400
 
-    # For anonymous users, we can create or find a patient not tied to a specific user.
-    # A better approach might be to associate anonymous data to a special 'guest' user ID.
-    # For now, we'll create a new patient for each new session.
-    paciente_obj = Paciente(
-        nombre=paciente_nombre_form,
-        identificacion_documento=data.get('paciente_identificacion_documento','').strip() or None,
-        # IMPORTANT: This patient will NOT be linked to any user.
-        # This requires a change in the Paciente model: creado_por_id should be nullable=True.
-        # Or you could associate it with a special "guest" user account.
-        creado_por_id=None # Assuming the column is nullable. If not, this will crash.
-    )
-    db.session.add(paciente_obj)
-    paciente_fue_creado = True
-    logging.info(f"Nuevo paciente '{paciente_nombre_form}' será creado por un usuario anónimo.")
+    # Simular la creación de una visita y un paciente sin usar la base de datos
+    visita_id_demo = 9999
+    
+    # Guardar en la sesión los datos de la visita para que otras funciones puedan acceder
+    session['visita_actual_id'] = visita_id_demo
+    session['demo_visita_data'] = {
+        'paciente_id': 9999,
+        'paciente_nombre': paciente_nombre_form,
+        'plantilla': plantilla_form,
+        'tipo_visita': tipo_visita_form,
+        'transcripcion': None,
+        'resumen_ai': None,
+        'notas_ai': None,
+        'idioma_detectado': None
+    }
+    
+    logging.info(f"Visita ID {visita_id_demo} iniciada en modo demo para el paciente '{paciente_nombre_form}'.")
+    
+    # La función 'obtener_datos_overview' también necesita ser adaptada
+    # para leer desde la sesión en lugar de la base de datos.
+    overview = obtener_datos_overview_demo(visita_id_demo)
 
-    if not paciente_obj:
-        logging.critical(f"CRITICAL: No patient object could be resolved or created. Cannot start visit.")
-        return jsonify({"error": "Error crítico: no se pudo determinar el paciente para la visita."}), 500
+    return jsonify({
+        "message": "Visita iniciada con éxito en modo demo.", 
+        "visita_id": visita_id_demo,
+        "paciente_nombre": paciente_nombre_form, 
+        "paciente_id": 9999,
+        "paciente_creado_ahora": True,
+        "overview": overview
+    }), 200
 
-    try:
-        db.session.flush() # Get the new patient's ID
-        nueva_visita_db = Visita(
-            paciente_id=paciente_obj.id,
-            # IMPORTANT: The medico_id will be NULL for anonymous users.
-            # This requires the Visita model's medico_id column to be nullable=True.
-            medico_id=None, 
-            plantilla=plantilla_form,
-            tipo_visita=tipo_visita_form,
-            fecha=datetime.now(timezone.utc)
-        )
-        db.session.add(nueva_visita_db)
-        db.session.commit()
-
-        # The log entry will not have a user ID.
-        desc_log = f"Visita de tipo '{tipo_visita_form.replace('_',' ').capitalize()}' iniciada para el paciente '{paciente_obj.nombre}' por un usuario anónimo."
-        reg_act = RegistroActividad(
-            visita_id=nueva_visita_db.id, usuario_id=None, usuario_nombre_display='Anónimo',
-            accion="visita_creada", descripcion=desc_log
-        )
-        db.session.add(reg_act)
-        db.session.commit()
-
-        session['visita_actual_id'] = nueva_visita_db.id
-        logging.info(f"Visita ID {nueva_visita_db.id} iniciada para Paciente ID {paciente_obj.id}. Plantilla: {plantilla_form}, Tipo: {tipo_visita_form}, por un usuario anónimo.")
+# Necesitas una versión adaptada de `obtener_datos_overview` que lea de la sesión
+def obtener_datos_overview_demo(visita_id_param):
+    visita_data = session.get('demo_visita_data')
+    if not visita_data:
+        return {'resumen': "Error: No hay visita demo activa."}
         
-        # The overview call needs to handle anonymous users as well.
-        # You'll need to modify `obtener_datos_overview` to accept `None` for the user ID.
-        return jsonify({
-            "message": "Visita iniciada con éxito.", "visita_id": nueva_visita_db.id,
-            "paciente_nombre": paciente_obj.nombre, "paciente_id": paciente_obj.id,
-            "paciente_creado_ahora": paciente_fue_creado,
-            # The overview for an anonymous user will not contain personal data.
-            "overview": obtener_datos_overview(nueva_visita_db.id)
-        }), 200
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error crítico al iniciar visita (paciente: {paciente_obj.nombre if paciente_obj else 'N/A'}, usuario anónimo): {e}", exc_info=True)
-        return jsonify({"error": f"No se pudo iniciar la visita: {str(e)}"}), 500
+    return {
+        'staff': "Demo User",
+        'paciente': visita_data['paciente_nombre'],
+        'paciente_id': visita_data['paciente_id'],
+        'resumen': visita_data['resumen_ai'] or "No disponible",
+        'activity_logs': [],
+        'idioma_detectado': visita_data['idioma_detectado'],
+        'notas_ai': visita_data['notas_ai'],
+        'plantilla': visita_data['plantilla'],
+        'tipo_visita': visita_data['tipo_visita'],
+        'resumen_ai': visita_data['resumen_ai'],
+        'fecha': datetime.now(timezone.utc).isoformat(),
+        'visita_id': visita_id_param
+    }
 @app.route('/api/resumir_documentos_e_iniciar_visita', methods=['POST'])
 def api_resumir_documentos_e_iniciar_visita():
     logging.info(f"Solicitud a /api/resumir_documentos_e_iniciar_visita desde IP: {request.remote_addr} por Usuario ID: {current_user.id}")
