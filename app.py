@@ -1491,8 +1491,9 @@ def extraer_medicamentos_con_ia(transcripcion, idioma_detectado='es'):
         "\n{\"medicamentos\": [{\"nombre\": \"Ibuprofen 600mg Tablets\", \"cantidad\": \"1 box (30 tabs)\", \"dosis\": \"1 tablet\", \"frecuencia\": \"Every 8 hours if pain occurs\", \"duracion\": \"For 5 days\", \"indicaciones\": \"Take with food\"}], \"diagnostico_sugerido\": \"Tension headache\"}"
         "\nRespond ONLY with the JSON object."
     )
-        prompt_usuario = f"Clinical transcript:\n---\n{transcripcion}\n---\nExtract the prescription information in the specified JSON format."    logging.info(f"Solicitando extracción de medicamentos de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar con prompt mejorado.")
-    try:
+        prompt_usuario = f"Clinical transcript:\n---\n{transcripcion}\n---\nExtract the prescription information in the specified JSON format."
+        logging.info(f"Solicitando extracción de medicamentos de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar con prompt mejorado.")
+        try:
         model_to_use = "gpt-4o"
         datos_extraidos = _llamar_openai_chat(prompt_sistema, prompt_usuario,
                                               modelo_chat=model_to_use, max_tokens_salida=1500,
