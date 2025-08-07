@@ -2644,50 +2644,29 @@ def nueva_referencia_para_visita(visita_id):
             
     if request.method == 'POST':
         especialidad = request.form.get('especialidad_referida','').strip()
-        # <-- CORRECCIÓN 1: Capturar el motivo de la referencia del formulario
         motivo = request.form.get('motivo_referencia', '').strip()
 
-        # <-- CORRECCIÓN 2: Validar que ambos campos obligatorios no estén vacíos
         if not especialidad or not motivo:
             if not especialidad:
                 flash('La especialidad referida es obligatoria.', 'danger')
             if not motivo:
                 flash('El motivo de la referencia es obligatorio.', 'danger')
-            return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+            # Corrección aquí
+            return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
         
         try:
-            nueva_referencia_db = ReferenciaMedica(
-                visita_id=visita.id,
-                paciente_id=visita.paciente_id,
-                medico_referente_id=current_user.id,
-                especialidad_referida=especialidad,
-                # <-- CORRECCIÓN 3: Guardar el motivo en la base de datos
-                motivo_referencia=motivo,
-                medico_referido_nombre=request.form.get('medico_referido_nombre', '').strip() or None,
-                institucion_referida=request.form.get('institucion_referida', '').strip() or None,
-                resumen_clinico_relevante=request.form.get('resumen_clinico_relevante', '').strip() or None, 
-                estudios_adjuntos_info=request.form.get('estudios_adjuntos_info', '').strip() or None, 
-                estado=request.form.get('estado', 'pendiente')
-            )
-            db.session.add(nueva_referencia_db)
-            db.session.commit()
-            reg_act = RegistroActividad(
-                visita_id=visita.id, usuario_id=current_user.id, usuario_nombre_display=current_user.nombre,
-                accion="referencia_creada",
-                descripcion=f"Referencia (ID: {nueva_referencia_db.id}) a {especialidad} creada para '{visita.paciente.nombre}'."
-            )
-            db.session.add(reg_act)
-            db.session.commit()
+            # ... (lógica de creación de referencia) ...
             flash('Referencia médica creada exitosamente.', 'success')
             return redirect(url_for('ver_referencia', referencia_id=nueva_referencia_db.id))
         except Exception as e:
             db.session.rollback()
             logging.error(f"Error al crear referencia médica para visita {visita_id} (usuario {current_user.id}): {e}", exc_info=True)
             flash('Error al crear la referencia médica.', 'danger')
-            return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
+            # Corrección aquí
+            return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
     
-    return render_template('crear_referencia.html', visita=visita, patient=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
-@app.route('/referencia/<int:referencia_id>')
+    # Corrección aquí
+    return render_template('crear_referencia.html', visita=visita, paciente=visita.paciente, css_file="css/crear_documento.css", form_data=form_data_to_pass)
 @login_required
 def ver_referencia(referencia_id):
     referencia = db.session.query(ReferenciaMedica).filter_by(id=referencia_id, medico_referente_id=current_user.id).first()
@@ -4550,7 +4529,7 @@ def admin_delete_prospect(prospect_id):
 
 @app.route("/vitta-health-pitch.html")
 def pitch_deck_route():
-    return render_template("vitta-health-pitch.html")
+    return render_template("vitta-health-pitch-investors.html")
 
 @app.cli.command("create-demo-user")
 def create_demo_user():
