@@ -1065,7 +1065,8 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
 
             translator = pipeline("translation", model=model_name, tokenizer=model_name, device=device_str)
             translation_pipelines_cache[pipeline_key] = translator
-            logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_str}).")        
+            logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_arg}).")
+        
         chunks = []
         if len(texto_original) > max_chunk_length:
             sentences = re.split(r'(?<=[.!?])\s+', texto_original)
@@ -4639,21 +4640,5 @@ def reset_password(email, new_password):
 @login_required
 def change_password_route():
     return render_template('change_password.html')
-def run_model_preloading():
-    """
-    Función que se ejecutará en segundo plano para no bloquear el inicio.
-    """
-    with app.app_context():
-        logging.info("Iniciando la precarga de modelos en un hilo de segundo plano...")
-        try:
-            precargar_modelos_traduccion()
-        except Exception as e:
-            logging.error(f"Error catastrófico durante la precarga de modelos en segundo plano: {e}", exc_info=True)
-
-logging.info("Iniciando el hilo de precarga de modelos...")
-preload_thread = threading.Thread(target=run_model_preloading)
-preload_thread.daemon = True
-preload_thread.start()
-
-if __name__ == '__main__':
-    socketio.run(app, debug=debug_mode)
+with app.app_context():
+    precargar_modelos_traduccion()
