@@ -424,9 +424,6 @@ else:
     logging.info("SocketIO initialized WITHOUT message queue Redis. Async_mode auto-detected.")
 socketio = SocketIO(app, **socketio_kwargs)
 
-with app.app_context():
-    precargar_modelos_traduccion()
-
 # --- Modelos de Base de Datos ---
 class User(db.Model, UserMixin):
     __tablename__='user'
@@ -4643,3 +4640,5 @@ def reset_password(email, new_password):
 @login_required
 def change_password_route():
     return render_template('change_password.html')
+with app.app_context():
+    precargar_modelos_traduccion()
