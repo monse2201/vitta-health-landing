@@ -2771,7 +2771,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
 
     # Se inicializa el diccionario de datos del formulario para que sea persistente en la solicitud GET.
     # Esto es crucial para que el JavaScript pueda leer las sugerencias.
-    form_data_dict = {}
+    form_data_dict = {'suggested_plan_data': {}} # <-- CORRECCIÓN CLAVE: Inicializar con un diccionario vacío
 
     if request.method == 'GET':
         # Esta es la lógica para precargar el formulario al inicio.
@@ -2790,17 +2790,22 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
 
     if request.method == 'POST':
         form_data_dict = request.form.copy()
+        # CORRECCIÓN: Para evitar el error en el return, se re-inicializa la clave
+        # 'suggested_plan_data' si no existe en el formulario POST.
+        form_data_dict['suggested_plan_data'] = form_data_dict.get('suggested_plan_data', {})
+        
         contenido_json_final_str = request.form.get('final_json_content_str')
         # La clave para las notas generales debe ser 'general_notes' para coincidir con el formulario.
         notas_adicionales_form = request.form.get('general_notes', '').strip()
         
         if not contenido_json_final_str:
             flash('El contenido del plan nutricional (JSON) es obligatorio.', 'danger')
+            # Se asegura de que la variable exista antes de renderizar
             return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
         
         try:
             parsed_contenido = json.loads(contenido_json_final_str)
-            if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('main_goal'):
+            if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('objetivo_principal'): # CORRECCIÓN: Se revisa la clave en español
                  flash('El JSON del plan nutricional no tiene la estructura requerida.', 'danger')
                  raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
 
@@ -2845,7 +2850,9 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
         # En caso de error, se vuelve a la página con los datos del formulario que ya se llenaron.
         return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
 
+    # CORRECCIÓN: También se asegura de que la variable exista en la carga inicial de la página (GET)
     return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
+
 
 @app.route('/plan_nutricional/<int:plan_id>')
 @login_required
