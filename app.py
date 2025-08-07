@@ -1065,8 +1065,7 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
 
             translator = pipeline("translation", model=model_name, tokenizer=model_name, device=device_str)
             translation_pipelines_cache[pipeline_key] = translator
-            logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_arg}).")
-        
+            logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_str}).")        
         chunks = []
         if len(texto_original) > max_chunk_length:
             sentences = re.split(r'(?<=[.!?])\s+', texto_original)
