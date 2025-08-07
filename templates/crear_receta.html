@@ -29,7 +29,7 @@
         padding: 0;
     }
 
-    .container-plan {
+    .container-receta {
         max-width: 900px;
         margin: 30px auto;
         padding: 30px 35px;
@@ -38,7 +38,7 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
-    .container-plan h1 {
+    .container-receta h1 {
         font-size: 24px;
         font-weight: 600;
         color: #111827;
@@ -49,7 +49,7 @@
         align-items: center;
         gap: 12px;
     }
-    .container-plan h1 .fa-utensils {
+    .container-receta h1 .fa-prescription-bottle-alt {
         color: var(--vitta-blue);
     }
 
@@ -80,7 +80,7 @@
     .microphone-container {
         display: flex;
         align-items: center;
-        margin-left: auto; /* Push to the right */
+        margin-left: auto;
         gap: 8px;
     }
 
@@ -152,23 +152,26 @@
         min-height: 90px;
     }
 
-    .food-item {
+    .medication-item {
         display: grid;
-        grid-template-columns: 2fr 1.2fr auto;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
         gap: 15px;
         padding: 20px 0;
         border-bottom: 1px dashed var(--border-color);
         align-items: flex-end;
     }
-    .food-item:last-child {
+    .medication-item:last-child {
         border-bottom: none;
         padding-bottom: 10px;
     }
-    .food-item .form-group {
+    .medication-item .form-group {
         margin-bottom: 0;
     }
+    .medication-item .form-group.full-width {
+        grid-column: 1 / -1;
+    }
 
-    .btn-add-food {
+    .btn-add-medication {
         background-color: var(--white);
         color: var(--vitta-blue);
         border: 1px solid var(--vitta-blue);
@@ -183,12 +186,12 @@
         align-items: center;
         gap: 6px;
     }
-    .btn-add-food:hover {
+    .btn-add-medication:hover {
         background-color: var(--vitta-blue-light);
         border-color: var(--vitta-blue-dark);
         color: var(--vitta-blue-dark);
     }
-    .btn-remove-food {
+    .btn-remove-medication {
         background-color: var(--danger-red);
         color: white;
         border: none;
@@ -202,7 +205,7 @@
         align-items: center;
         justify-content: center;
     }
-    .btn-remove-food:hover {
+    .btn-remove-medication:hover {
         background-color: var(--danger-red-dark);
     }
 
@@ -215,7 +218,7 @@
         gap: 12px;
     }
 
-    .btn-plan {
+    .btn-receta {
         padding: 12px 20px;
         border: none;
         border-radius: 6px;
@@ -228,22 +231,22 @@
         gap: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .btn-plan:hover {
+    .btn-receta:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .btn-plan.primary {
+    .btn-receta.primary {
         background-color: var(--vitta-blue);
         color: white;
     }
-    .btn-plan.primary:hover {
+    .btn-receta.primary:hover {
         background-color: var(--vitta-blue-dark);
     }
-    .btn-plan.secondary {
+    .btn-receta.secondary {
         background-color: #6c757d;
         color: white;
     }
-    .btn-plan.secondary:hover {
+    .btn-receta.secondary:hover {
         background-color: #5a6268;
     }
     
@@ -266,40 +269,18 @@
         color: #003063;
     }
 
-    .meal-header-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-    .meal-header-row .form-group {
-        margin-bottom: 0;
-        flex-grow: 1;
-    }
-    .input-with-microphone {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .input-with-microphone .form-group {
-        flex-grow: 1;
-        margin-bottom: 0;
-    }
     @media (max-width: 768px) {
-        .container-plan { margin: 15px; padding: 20px; }
-        .food-item { grid-template-columns: 1fr; gap: 10px; align-items: stretch; padding: 15px 0; }
-        .btn-remove-food { width: 100%; margin-top: 10px; }
+        .container-receta { margin: 15px; padding: 20px; }
+        .medication-item { grid-template-columns: 1fr; gap: 10px; align-items: stretch; padding: 15px 0; }
+        .medication-item .form-group.full-width { grid-column: auto; }
+        .btn-remove-medication { width: 100%; margin-top: 10px; }
         .form-section h2 { flex-direction: column; align-items: flex-start; }
         .microphone-container { width: 100%; justify-content: flex-start; margin-left: 0; margin-top: 10px; }
-        .input-with-microphone { flex-direction: column; align-items: flex-start; }
-        .input-with-microphone .form-group { width: 100%; }
-        .meal-header-row .form-group { flex-basis: 100%; }
     }
 </style>
 
-<div class="container-plan">
-    <h1><i class="fas fa-utensils"></i> Create New Nutrition Plan</h1>
+<div class="container-receta">
+    <h1><i class="fas fa-prescription-bottle-alt"></i> Create New Prescription</h1>
 
     {% if paciente and visita %}
     <div class="patient-info">
@@ -309,335 +290,181 @@
     </div>
     {% endif %}
 
-    <form id="createNutritionPlanForm" method="POST" action="{{ url_for('nuevo_plan_nutricional_para_visita_page', visita_id=visita.id) }}">
-        
+    <form id="createPrescriptionForm" method="POST" action="{{ url_for('nueva_receta_para_visita', visita_id=visita.id) }}">
         <input type="hidden" name="visita_id" value="{{ visita.id }}">
         <input type="hidden" name="paciente_id" value="{{ paciente.id }}">
-        <input type="hidden" name="final_json_content_str" id="final_json_content_str">
+        <input type="hidden" name="medications_json_str" id="medications_json_str">
 
         <div class="form-section">
-            <h2><i class="fas fa-bullseye"></i> Plan Details</h2>
-            <div class="input-with-microphone">
-                <div class="form-group">
-                    <label for="plan_name">Plan Name/Main Goal</label>
-                    <input type="text" id="plan_name" name="plan_name" placeholder="E.g., Muscle Gain Plan, Hypocaloric Diet Week 1" required 
-                           value="{{ form_data.plan_name if form_data and form_data.plan_name else '' }}">
-                </div>
-                <button type="button" class="btn-microphone" onclick="startRecognitionPlanName()">
-                    <i class="fas fa-microphone"></i>
-                </button>
+            <h2><i class="fas fa-notes-medical"></i> General Prescription Information</h2>
+            <div class="form-group">
+                <label for="related_diagnosis">Related Diagnosis</label>
+                <input type="text" id="related_diagnosis" name="related_diagnosis" 
+                       placeholder="E.g., Cefalea tensional" 
+                       value="{{ form_data.diagnostico_relacionado if form_data and form_data.diagnostico_relacionado else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="validity_days">Validity (days)</label>
+                <input type="number" id="validity_days" name="validity_days" 
+                       placeholder="E.g., 30" value="30">
+            </div>
+            <div class="form-group">
+                <label for="additional_notes_prescription">Additional Notes for the Patient</label>
+                <textarea id="additional_notes_prescription" name="additional_notes_prescription" rows="4" 
+                          placeholder="E.g., In case of fever, you can take a fever reducer..."></textarea>
             </div>
         </div>
 
-        {% set meals_display_info = [
-            { 'id': 'breakfast', 'display_name': 'Breakfast', 'icon': 'fa-mug-saucer', 'ai_name': 'Breakfast', 'default_time_24hr': '07:00' },
-            { 'id': 'lunch', 'display_name': 'Lunch', 'icon': 'fa-drumstick-bite', 'ai_name': 'Lunch', 'default_time_24hr': '12:00' },
-            { 'id': 'dinner', 'display_name': 'Dinner', 'icon': 'fa-bowl-rice', 'ai_name': 'Dinner', 'default_time_24hr': '19:00' },
-            { 'id': 'snacks', 'display_name': 'Snacks', 'icon': 'fa-apple-alt', 'primary_ai_name': 'Mid-Morning Snack', 'secondary_ai_name': 'Afternoon Snack', 'default_time_24hr': '14:00' }
-        ] %}
-
-        {% for meal_info in meals_display_info %}
-        <div class="form-section" id="section-{{ meal_info.id }}">
-            <h2>
-                <i class="fas {{ meal_info.icon }}"></i> {{ meal_info.display_name }}
-                <div class="microphone-container">
-                    <button type="button" class="btn-microphone" onclick="startRecognition('{{ meal_info.id }}')">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <span class="microphone-info-text">(Click to dictate a <strong>new</strong> food item)</span>
-                </div>
-            </h2>
-
-            <div class="meal-header-row">
-                <div class="form-group">
-                    <label for="suggested_time_{{ meal_info.id }}">Suggested Time</label>
-                    <select id="suggested_time_{{ meal_info.id }}" name="{{ meal_info.id }}_suggested_time">
-                        <option value="">Select time</option>
-                        {% for hour in range(0, 24) %}
-                            {% for minute in [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] %}
-                                {% set formatted_hour_24 = '%02d' % hour %}
-                                {% set formatted_minute = '%02d' % minute %}
-                                {% set time_24hr = formatted_hour_24 + ':' + formatted_minute %}
-                                {% set ampm = 'AM' if hour < 12 else 'PM' %}
-                                {% set display_hour = hour if hour > 0 and hour < 13 else 12 if hour == 0 or hour == 12 else hour - 12 %}
-                                {% set display_time = '%02d' % display_hour + ':' + formatted_minute + ' ' + ampm %}
-                                <option value="{{ time_24hr }}"
-                                        {% if form_data and form_data.meal_times and form_data.meal_times[meal_info.ai_name] == time_24hr %}selected{% elif not form_data or not form_data.meal_times or not form_data.meal_times[meal_info.ai_name] and meal_info.default_time_24hr == time_24hr %}selected{% endif %}>
-                                    {{ display_time }}
-                                </option>
-                            {% endfor %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div id="food-items-{{ meal_info.id }}">
-                <div class="food-item">
+        <div class="form-section">
+            <h2><i class="fas fa-pills"></i> Medications</h2>
+            <div id="medication-items-container">
+                <div class="medication-item">
                     <div class="form-group">
-                        <label>Menu/Description</label>
-                        <input type="text" name="{{ meal_info.id }}_foods[0][description]" placeholder="E.g.: Oatmeal with fruit">
+                        <label>Medication Name</label>
+                        <input type="text" name="medications[0][nombre]" placeholder="E.g.: Ibuprofen 600mg Tablets">
                     </div>
                     <div class="form-group">
-                        <label>Notes/Calories</label>
-                        <input type="text" name="{{ meal_info.id }}_foods[0][notes]" placeholder="Notes">
+                        <label>Quantity</label>
+                        <input type="text" name="medications[0][cantidad]" placeholder="E.g.: 1 box (30 tabs)">
                     </div>
-                    <div></div> {# Empty div to maintain grid structure #}
+                    <div class="form-group">
+                        <label>Dose</label>
+                        <input type="text" name="medications[0][dosis]" placeholder="E.g.: 1 tablet">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency</label>
+                        <input type="text" name="medications[0][frecuencia]" placeholder="E.g.: Every 8 hours">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <input type="text" name="medications[0][duracion]" placeholder="E.g.: For 5 days">
+                    </div>
+                    <div></div> <div class="form-group full-width">
+                        <label>Instructions</label>
+                        <input type="text" name="medications[0][indicaciones]" placeholder="E.g.: Take with food">
+                    </div>
                 </div>
             </div>
-            <button type="button" class="btn-add-food" onclick="addFoodItem('{{ meal_info.id }}')">
-                <i class="fas fa-plus"></i> Add Food Item
+            <button type="button" class="btn-add-medication" onclick="addMedicationItem()">
+                <i class="fas fa-plus"></i> Add Medication
             </button>
-        </div>
-        {% endfor %}
-
-        <div class="form-section">
-            <h2><i class="fas fa-clipboard-list"></i> Notes & Recommendations</h2>
-            <div class="input-with-microphone">
-                <div class="form-group">
-                    <label for="general_notes">General instructions, shopping list, etc.</label>
-                    <textarea id="general_notes" name="general_notes" rows="5" placeholder="E.g.: Drink 2 liters of water daily, avoid refined sugars...">{{ form_data.general_notes if form_data and form_data.general_notes else '' }}</textarea>
-                </div>
-                 <button type="button" class="btn-microphone" onclick="startRecognition('general_notes')">
-                    <i class="fas fa-microphone"></i>
-                </button>
-            </div>
         </div>
 
         <div class="form-actions">
-            <button type="button" class="btn-plan secondary" onclick="window.history.back();">
+            <button type="button" class="btn-receta secondary" onclick="window.history.back();">
                 <i class="fas fa-arrow-left"></i> Go Back
             </button>
-            <button type="submit" class="btn-plan primary">
-                <i class="fas fa-save"></i> Save Nutrition Plan
+            <button type="submit" class="btn-receta primary">
+                <i class="fas fa-save"></i> Save Prescription
             </button>
         </div>
     </form>
 </div>
 
 <script>
-    let itemCounters = {};
-    let recognition; // Variable to store the SpeechRecognition instance
+    let medicationItemCounter = 0;
 
-    // Initialize item counters on page load
     document.addEventListener('DOMContentLoaded', function() {
-        {% for meal_info in meals_display_info %}
-            itemCounters['{{ meal_info.id }}'] = document.getElementById(`food-items-{{ meal_info.id }}`).getElementsByClassName('food-item').length;
-        {% endfor %}
+        medicationItemCounter = document.getElementById('medication-items-container').getElementsByClassName('medication-item').length;
 
-        // --- CORRECCIÓN APLICADA AQUÍ ---
-        // Recibimos un objeto JS directamente desde el backend gracias al filtro tojson.
-        // No se necesita JSON.parse(). La clave del objeto también ha sido corregida.
-        let suggestions = {{ form_data.suggested_plan_data | default({}) | tojson | safe }};
+        // Aquí es donde se carga la información sugerida por la IA
+        let suggestedMedicationsJSON = {{ form_data.medicamentos_sugeridos_json | default('[]') | tojson | safe }};
+        let suggestedMedications;
 
-        if (Object.keys(suggestions).length > 0 && !suggestions.error) {
-            console.log("Applying suggestions to form:", suggestions);
+        try {
+            suggestedMedications = JSON.parse(suggestedMedicationsJSON);
+        } catch (e) {
+            console.error("Error parsing suggested medications JSON:", e);
+            suggestedMedications = [];
+        }
 
-            if (suggestions.objetivo_principal) {
-                document.getElementById('plan_name').value = suggestions.objetivo_principal;
-            }
-            
-            let generalNotesText = "";
-            if (suggestions.recomendaciones_generales && Array.isArray(suggestions.recomendaciones_generales)) {
-                generalNotesText += suggestions.recomendaciones_generales.join("\n") + "\n\n";
-            }
-            if (suggestions.notas_adicionales_plan) {
-                generalNotesText += suggestions.notas_adicionales_plan;
-            }
-            document.getElementById('general_notes').value = generalNotesText.trim();
+        // Si hay medicamentos sugeridos y la lista no es vacía
+        if (suggestedMedications.length > 0) {
+            // Limpiar los campos por defecto para llenarlos con las sugerencias
+            document.getElementById('medication-items-container').innerHTML = '';
+            medicationItemCounter = 0;
 
-            if (suggestions.meal_times) {
-                for (const mealAIName in suggestions.meal_times) {
-                    let htmlIdPart = mealAIName.toLowerCase().replace(/\s+/g, '-');
-                    if (['mid-morning-snack', 'afternoon-snack'].includes(htmlIdPart)) {
-                        htmlIdPart = 'snacks';
-                    }
-                    const selectElement = document.getElementById(`suggested_time_${htmlIdPart}`);
-                    if (selectElement && suggestions.meal_times[mealAIName]) {
-                        selectElement.value = suggestions.meal_times[mealAIName];
-                    }
+            suggestedMedications.forEach(medication => {
+                const newItemElement = addMedicationItem();
+                if (newItemElement) {
+                    newItemElement.querySelector('input[name$="[nombre]"]').value = medication.nombre || '';
+                    newItemElement.querySelector('input[name$="[cantidad]"]').value = medication.cantidad || '';
+                    newItemElement.querySelector('input[name$="[dosis]"]').value = medication.dosis || '';
+                    newItemElement.querySelector('input[name$="[frecuencia]"]').value = medication.frecuencia || '';
+                    newItemElement.querySelector('input[name$="[duracion]"]').value = medication.duracion || '';
+                    newItemElement.querySelector('input[name$="[indicaciones]"]').value = medication.indicaciones || '';
                 }
-            }
-
-            const dailyMealPlanAI = suggestions.plan_diario_tipo;
-            if (dailyMealPlanAI) {
-                const mealsInfo = [
-                    { id: 'breakfast', aiNames: ['Desayuno'] },
-                    { id: 'lunch', aiNames: ['Almuerzo'] },
-                    { id: 'dinner', aiNames: ['Cena'] },
-                    { id: 'snacks', aiNames: ['Media Mañana', 'Merienda'] }
-                ];
-
-                mealsInfo.forEach(mealHtmlInfo => {
-                    const container = document.getElementById(`food-items-${mealHtmlInfo.id}`);
-                    if (!container) return;
-
-                    let optionsForThisSection = [];
-                    mealHtmlInfo.aiNames.forEach(aiName => {
-                        if (dailyMealPlanAI[aiName] && Array.isArray(dailyMealPlanAI[aiName])) {
-                            optionsForThisSection = optionsForThisSection.concat(dailyMealPlanAI[aiName]);
-                        }
-                    });
-                    
-                    if (optionsForThisSection.length > 0) {
-                        container.innerHTML = ''; // Clear default items
-                        itemCounters[mealHtmlInfo.id] = 0; // Reset counter
-
-                        optionsForThisSection.forEach(optionStr => {
-                            const newItemElement = addFoodItem(mealHtmlInfo.id, 'ia');
-                            if (newItemElement) {
-                                const descInput = newItemElement.querySelector('input[name$="[description]"]');
-                                const notesInput = newItemElement.querySelector('input[name$="[notes]"]');
-                                
-                                const match = optionStr.match(/^(Option\s\d+:\s*)(.*?)(?:\s*-\s*(.+))?$/);
-                                if (match) {
-                                    descInput.value = (match[1] + (match[2] || '')).trim();
-                                    notesInput.value = (match[3] || '').trim();
-                                } else {
-                                    descInput.value = optionStr;
-                                }
-                            }
-                        });
-                    }
-                });
-            }
+            });
         }
     });
 
-    function addFoodItem(mealType, source = 'manual', recognizedText = '') {
-        if (itemCounters[mealType] === undefined) {
-            itemCounters[mealType] = document.getElementById(`food-items-${mealType}`).getElementsByClassName('food-item').length;
-        }
-        const container = document.getElementById(`food-items-${mealType}`);
-        const newItemIndex = itemCounters[mealType]++;
+    function addMedicationItem() {
+        const container = document.getElementById('medication-items-container');
+        const newItemIndex = medicationItemCounter++;
         
         const newItem = document.createElement('div');
-        newItem.classList.add('food-item');
-        const initialDescription = (source === 'speech') ? recognizedText : '';
+        newItem.classList.add('medication-item');
 
         newItem.innerHTML = `
             <div class="form-group">
-                <label>Menu/Description</label>
-                <input type="text" name="${mealType}_foods[${newItemIndex}][description]" placeholder="Description" value="${initialDescription}">
+                <label>Medication Name</label>
+                <input type="text" name="medications[${newItemIndex}][nombre]" placeholder="E.g.: Ibuprofen 600mg Tablets">
             </div>
             <div class="form-group">
-                <label>Notes/Calories</label>
-                <input type="text" name="${mealType}_foods[${newItemIndex}][notes]" placeholder="Notes">
+                <label>Quantity</label>
+                <input type="text" name="medications[${newItemIndex}][cantidad]" placeholder="E.g.: 1 box (30 tabs)">
+            </div>
+            <div class="form-group">
+                <label>Dose</label>
+                <input type="text" name="medications[${newItemIndex}][dosis]" placeholder="E.g.: 1 tablet">
+            </div>
+            <div class="form-group">
+                <label>Frequency</label>
+                <input type="text" name="medications[${newItemIndex}][frecuencia]" placeholder="E.g.: Every 8 hours">
+            </div>
+            <div class="form-group">
+                <label>Duration</label>
+                <input type="text" name="medications[${newItemIndex}][duracion]" placeholder="E.g.: For 5 days">
             </div>
             <div>
-                <button type="button" class="btn-remove-food" onclick="removeFoodItem(this)" title="Remove food item">
+                <button type="button" class="btn-remove-medication" onclick="removeMedicationItem(this)" title="Remove medication">
                     <i class="fas fa-trash-alt"></i>
                 </button>
+            </div>
+            <div class="form-group full-width">
+                <label>Instructions</label>
+                <input type="text" name="medications[${newItemIndex}][indicaciones]" placeholder="E.g.: Take with food">
             </div>
         `;
         container.appendChild(newItem);
         return newItem;
     }
 
-    function removeFoodItem(button) {
-        button.closest('.food-item').remove();
+    function removeMedicationItem(button) {
+        button.closest('.medication-item').remove();
     }
 
-    function startRecognitionPlanName() {
-        startRecognition('plan_name');
-    }
-
-    function startRecognition(targetSectionId) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            alert('Your browser does not support the Speech Recognition API. Please use Chrome or Edge for this feature.');
-            return;
-        }
-
-        if (recognition && recognition.serviceURI) {
-            recognition.stop();
-        }
-
-        recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        recognition.onresult = function(event) {
-            const speechResult = event.results[0][0].transcript;
-            console.log('Speech result:', speechResult);
-
-            if (targetSectionId === 'plan_name') {
-                 document.getElementById('plan_name').value = speechResult;
-            } else if (targetSectionId === 'general_notes') {
-                const notesTextarea = document.getElementById('general_notes');
-                notesTextarea.value += (notesTextarea.value.trim() ? '\n' : '') + speechResult;
-            } else {
-                addFoodItem(targetSectionId, 'speech', speechResult);
-            }
-        };
-
-        recognition.onerror = function(event) {
-            console.error('Speech recognition error:', event.error);
-            alert('Speech recognition error: ' + event.error + '. Make sure your microphone is connected and permissions are granted.');
-        };
-        
-        recognition.start();
-        let alertMessage = 'Speak now ';
-        if (targetSectionId === 'plan_name') alertMessage += 'to dictate the Plan Name/Main Goal.';
-        else if (targetSectionId === 'general_notes') alertMessage += 'to dictate general notes and recommendations.';
-        else {
-            const sectionDisplayName = document.querySelector(`#section-${targetSectionId} h2`).childNodes[1].nodeValue.trim();
-            alertMessage += `to dictate a food item for the ${sectionDisplayName} section.`;
-        }
-        alert(alertMessage);
-    }
-
-    document.getElementById('createNutritionPlanForm').addEventListener('submit', function(event) {
+    document.getElementById('createPrescriptionForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
-        const planData = {
-            objetivo_principal: document.getElementById('plan_name').value || "",
-            recomendaciones_generales: [],
-            plan_diario_tipo: {},
-            notas_adicionales_plan: "",
-            meal_times: {}
-        };
-        
-        const mealsInfo = [
-            { id: 'breakfast', ai_name: 'Desayuno' },
-            { id: 'lunch', ai_name: 'Almuerzo' },
-            { id: 'dinner', ai_name: 'Cena' },
-            { id: 'snacks', ai_name: 'Snacks' }
-        ];
-
-        mealsInfo.forEach(mealInfo => {
-            const selectElement = document.getElementById(`suggested_time_${mealInfo.id}`);
-            if (selectElement && selectElement.value) {
-                planData.meal_times[mealInfo.ai_name] = selectElement.value;
+        const medications = [];
+        const items = document.getElementsByClassName('medication-item');
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const medicationName = item.querySelector('input[name$="[nombre]"]').value.trim();
+            if (medicationName) {
+                medications.push({
+                    nombre: medicationName,
+                    cantidad: item.querySelector('input[name$="[cantidad]"]').value.trim(),
+                    dosis: item.querySelector('input[name$="[dosis]"]').value.trim(),
+                    frecuencia: item.querySelector('input[name$="[frecuencia]"]').value.trim(),
+                    duracion: item.querySelector('input[name$="[duracion]"]').value.trim(),
+                    indicaciones: item.querySelector('input[name$="[indicaciones]"]').value.trim()
+                });
             }
-        });
-
-        const generalNotesValue = document.getElementById('general_notes').value;
-        const separateNotes = generalNotesValue.split('\n').filter(line => line.trim().length > 0);
-        planData.recomendaciones_generales = separateNotes.filter(line => /^\s*[-*]/.test(line));
-        planData.notas_adicionales_plan = separateNotes.filter(line => !/^\s*[-*]/.test(line)).join('\n');
-
-        mealsInfo.forEach(mealInfo => {
-            const mealAIName = mealInfo.ai_name;
-            planData.plan_diario_tipo[mealAIName] = [];
-            const container = document.getElementById(`food-items-${mealInfo.id}`);
-            if (container) {
-                const items = container.getElementsByClassName('food-item');
-                for (let i = 0; i < items.length; i++) {
-                    const descInput = items[i].querySelector('input[name$="[description]"]');
-                    const notesInput = items[i].querySelector('input[name$="[notes]"]');
-                    if (descInput && descInput.value.trim()) {
-                        let optionString = descInput.value.trim();
-                        if (notesInput && notesInput.value.trim()) {
-                            optionString += ` - ${notesInput.value.trim()}`;
-                        }
-                        planData.plan_diario_tipo[mealAIName].push(optionString);
-                    }
-                }
-            }
-        });
+        }
         
-        document.getElementById('final_json_content_str').value = JSON.stringify(planData, null, 2);
+        document.getElementById('medications_json_str').value = JSON.stringify(medications);
         this.submit();
     });
 </script>
