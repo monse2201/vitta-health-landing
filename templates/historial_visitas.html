@@ -741,159 +741,7 @@
     .template-link i {
         font-size: 1.1em;
     }
-
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-
-    .popup-overlay.visible {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .popup-content {
-        background-color: #ffffff;
-        padding: 25px 30px;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        width: 90%;
-        max-width: 500px;
-        position: relative;
-        transform: scale(0.9);
-        transition: transform 0.3s ease;
-        max-height: 90vh; 
-        overflow-y: auto; 
-    }
-
-    .popup-overlay.visible .popup-content {
-        transform: scale(1);
-    }
-
-    .popup-close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 28px;
-        color: #888;
-        cursor: pointer;
-        line-height: 1;
-    }
-
-    .popup-close:hover {
-        color: #333;
-    }
-
-    .popup-content h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 20px;
-        color: #333;
-        font-weight: 600;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-    }
-
-    .popup-content p {
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: #555;
-    }
-
-    .popup-content p strong {
-        color: #007bff;
-    }
-
-    .form-group {
-        margin-bottom: 18px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 13px;
-        color: #454545;
-        font-weight: 500;
-    }
-
-    .form-group input[type="email"],
-    .form-group input[type="text"],
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        outline: none;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-        min-height: 70px;
-    }
-
-    .popup-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 25px;
-        padding-top: 15px;
-        border-top: 1px solid #eee;
-        flex-wrap: wrap; 
-    }
-
-    .feedback-message {
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        font-size: 13px;
-        text-align: center;
-        display: none;
-    }
-
-    .feedback-message.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-        display: block;
-    }
-
-    .feedback-message.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-        display: block;
-    }
-
-    .feedback-message.processing {
-        background-color: #e7f3ff;
-        color: #004085;
-        border: 1px solid #b8daff;
-        display: block;
-    }
-
+    
     @media (min-width: 768px) {
         .main-container {
             flex-direction: row; 
@@ -918,9 +766,6 @@
             margin-left: 10px; 
         }
 
-        .popup-actions {
-            flex-wrap: nowrap;
-        }
     }
 
     @media (max-width: 767px) {
@@ -1143,44 +988,6 @@
         .visit-id-display {
             font-size: 11px;
         }
-
-        .popup-content {
-            padding: 20px 25px;
-        }
-
-        .popup-content h3 {
-            font-size: 18px;
-        }
-
-        .popup-content p {
-            font-size: 13px;
-        }
-
-        .form-group label {
-            font-size: 11px;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            padding: 8px 10px;
-            font-size: 13px;
-        }
-
-        .popup-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-            flex-wrap: wrap; 
-        }
-
-        .popup-actions .btn-action {
-            width: 100%;
-            justify-content: center; 
-        }
     }
 </style>
 
@@ -1253,7 +1060,7 @@
                 {{ action_for_specialty.text | safe if action_for_specialty.text else 'Specialty Action' }}
             </button>
             {% endif %}
-            <button class="btn-action secondary" id="btn-share-visit" disabled><i class="fas fa-share-alt"></i> Share</button>
+            
             <button class="btn-action menu secondary"><i class="fas fa-ellipsis-h"></i></button>
         </div>
 
@@ -1359,35 +1166,6 @@
         </div>
     </div>
 
-    <div id="share-email-popup" class="popup-overlay">
-        <div class="popup-content">
-            <button class="popup-close" onclick="closeSharePopup()">&times;</button>
-            <h3>Share Visit Details</h3>
-            <p>Information for the current visit for patient: <strong id="popup-patient-name">N/A</strong> will be shared.</p>
-            <form id="share-email-form" onsubmit="sendShareEmail(event)">
-                <div id="share-feedback" class="feedback-message"></div>
-                <div class="form-group">
-                    <label for="recipient-email">Recipient's Email:</label>
-                    <input type="email" id="recipient-email" name="email_destinatario" required>
-                </div>
-                <div class="form-group">
-                    <label for="optional-subject">Subject (Optional):</label>
-                    <input type="text" id="optional-subject" name="asunto_opcional" placeholder="Medical Visit Details">
-                </div>
-                <div class="form-group">
-                    <label for="additional-message">Additional Message (Optional):</label>
-                    <textarea id="additional-message" name="mensaje_adicional" rows="3" placeholder="Hi, I'm sharing the visit details with you..."></textarea>
-                </div>
-                <div class="popup-actions">
-                    <button type="button" class="btn-action secondary" onclick="closeSharePopup()">Cancel</button>
-                    <button type="submit" class="btn-action" id="btn-send-email-popup">
-                        <i class="fas fa-paper-plane"></i> Send Email
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
 <script>
@@ -1418,13 +1196,6 @@
 
     let currentlySelectedVisit = null;
     let originalTranscriptionHtml = '';
-
-    const sharePopup = document.getElementById('share-email-popup');
-    const btnShareVisit = document.getElementById('btn-share-visit');
-    const shareEmailForm = document.getElementById('share-email-form');
-    const shareFeedbackDiv = document.getElementById('share-feedback');
-    const patientNamePopup = document.getElementById('popup-patient-name');
-    const btnSendEmailPopup = document.getElementById('btn-send-email-popup');
 
     const formDeleteVisit = document.getElementById('form-delete-visit');
     const btnDeleteFullVisit = document.getElementById('btn-delete-visit-complete');
@@ -1472,8 +1243,6 @@
         disableEditMode();
 
         switchTab(null, 'overview');
-
-        if (btnShareVisit) btnShareVisit.disabled = !currentlySelectedVisit;
 
         if (btnCreatePrescriptionVisit) {
             btnCreatePrescriptionVisit.disabled = !currentlySelectedVisit;
@@ -2119,82 +1888,7 @@
             visitListDiv.innerHTML = '<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 14px; padding: 20px;">No visits match the filters.</p>';
         }
     }
-
-    if (btnShareVisit) {
-        btnShareVisit.addEventListener('click', () => {
-            if (!currentlySelectedVisit) {
-                alert("Please select a visit to share.");
-                return;
-            }
-            const currentVisitDetail = visitDetails[currentlySelectedVisit];
-            patientNamePopup.textContent = currentVisitDetail ? currentVisitDetail.paciente_nombre : "N/A";
-            sharePopup.classList.add('visible');
-            document.getElementById('recipient-email').focus();
-        });
-    }
-
-    function closeSharePopup() {
-        sharePopup.classList.remove('visible');
-        if (shareEmailForm) shareEmailForm.reset();
-        if (shareFeedbackDiv) {
-            shareFeedbackDiv.style.display = 'none';
-            shareFeedbackDiv.className = 'feedback-message';
-        }
-        if (btnSendEmailPopup) {
-            btnSendEmailPopup.disabled = false;
-            btnSendEmailPopup.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
-        }
-    }
-
-    async function sendShareEmail(event) {
-        event.preventDefault();
-        if (!currentlySelectedVisit) {
-            showShareFeedback("No visit selected.", "error");
-            return;
-        }
-        const recipientEmail = document.getElementById('recipient-email').value;
-        const optionalSubject = document.getElementById('optional-subject').value;
-        const additionalMessage = document.getElementById('additional-message').value;
-
-        btnSendEmailPopup.disabled = true;
-        btnSendEmailPopup.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        showShareFeedback("Sending email...", "processing");
-
-        try {
-            const payload = {
-                visita_id: currentlySelectedVisit,
-                email_destinatario: recipientEmail,
-                asunto: optionalSubject,
-                mensaje_adicional: additionalMessage
-            };
-
-            const response = await fetch('/api/compartir_visita_email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await response.json();
-            if (response.ok) {
-                showShareFeedback(data.mensaje || "Email sent.", "success");
-            } else {
-                showShareFeedback(data.error || "Error sending email.", "error");
-            }
-        } catch (error) {
-            console.error("Error sending email:", error);
-            showShareFeedback("Network or server error.", "error");
-        } finally {
-            btnSendEmailPopup.disabled = false;
-            btnSendEmailPopup.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
-        }
-    }
-
-    function showShareFeedback(message, type) {
-        shareFeedbackDiv.textContent = message;
-        shareFeedbackDiv.className = 'feedback-message';
-        shareFeedbackDiv.classList.add(type);
-        shareFeedbackDiv.style.display = 'block';
-    }
-
+    
     function initializeHistoryPage() {
         console.log("[HISTORY] Initializing page.");
 
@@ -2226,8 +1920,7 @@
             btnSpecialtyAction.disabled = true;
             btnSpecialtyAction.onclick = null;
         }
-
-        if (btnShareVisit) btnShareVisit.disabled = true;
+        
         if (btnCreatePrescriptionVisit) btnCreatePrescriptionVisit.disabled = true;
         
         if (document.getElementById('form-delete-visit') && btnDeleteFullVisit) {
@@ -2252,19 +1945,7 @@
         }
 
         disableEditMode();
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape" && sharePopup && sharePopup.classList.contains('visible')) {
-                closeSharePopup();
-            }
-        });
-        if (sharePopup) {
-            sharePopup.addEventListener('click', function(event) {
-                if (event.target === sharePopup) {
-                    closeSharePopup();
-                }
-            });
-        }
+        
         console.log("[HISTORY] Initialization complete.");
 
         const recentVisitId = '{{ visita_reciente.id if visita_reciente else 'null' }}';
@@ -2283,3 +1964,5 @@
     document.addEventListener('DOMContentLoaded', initializeHistoryPage);
 </script>
 {% endblock %}
+}
+en este nuevo codigo agrega la opcion de eliminar y ademas de un boton de share que me envie a la pagina de whatsapp con un mensaje predeterminado

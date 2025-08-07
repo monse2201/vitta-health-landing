@@ -106,11 +106,11 @@
         padding-bottom: 0.75rem;
         border-bottom: 2px solid var(--vitta-blue);
     }
-    
+
     .meals-grid {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between; 
+        justify-content: space-between;
     }
     .meal-section {
         padding: 1.5rem;
@@ -118,8 +118,8 @@
         border-radius: 8px;
         background-color: var(--white-color);
         box-sizing: border-box;
-        width: 48%; 
-        margin-bottom: 1.5rem; 
+        width: 48%;
+        margin-bottom: 1.5rem;
     }
 
     .meal-section h4 {
@@ -177,95 +177,12 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .btn i { margin-right: 8px; }
-    
+
     .btn-primary { color: var(--white-color); background-color: var(--vitta-blue); border-color: var(--vitta-blue); }
     .btn-primary:hover { background-color: var(--vitta-blue-dark); border-color: var(--vitta-blue-dark); }
 
     .btn-secondary { color: var(--text-dark); background-color: #e2e6ea; border-color: #dae0e5; }
     .btn-secondary:hover { background-color: #d3d9df; border-color: #c7ced3; }
-
-    .modal-scribe {
-        display: none;
-        position: fixed;
-        z-index: 1050;
-        left: 0; top: 0;
-        width: 100%; height: 100%;
-        overflow: auto;
-        background-color: rgba(33, 37, 41, 0.6);
-        -webkit-backdrop-filter: blur(3px);
-        backdrop-filter: blur(3px);
-    }
-    .modal-scribe-content {
-        background-color: var(--white-color);
-        margin: 8% auto;
-        padding: 0;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 550px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        position: relative;
-        overflow: hidden;
-    }
-    .modal-scribe-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .modal-scribe-header h5 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-dark);
-        margin: 0;
-    }
-    .modal-scribe-header .close-scribe-modal {
-        font-size: 1.6rem;
-        font-weight: 700;
-        opacity: .5;
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-    }
-    .modal-scribe-body {
-        padding: 1.5rem;
-    }
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        font-size: 14px;
-        color: var(--text-secondary);
-    }
-    .form-control {
-        display: block;
-        width: 100%;
-        padding: 10px 14px;
-        font-size: 15px;
-        font-family: inherit;
-        color: var(--text-dark);
-        background-color: var(--white-color);
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-    }
-    .form-control:focus {
-        border-color: var(--vitta-blue);
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
-    }
-    .modal-scribe-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        padding: 1.25rem 1.5rem;
-        border-top: 1px solid var(--border-color);
-        background-color: var(--background-secondary);
-    }
 
     @media print {
         body { background-color: #fff; font-size: 11pt; }
@@ -381,173 +298,45 @@
     <button type="button" id="btnDownloadImage" class="btn btn-primary">
         <i class="fas fa-camera"></i> Download Image
     </button>
-    <button type="button" class="btn btn-primary" id="btnOpenShareModal">
-        <i class="fas fa-envelope"></i> Share
-    </button>
-</div>
-
-<div id="sharePlanModal" class="modal-scribe">
-    <div class="modal-scribe-content">
-        <div class="modal-scribe-header">
-            <h5>Share Nutritional Plan</h5>
-            <button type="button" class="close-scribe-modal" onclick="document.getElementById('sharePlanModal').style.display='none';">&times;</button>
-        </div>
-        <div class="modal-scribe-body">
-            <form id="formSharePlan" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="recipient_email_plan">Recipient's Email *</label>
-                    <input type="email" class="form-control" id="recipient_email_plan" required>
-                </div>
-                <div class="form-group">
-                    <label for="subject_email_plan">Subject (Optional)</label>
-                    <input type="text" class="form-control" id="subject_email_plan">
-                </div>
-                <div class="form-group">
-                    <label for="additional_message_plan">Additional Message (Optional)</label>
-                    <textarea class="form-control" id="additional_message_plan" rows="3"></textarea>
-                </div>
-                <div id="share-plan-feedback" style="display:none; margin-top:10px;"></div>
-            </form>
-        </div>
-        <div class="modal-scribe-footer">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('sharePlanModal').style.display='none';">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btnSendPlanEmail"><i class="fas fa-paper-plane"></i> Send</button>
-        </div>
-    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const shareModal = document.getElementById('sharePlanModal');
-    const btnOpenShareModal = document.getElementById('btnOpenShareModal');
     const btnDownloadImage = document.getElementById('btnDownloadImage');
     const planContainer = document.getElementById('nutrition-plan-container');
 
-    async function generateImage(action) {
+    async function generateImageAndDownload(filename) {
+        // Hide buttons before taking the screenshot
         document.querySelector('.footer-actions').style.display = 'none';
+        
         const canvas = await html2canvas(planContainer, {
             scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff'
         });
+        
+        // Show the buttons again
         document.querySelector('.footer-actions').style.display = 'flex';
         
-        if (action.type === 'download') {
-            const link = document.createElement('a');
-            link.download = action.filename;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        } else if (action.type === 'share') {
-            sendEmailWithImage(canvas.toDataURL('image/png'));
-        }
+        // Create a link to download the image
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
     }
 
     btnDownloadImage.addEventListener('click', function() {
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        
         const patientName = {{ plan.paciente_plan.nombre | tojson }}.replace(/ /g, '_');
         const filename = `Nutritional_Plan_${patientName}_{{ plan.id }}.png`;
         
-        generateImage({ type: 'download', filename: filename }).finally(() => {
+        generateImageAndDownload(filename).finally(() => {
             this.disabled = false;
             this.innerHTML = '<i class="fas fa-camera"></i> Download Image';
         });
     });
-
-    if (btnOpenShareModal) {
-        btnOpenShareModal.addEventListener('click', function() {
-            shareModal.style.display = 'block';
-            const patientName = {{ plan.paciente_plan.nombre | tojson }};
-            const planDate = "{{ plan.fecha_emision.strftime('%B %d, %Y') if plan.fecha_emision else 'N/A' }}";
-            const subjectInput = document.getElementById('subject_email_plan');
-            if (subjectInput.value.trim() === '') {
-                 subjectInput.value = `Nutritional Plan for ${patientName} - Issued ${planDate}`;
-            }
-        });
-    }
-
-    document.getElementById('btnSendPlanEmail').addEventListener('click', function() {
-        const recipientEmail = document.getElementById('recipient_email_plan').value;
-        if (!recipientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-            showFeedback(document.getElementById('share-plan-feedback'), "Please enter a valid email address.", "error");
-            return;
-        }
-
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating and Sending...';
-        showFeedback(document.getElementById('share-plan-feedback'), "Generating plan image...", "processing");
-
-        generateImage({ type: 'share' });
-    });
-
-    function sendEmailWithImage(imageDataBase64) {
-        const recipientEmail = document.getElementById('recipient_email_plan').value;
-        const subject = document.getElementById('subject_email_plan').value;
-        const additionalMessage = document.getElementById('additional_message_plan').value;
-        const feedbackDiv = document.getElementById('share-plan-feedback');
-        const btn = document.getElementById('btnSendPlanEmail');
-        
-        const data = {
-            recipient_email: recipientEmail,
-            subject: subject,
-            additional_message: additionalMessage,
-            image_data: imageDataBase64
-        };
-
-        showFeedback(feedbackDiv, "Sending email...", "processing");
-
-        fetch(`/api/plan_nutricional/{{ plan.id }}/share_email`, { 
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json().then(data => ({ ok: response.ok, data })))
-        .then(({ ok, data }) => {
-            if (!ok) throw new Error(data.error || 'Unknown server error.');
-            showFeedback(feedbackDiv, data.message || "Sent successfully", "success");
-            setTimeout(() => { shareModal.style.display = 'none'; }, 2500);
-        })
-        .catch(error => {
-            console.error('Error sharing nutritional plan:', error);
-            showFeedback(feedbackDiv, "Error: " + error.message, "error");
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
-        });
-    }
-
-    shareModal.querySelector('.close-scribe-modal').addEventListener('click', () => shareModal.style.display = 'none');
-    shareModal.querySelector('.modal-scribe-footer .btn-secondary').addEventListener('click', () => shareModal.style.display = 'none');
-    window.addEventListener('click', (event) => {
-        if (event.target == shareModal) {
-            shareModal.style.display = 'none';
-        }
-    });
-
-    function showFeedback(divElement, message, type) {
-        divElement.textContent = message;
-        divElement.className = '';
-        divElement.style.padding = '10px';
-        divElement.style.borderRadius = '6px';
-        divElement.style.display = 'block';
-        divElement.style.textAlign = 'center';
-        divElement.style.border = '1px solid transparent';
-
-        if (type === 'success') {
-            divElement.style.backgroundColor = '#d4edda';
-            divElement.style.color = '#155724';
-            divElement.style.borderColor = '#c3e6cb';
-        } else if (type === 'error') {
-            divElement.style.backgroundColor = '#f8d7da';
-            divElement.style.color = '#721c24';
-            divElement.style.borderColor = '#f5c6cb';
-        } else if (type === 'processing') {
-            divElement.style.backgroundColor = '#cce5ff';
-            divElement.style.color = '#004085';
-            divElement.style.borderColor = '#b8daff';
-        }
-    }
 });
 </script>
 {% endblock %}

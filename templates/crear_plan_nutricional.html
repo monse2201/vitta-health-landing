@@ -424,15 +424,7 @@
             itemCounters['{{ meal_info.id }}'] = document.getElementById(`food-items-{{ meal_info.id }}`).getElementsByClassName('food-item').length;
         {% endfor %}
 
-        let aiSuggestionsJSON = {{ form_data.suggested_json_content | default('{}') | tojson | safe }};
-        let suggestions;
-
-        try {
-            suggestions = JSON.parse(aiSuggestionsJSON);
-        } catch (e) {
-            console.error("Error parsing AI suggestions JSON:", e);
-            suggestions = {};
-        }
+        let suggestions = {{ form_data.suggested_plan_data | default({}) | tojson | safe }};
 
         if (Object.keys(suggestions).length > 0 && !suggestions.error) {
             console.log("Applying suggestions to form:", suggestions);

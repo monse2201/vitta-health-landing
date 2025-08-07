@@ -2518,7 +2518,6 @@ def nueva_receta_para_visita(visita_id):
 
     if request.method == 'POST':
         form_data_repost = request.form.copy()
-        # <-- CORRECCIÓN 1: Usar 'medications_json_str' en lugar de 'medicamentos_json_str'
         medicamentos_json_str = request.form.get('medications_json_str')
 
         if not medicamentos_json_str:
@@ -2536,11 +2535,8 @@ def nueva_receta_para_visita(visita_id):
                 paciente_id=visita.paciente_id,
                 medico_id=current_user.id,
                 medicamentos_json=medicamentos_json_str,
-                # <-- CORRECCIÓN 2: Usar 'related_diagnosis' en lugar de 'diagnostico_relacionado'
                 diagnostico_relacionado=request.form.get('related_diagnosis'),
-                # <-- CORRECCIÓN 3: Usar 'validity_days' en lugar de 'validez_dias'
                 validez_dias=request.form.get('validity_days', type=int, default=30),
-                # <-- CORRECCIÓN 4: Usar 'additional_notes_prescription' en lugar de 'notas_adicionales_receta'
                 notas_adicionales_receta=request.form.get('additional_notes_prescription'),
                 estado="activa"
             )
@@ -2575,8 +2571,9 @@ def nueva_receta_para_visita(visita_id):
             form_data_initial['medicamentos_sugeridos_json'] = json.dumps(datos_ia["medicamentos"])
             flash(f"Se han sugerido {len(datos_ia['medicamentos'])} medicamento(s) basados en la transcripción. Por favor, revísalos y ajústalos.", 'info')
         if datos_ia and datos_ia.get("diagnostico_sugerido") and not datos_ia.get("diagnostico_sugerido","").startswith("[Error"):
-            # <-- CORRECCIÓN 5: Usar la clave correcta para el prellenado del formulario
-            form_data_initial['related_diagnosis'] = datos_ia["diagnostico_sugerido"]
+            # --- CORRECCIÓN APLICADA AQUÍ ---
+            # Se usa 'diagnostico_relacionado' para que coincida con el JavaScript del frontend.
+            form_data_initial['diagnostico_relacionado'] = datos_ia["diagnostico_sugerido"]
             
     form_data_initial.setdefault('validity_days', '30')
 
@@ -2755,21 +2752,20 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
 
     form_data_dict = {}
     if request.method == 'GET':
-        contenido_sugerido_json_str = None
         if visita.transcripcion and visita.transcripcion.strip() and client_openai and not visita.transcripcion.startswith("[Error"):
             datos_ia_plan = generar_contenido_plan_nutricional_con_ia(visita.transcripcion, visita.idioma_detectado)
             if datos_ia_plan and not datos_ia_plan.get("error"):
-                # <-- CORRECCIÓN 1: Cambiado el nombre de la clave para que coincida con el JS del template.
-                form_data_dict['suggested_json_content'] = json.dumps(datos_ia_plan, indent=2, ensure_ascii=False)
+                # --- CORRECCIÓN APLICADA AQUÍ ---
+                # Pasamos el diccionario de Python directamente, en lugar de un string JSON.
+                # Jinja se encargará de convertirlo a un objeto JavaScript en la plantilla.
+                form_data_dict['suggested_plan_data'] = datos_ia_plan
                 flash("Se ha sugerido un borrador del plan nutricional basado en la transcripción. Por favor, revísalo y ajústalo.", 'info')
             elif datos_ia_plan and datos_ia_plan.get("error"):
                 flash(f"Error al sugerir plan desde IA: {datos_ia_plan.get('error')}", "warning")
 
     if request.method == 'POST':
         form_data_dict = request.form.copy()
-        # <-- CORRECCIÓN 2: Usar el nombre correcto del campo que viene del formulario HTML.
         contenido_json_final_str = request.form.get('final_json_content_str')
-        # <-- CORRECCIÓN 3: Usar el nombre correcto para las notas generales.
         notas_adicionales_form = request.form.get('general_notes', '').strip()
         
         if not contenido_json_final_str:
@@ -2778,7 +2774,6 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
         
         try:
             parsed_contenido = json.loads(contenido_json_final_str)
-            # Validar que el plan tenga una estructura mínima.
             if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('main_goal') or not parsed_contenido.get('daily_meal_plan'):
                  flash('El JSON del plan nutricional no tiene la estructura requerida.', 'danger')
                  raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
@@ -2820,11 +2815,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             logging.error(f"Error al crear Plan Nutricional para visita {visita_id}: {e}", exc_info=True)
             flash(f'Error al crear el Plan Nutricional: {str(e)}', 'danger')
         
-        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
-
-    # Para la solicitud GET, también pasamos el form_data
-    return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
-
+        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)    
 @app.route('/plan_nutricional/<int:plan_id>')
 @login_required
 def ver_plan_nutricional(plan_id):
