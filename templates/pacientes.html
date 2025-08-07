@@ -320,9 +320,7 @@
 
     <div class="patient-page-header">
         <h2><i class="fas fa-users"></i> Patient Management</h2>
-        <a href="{{ url_for('agregar_paciente') }}" class="action-btn action-btn-primary" id="addPatientBtn">
-            <i class="fas fa-user-plus"></i> Add New Patient
-        </a>
+        
     </div>
 
     <div class="patient-search-actions">
@@ -376,7 +374,7 @@
     <div class="no-patients">
         <i class="fas fa-user-md"></i>
         <p>You don't have any registered patients yet.</p>
-        <p>Get started by clicking "Add New Patient".</p>
+        <p>You can add patients from the "Record Summary" or "Record Appointment" sections.</p>
     </div>
     {% endif %}
 
@@ -388,9 +386,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // El bloque de JavaScript que causaba el error ha sido eliminado.
-    // El enlace <a> para agregar paciente ya funciona por sí solo.
-
     const patientSearchInput = document.getElementById('patientSearchInput');
     const patientListGrid = document.getElementById('patientListGrid');
 

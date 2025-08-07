@@ -631,10 +631,6 @@
         <a href="{{ url_for('configuracion_documentos') }}" class="{% if request.endpoint == 'configuracion_documentos' %}active{% endif %}" title="Document Settings">
             <i class="fas fa-file-alt fa-fw"></i><span class="btn-text">Document Settings</span>
         </a>
-
-        <a href="{{ url_for('cambiar_contrasena_route') }}" class="{% if request.endpoint == 'cambiar_contrasena_route' %}active{% endif %}" title="Change Password">
-            <i class="fas fa-key fa-fw"></i><span class="btn-text">Change Password</span>
-        </a>
         
         <a href="{{ url_for('logout_route') }}" class="logout-link" title="Log Out">
             <i class="fas fa-sign-out-alt fa-fw"></i><span class="btn-text">Log Out</span>
