@@ -2733,6 +2733,7 @@ def configuracion_documentos():
 
         try:
             db.session.commit()
+            # Refrescar el usuario actual en sesión con los nuevos datos
             login_user(user_db_instance)
             flash('Configuración guardada con éxito', 'success')
             return redirect(url_for('configuracion_documentos'))
@@ -2741,20 +2742,26 @@ def configuracion_documentos():
             flash('Error al guardar configuración', 'danger')
             logging.error(f"Error al guardar la configuración de documentos para el usuario {current_user.id}: {e}", exc_info=True)
 
+    # --- LÓGICA CORREGIDA PARA LA CARGA DE LA PÁGINA (GET) ---
+
+    # Cargar los datos más recientes del usuario desde la BD
     updated_user = db.session.get(User, current_user.id)
     if not updated_user:
-        flash('Error al cargar la información de tu perfil. Por favor, intenta iniciar sesión de nuevo.', 'danger')
+        flash('Error al cargar tu perfil. Por favor, intenta iniciar sesión de nuevo.', 'danger')
         logout_user()
         return redirect(url_for('login_route'))
 
-    logo_base64 = None
+    # Lógica para obtener el logo (la clave de la solución)
+    logo_base64 = None # Inicia como nulo
     if updated_user.url_logo_clinica:
+        # Llama a tu función para obtener la imagen en base64
         logo_base64 = get_base64_image_from_path(updated_user.url_logo_clinica)
 
+    # Ahora SIEMPRE pasamos 'logo_clinica_base64' a la plantilla
     return render_template(
         'configuracion_documentos.html',
         user=updated_user,
-        logo_clinica_base64=logo_base64
+        logo_clinica_base64=logo_base64 # <-- ESTA LÍNEA ES LA SOLUCIÓN
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
 @login_required
