@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename=css_file) }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    /* ... (Your CSS remains the same) ... */
     :root {
         --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         --body-background: #f8f9fa;
@@ -12,7 +11,7 @@
         --text-secondary: #495057;
         --text-muted: #6c757d;
         --accent-color: #007bff;
-        --info-color: #17a2b8; /* Color for the share button */
+        --info-color: #17a2b8;
         --border-color: #dee2e6;
         --border-radius-md: 8px;
         --border-radius-sm: 6px;
@@ -29,12 +28,12 @@
         max-width: 800px;
         margin: 30px auto;
         background-color: var(--card-background);
-        padding: 40px 50px; /* Increased padding for better spacing */
+        padding: 40px 50px;
         border-radius: var(--border-radius-md);
         box-shadow: var(--shadow-md);
         border: 1px solid var(--border-color);
-        position: relative; /* Needed for the watermark */
-        overflow: hidden; /* Ensures watermark does not bleed out */
+        position: relative;
+        overflow: hidden;
     }
     .header-document {
         margin-bottom: 25px;
@@ -173,105 +172,27 @@
         background-color: #d3d9df;
         border-color: #b9c2cb;
     }
-    .btn-info {
-        color: #fff;
-        background-color: var(--info-color);
-        border-color: var(--info-color);
-    }
-    .btn-info:hover {
-        background-color: #117a8b;
-        border-color: #10707f;
-    }
     .text-sm {
       font-size: 0.875rem;
     }
-
-    /* --- Modal Styles --- */
-    .modal-scribe {
-        display: none;
-        position: fixed;
-        z-index: 1050;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-    }
-    .modal-scribe-content {
-        background-color: var(--card-background);
-        margin: 10% auto;
-        padding: 25px 30px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-md);
-        width: 90%;
-        max-width: 550px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        position: relative;
-    }
-    .modal-scribe-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .modal-scribe-header h5 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0;
-        color: var(--text-primary);
-    }
-    .modal-scribe-header .close-scribe-modal {
-        font-size: 1.6rem;
-        font-weight: 700;
-        line-height: 1;
-        color: #000;
-        text-shadow: 0 1px 0 #fff;
-        opacity: .5;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-    }
-    .modal-scribe .form-group label {
-        font-weight: 500;
-        color: var(--text-secondary);
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-    .modal-scribe .form-control {
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-    .modal-scribe-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        padding-top: 20px;
-        margin-top: 20px;
-        border-top: 1px solid var(--border-color);
-    }
-
-    /* --- NEW: Watermark Style --- */
     .watermark {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(-45deg);
         font-size: 5rem;
-        color: rgba(220, 53, 69, 0.15); /* Light, transparent red */
+        color: rgba(220, 53, 69, 0.15);
         font-weight: 700;
         text-align: center;
         letter-spacing: 5px;
-        pointer-events: none; /* Allows clicking through the watermark */
+        pointer-events: none;
         z-index: 1000;
         text-transform: uppercase;
         white-space: nowrap;
     }
 
     @media print {
-        .footer-actions, .modal-scribe { display: none !important; }
+        .footer-actions { display: none !important; }
         .watermark { color: rgba(220, 53, 69, 0.1) !important; }
     }
 </style>
@@ -372,9 +293,6 @@
     </div>
 
     <div class="footer-actions">
-        <button type="button" class="btn btn-info" id="btnOpenShareModal">
-            <i class="fas fa-envelope"></i> Share via Email
-        </button>
         <button type="button" class="btn btn-secondary" onclick="window.print();">
             <i class="fas fa-print"></i> Print
         </button>
@@ -383,133 +301,4 @@
         </a>
     </div>
 </div>
-
-<div id="shareRecetaModal" class="modal-scribe">
-    <div class="modal-scribe-content">
-        <div class="modal-scribe-header">
-            <h5>Share Medical Prescription via Email</h5>
-            <button type="button" class="close-scribe-modal" data-dismiss="modal" aria-label="Close" onclick="document.getElementById('shareRecetaModal').style.display='none';">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-scribe-body">
-            <form id="formShareReceta">
-                <div class="form-group">
-                    <label for="recipient_email">Recipient's Email *</label>
-                    <input type="email" class="form-control" id="recipient_email" name="recipient_email" required>
-                </div>
-                <div class="form-group">
-                    <label for="email_subject">Subject (Optional)</label>
-                    <input type="text" class="form-control" id="email_subject" name="email_subject">
-                </div>
-                <div class="form-group">
-                    <label for="email_language">Email Content Language</label>
-                    <select class="form-control" id="email_language" name="email_language">
-                        <option value="es">Spanish</option>
-                        <option value="en" selected>English (Original)</option>
-                        <option value="fr">French</option>
-                        <option value="pt">Portuguese</option>
-                        </select>
-                </div>
-                <div class="form-group">
-                    <label for="additional_message">Additional Message (Optional)</label>
-                    <textarea class="form-control" id="additional_message" name="additional_message" rows="3"></textarea>
-                </div>
-            </form>
-        </div>
-        <div class="modal-scribe-footer">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('shareRecetaModal').style.display='none';">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btnSendRecetaEmail"><i class="fas fa-paper-plane"></i> Send Email</button>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const shareModal = document.getElementById('shareRecetaModal');
-    const btnOpenShareModal = document.getElementById('btnOpenShareModal');
-    const btnCloseModal = shareModal.querySelector('.close-scribe-modal');
-    const btnSendEmail = document.getElementById('btnSendRecetaEmail');
-    const recetaId = {{ receta.id | tojson }};
-
-    if (btnOpenShareModal) {
-        btnOpenShareModal.addEventListener('click', function() {
-            shareModal.style.display = 'block';
-            const patientName = "{{ receta.paciente_receta.nombre if receta.paciente_receta else 'Patient' | e }}";
-            const prescriptionDate = "{{ receta.fecha_emision.strftime('%d/%m/%Y') }}";
-            document.getElementById('email_subject').value = `Medical Prescription: ${patientName} - ${prescriptionDate}`;
-        });
-    }
-
-    if (btnCloseModal) {
-        btnCloseModal.addEventListener('click', function() {
-            shareModal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', function(event) {
-        if (event.target == shareModal) {
-            shareModal.style.display = 'none';
-        }
-    });
-
-    if (btnSendEmail) {
-        btnSendEmail.addEventListener('click', function() {
-            const recipientEmail = document.getElementById('recipient_email').value;
-            const subject = document.getElementById('email_subject').value;
-            const emailLanguage = document.getElementById('email_language').value;
-            const additionalMessage = document.getElementById('additional_message').value;
-
-            if (!recipientEmail) {
-                alert("Please enter the recipient's email address.");
-                return;
-            }
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(recipientEmail)) {
-                alert("Please enter a valid email address.");
-                return;
-            }
-
-            const data = {
-                recipient_email: recipientEmail,
-                subject: subject,
-                email_language: emailLanguage,
-                additional_message_raw: additionalMessage
-            };
-
-            btnSendEmail.disabled = true;
-            btnSendEmail.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-            fetch(`/api/receta/${recetaId}/share_email`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.message) {
-                    alert("Success: " + result.message);
-                    shareModal.style.display = 'none';
-                    document.getElementById('recipient_email').value = '';
-                    document.getElementById('additional_message').value = '';
-                } else if (result.error) {
-                    alert("Error: " + result.error);
-                } else {
-                    alert("An unknown error occurred.");
-                }
-            })
-            .catch(error => {
-                console.error('Error sharing prescription:', error);
-                alert("Connection error while trying to share the prescription.");
-            })
-            .finally(() => {
-                btnSendEmail.disabled = false;
-                btnSendEmail.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
-            });
-        });
-    }
-});
-</script>
 {% endblock %}

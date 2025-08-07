@@ -4598,3 +4598,7 @@ def reset_password(email, new_password):
             print(f"Error reseteando la contraseña: {e}")
     else:
         print(f"Error: No se encontró un usuario con el correo '{email}'.")
+@app.route('/account/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password_route():
+    return render_template('change_password.html')
