@@ -609,6 +609,8 @@
         {# --- Footer Links (text translated to English) --- #}
         <div class="configuracion-link-title">Account</div>
 
+        {# --- Link to Profile Settings (Disabled as per request) --- #}
+        {#
         <a href="{{ url_for('configuracion_perfil_profesional') }}" class="user-profile-sidebar-link {% if request.endpoint == 'configuracion_perfil_profesional' %}active{% endif %}" title="My Profile & Settings">
             <div class="user-profile-info">
                 <div class="user-avatar-initial">
@@ -624,6 +626,7 @@
                 </div>
             </div>
         </a>
+        #}
         
         <a href="{{ url_for('configuracion_documentos') }}" class="{% if request.endpoint == 'configuracion_documentos' %}active{% endif %}" title="Document Settings">
             <i class="fas fa-file-alt fa-fw"></i><span class="btn-text">Document Settings</span>

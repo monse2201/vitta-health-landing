@@ -4609,3 +4609,10 @@ def reset_password(email, new_password):
 @login_required
 def change_password_route():
     return render_template('change_password.html')
+@app.cli.command("reset-demo-account")
+def reset_demo_account():
+    """
+    Elimina todos los datos generados por el usuario de demostración (demo@vitta.health).
+    """
+    demo_email = "demo@vitta.health"
+    print(f"--- Iniciando reseteo diario de la cuenta demo: {demo_email} ---")

@@ -313,7 +313,7 @@
             clinic_address: {{ (user.clinic_address or '') | tojson }},
             clinic_phone: {{ (user.clinic_phone or '') | tojson }},
             clinic_website: {{ (user.clinic_website or '') | tojson }},
-            clinic_logo_base64: {{ (clinic_logo_base64 or null) | tojson }}
+            clinic_logo_base64: {{ clinic_logo_base64 | default(none) | tojson }}
         };
 
         function updatePreview() {
