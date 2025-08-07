@@ -423,47 +423,11 @@
         flex-shrink: 0;
     }
 
-    .translation-controls {
+    .ai-notes-actions {
         display: flex;
-        align-items: center;
-        flex-wrap: wrap; /* Allows controls to wrap */
         gap: 10px;
-        justify-content: flex-end; /* Aligns to the right on large screens */
-    }
-
-    .translation-controls > span {
-        font-size: 0.9em;
-        color: #495057;
-        white-space: nowrap;
-    }
-
-    .generic-translate-select {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3Csvg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.7rem center;
-        background-size: 1.2em 1.2em;
-        padding: 8px 2.8rem 8px 12px;
-        font-size: 13px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        background-color: white;
-        color: #007bff;
-        height: 36px;
-        min-width: 100px; /* Minimum width for the language select */
-    }
-
-    .generic-translate-select:disabled {
-        background-color: #e9ecef;
-        color: #6c757d;
-        border-color: #ced4da;
-    }
-
-    .generic-translate-select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        align-items: center;
+        margin-bottom: 15px;
     }
 
     .transcription-area {
@@ -894,10 +858,6 @@
         min-height: 70px;
     }
 
-    .form-group select.generic-translate-select {
-        padding-right: 2.8rem;
-    }
-
     .popup-actions {
         display: flex;
         justify-content: flex-end;
@@ -961,15 +921,7 @@
             min-width: auto;
         }
 
-        .translation-controls {
-            display: flex; /* Ensure flexbox for alignment */
-            flex-wrap: nowrap; /* Prevents controls from wrapping */
-            justify-content: flex-end;
-            align-items: center; /* Vertically align items */
-            gap: 10px; /* Spacing between elements */
-        }
-
-        .translation-controls .btn-action.secondary {
+        .ai-notes-actions .btn-action.secondary {
             margin-left: 10px; /* Add some spacing for the edit button */
         }
 
@@ -1102,33 +1054,19 @@
             font-size: 16px;
         }
 
-        .translation-controls {
-            flex-direction: column; /* Stacks translation controls */
-            align-items: flex-start; /* Aligns to the left */
+        .ai-notes-actions {
+            flex-direction: column;
+            align-items: flex-start;
             gap: 8px;
-            width: 100%; /* Takes up all available width */
+            width: 100%;
         }
 
-        .translation-controls > span {
-            width: 100%; /* So the text takes its own line */
+        .ai-notes-actions .btn-action {
+            width: 100%;
         }
 
-        .generic-translate-select {
-            width: 100%; /* Takes up all available width */
-            height: 34px;
-            font-size: 12px;
-        }
-
-        .generic-show-original-btn {
-            width: 100%; /* Takes up all available width */
-            height: 34px;
-            font-size: 12px;
-        }
-
-        /* NEW: Adjust for edit button in mobile translation controls */
-        .translation-controls .btn-action.secondary {
-            margin-left: 0; /* Remove left margin in mobile view */
-            width: 100%; /* Make it full width */
+        .ai-notes-actions .btn-action.secondary {
+            margin-left: 0;
         }
 
         .transcription-area,
@@ -1152,7 +1090,6 @@
         }
 
         /* --- END: Added styles for diet plan table (mobile) --- */
-
 
         .overview-grid {
             grid-template-columns: 1fr; /* Single column for all grid elements */
@@ -1372,19 +1309,6 @@
         <div id="transcription" class="tab-panel">
             <div class="section-header">
                 <h3>Transcription</h3>
-                <div class="translation-controls">
-                    <span id="transcription-original-language-display">Original Language: <strong id="transcription-original-language-text">N/A</strong></span>
-                    <span>Translate to:</span>
-                    <select id="transcription-translate-select" class="generic-translate-select" disabled>
-                        <option value="" disabled selected>Select...</option>
-                        <option value="es">Spanish</option>
-                        <option value="en">English</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                    </select>
-                    <button class="btn-action secondary generic-show-original-btn" id="btn-show-transcription-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
-                </div>
             </div>
             <div class="transcription-area" id="full-transcription">
                 <div class="no-speech">Select a visit.</div>
@@ -1401,26 +1325,12 @@
             {# Combined AI content section #}
             <div class="ai-notes-section">
                 <h4><i class="fas fa-robot"></i> AI Content (Notes & Summary)</h4>
-                <div class="translation-controls" style="margin-bottom:15px;">
-                    <span id="ai-notes-original-language-display">Original Language: <strong id="ai-notes-original-language-text">N/A</strong></span>
-                    <span>Translate to:</span>
-                    <select id="ai-notes-translate-select" class="generic-translate-select" disabled>
-                        <option value="" disabled selected>Select...</option>
-                        <option value="es">Spanish</option>
-                        <option value="en">English</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                    </select>
-                    <button class="btn-action secondary generic-show-original-btn" id="btn-show-ai-notes-original" style="display: none;"><i class="fas fa-undo"></i> Original</button>
-
-                    {# MOVED EDIT BUTTON HERE #}
+                
+                <div class="ai-notes-actions">
                     <button class="btn-action secondary" id="btn-edit-notes-summary-ia" title="Edit AI Notes & Summary content">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    {# END MOVED EDIT BUTTON #}
-
-                    <button class="btn-action secondary" id="btn-download-ai-notes-pdf" style="margin-left: 10px; display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
+                    <button class="btn-action secondary" id="btn-download-ai-notes-pdf" style="display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
                 </div>
 
                 {# This is the wrapper for the display div and the textarea #}
@@ -1486,17 +1396,6 @@
                     <label for="additional-message">Additional Message (Optional):</label>
                     <textarea id="additional-message" name="mensaje_adicional" rows="3" placeholder="Hi, I'm sharing the visit details with you..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="email-language">Email Content Language:</label>
-                    <select id="email-language" name="email_idioma" class="generic-translate-select" style="width:100%;">
-                        <option value="" selected>Original Visit Language</option>
-                        <option value="es">Spanish</option>
-                        <option value="en">English</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                    </select>
-                </div>
                 <div class="popup-actions">
                     <button type="button" class="btn-action secondary" onclick="closeSharePopup()">Cancel</button>
                     <button type="submit" class="btn-action" id="btn-send-email-popup">
@@ -1538,23 +1437,12 @@
     let currentlySelectedVisit = null;
     let originalTranscriptionHtml = '';
 
-    const languageNames = {
-        'es': 'Spanish',
-        'en': 'English',
-        'fr': 'French',
-        'de': 'German',
-        'it': 'Italian',
-        'N/D': 'Unknown',
-        'api': 'API (Auto)'
-    };
-
     const sharePopup = document.getElementById('share-email-popup');
     const btnShareVisit = document.getElementById('btn-share-visit');
     const shareEmailForm = document.getElementById('share-email-form');
     const shareFeedbackDiv = document.getElementById('share-feedback');
     const patientNamePopup = document.getElementById('popup-patient-name');
     const btnSendEmailPopup = document.getElementById('btn-send-email-popup');
-    const selectEmailLanguage = document.getElementById('email-language');
 
     const formDeleteVisit = document.getElementById('form-delete-visit');
     const btnDeleteFullVisit = document.getElementById('btn-delete-visit-complete');
@@ -1636,31 +1524,29 @@
         }
 
         if (btnSpecialtyAction) {
-    btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetail.transcripcion;
-    if (currentlySelectedVisit && currentVisitDetail.transcripcion) {
-        const routeNameFromData = btnSpecialtyAction.dataset.routeName;
-        const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
+            btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetail.transcripcion;
+            if (currentlySelectedVisit && currentVisitDetail.transcripcion) {
+                const routeNameFromData = btnSpecialtyAction.dataset.routeName;
+                const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
 
-        if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
-            btnSpecialtyAction.onclick = () => {
-                // This now always points to the new page for creation
-                window.location.href = `/visita/${currentlySelectedVisit}/${routeNameFromData}`;
-            };
-        } else {
-            btnSpecialtyAction.onclick = null;
-            console.warn("Route information for the specialty button not found.");
+                if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
+                    btnSpecialtyAction.onclick = () => {
+                        // This now always points to the new page for creation
+                        window.location.href = `/visita/${currentlySelectedVisit}/${routeNameFromData}`;
+                    };
+                } else {
+                    btnSpecialtyAction.onclick = null;
+                    console.warn("Route information for the specialty button not found.");
+                }
+            } else {
+                btnSpecialtyAction.onclick = null;
+            }
         }
-    } else {
-        btnSpecialtyAction.onclick = null;
-    }
-}
         document.querySelectorAll('.visit-card').forEach(card => card.classList.remove('selected'));
         const cardElement = document.querySelector(`.visit-card[onclick*="'${visitId}'"]`);
         if (cardElement) cardElement.classList.add('selected');
 
         const visitIdNum = currentVisitDetail.id || 'N/A';
-        const originalDetectedLanguage = currentVisitDetail.idioma_detectado || 'N/D';
-        const originalLanguageName = languageNames[originalDetectedLanguage] || originalDetectedLanguage.toUpperCase();
 
         document.getElementById('visit-id-general').textContent = `Visit ID: ${visitIdNum}`;
         document.getElementById('transcription-visit-id').textContent = `Visit ID: ${visitIdNum}`;
@@ -1674,8 +1560,6 @@
         const originalTranscriptionText = currentVisitDetail.transcripcion || null;
         originalTranscriptionHtml = formatTranscription(originalTranscriptionText);
         document.getElementById('full-transcription').innerHTML = originalTranscriptionHtml;
-        document.getElementById('transcription-original-language-text').textContent = originalLanguageName;
-        updateTranslationControls('transcription', originalDetectedLanguage, !!originalTranscriptionText);
 
         if (formDeleteVisit && btnDeleteFullVisit) {
             if (visitIdNum !== 'N/A' && currentlySelectedVisit) {
@@ -1699,20 +1583,17 @@
 
 
         document.getElementById('notes-patient-name').textContent = currentVisitDetail.paciente_nombre || 'N/A';
-        document.getElementById('ai-notes-original-language-text').textContent = originalLanguageName;
+        
+        // Enable edit button if there is content
+        if(btnEditNotesSummaryIA) {
+            btnEditNotesSummaryIA.disabled = !(originalSummaryAiText || originalNotesAiText);
+        }
 
         // New combined button to generate Notes and Summary
         if (btnGenerateNotesSummaryIA) {
             btnGenerateNotesSummaryIA.disabled = !originalTranscriptionText;
             btnGenerateNotesSummaryIA.onclick = () => callGenerateNotesAndSummaryApi(visitId);
         }
-
-        // Update translation controls for the unified 'ai-notes' content
-        updateTranslationControls(
-            'ai-notes',
-            originalDetectedLanguage,
-            (originalSummaryAiText || originalNotesAiText) // True if either has content
-        );
 
         // Set the PDF download button link for notes (summary is usually not PDF'd separately)
         if (btnDownloadAiNotesPdf) {
@@ -1799,13 +1680,6 @@
             if (overviewData.idioma_detectado && visitDetails[visitId] && overviewData.idioma_detectado !== visitDetails[visitId].idioma_detectado) {
                 console.log(`Detected language updated for visit ${visitId} from ${visitDetails[visitId].idioma_detectado} to ${overviewData.idioma_detectado}`);
                 visitDetails[visitId].idioma_detectado = overviewData.idioma_detectado;
-                const newOriginalLanguageName = languageNames[overviewData.idioma_detectado] || overviewData.idioma_detectado.toUpperCase();
-
-                document.getElementById('transcription-original-language-text').textContent = newOriginalLanguageName;
-                updateTranslationControls('transcription', overviewData.idioma_detectado, !!originalTranscriptionText);
-
-                document.getElementById('ai-notes-original-language-text').textContent = newOriginalLanguageName;
-                updateTranslationControls('ai-notes', overviewData.idioma_detectado, !!(originalSummaryAiText || originalNotesAiText));
             }
 
             const logList = document.getElementById('overview-activity-log-list');
@@ -1859,12 +1733,6 @@
         btnSaveNotesSummaryIA.style.display = 'inline-block';
         btnCancelEditNotesSummaryIA.style.display = 'inline-block';
 
-        // Disable translation controls during edit
-        const selectTranslateAiNotes = document.getElementById('ai-notes-translate-select');
-        if (selectTranslateAiNotes) selectTranslateAiNotes.disabled = true;
-        const btnShowAiNotesOriginal = document.getElementById('btn-show-ai-notes-original');
-        if (btnShowAiNotesOriginal) btnShowAiNotesOriginal.style.display = 'none';
-
         // Disable PDF download button during edit
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
         if (btnDownloadPdf) btnDownloadPdf.style.display = 'none';
@@ -1885,6 +1753,8 @@
         const hasContent = !!unifiedAiContentMarkdown;
         // Show btnEditNotesSummaryIA only if there is content and not in edit mode
         if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.style.display = (hasContent && notesSummaryAiUnifiedTextarea.style.display === 'none') ? 'inline-block' : 'none';
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = !hasContent;
+
 
         // Re-enable generate button only if a visit is selected and has transcription
         const currentDetail = visitDetails[currentlySelectedVisit];
@@ -1896,23 +1766,9 @@
         if (btnSaveNotesSummaryIA) btnSaveNotesSummaryIA.style.display = 'none';
         if (btnCancelEditNotesSummaryIA) btnCancelEditNotesSummaryIA.style.display = 'none';
 
-        // Re-enable translation controls
-        const selectTranslateAiNotes = document.getElementById('ai-notes-translate-select');
-        if (selectTranslateAiNotes) selectTranslateAiNotes.disabled = false;
-        const btnShowAiNotesOriginal = document.getElementById('btn-show-ai-notes-original');
-        if (btnShowAiNotesOriginal) {
-            btnShowAiNotesOriginal.style.display = 'none';
-        }
-        // Re-call translation controls update to restore correct state
-        const currentDetailForUpdate = visitDetails[currentlySelectedVisit];
-        updateTranslationControls(
-            'ai-notes',
-            currentDetailForUpdate ? currentDetailForUpdate.idioma_detectado : 'N/D',
-            !!unifiedAiContentMarkdown
-        );
-
         // Re-show PDF button if path exists
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
+        const currentDetailForUpdate = visitDetails[currentlySelectedVisit];
         if (btnDownloadPdf && currentDetailForUpdate && currentDetailForUpdate.ruta_notas_ai_pdf) {
             btnDownloadPdf.style.display = 'inline-block';
         } else if (btnDownloadPdf) {
@@ -2025,235 +1881,6 @@
                 notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
             } else {
                 notesSummaryAiUnifiedContentDisplay.innerHTML = md.render(unifiedAiContentMarkdown);
-            }
-        }
-    }
-
-
-    async function requestTranslation(visitId, contentType, targetLanguageCode) {
-        const baseDetail = visitDetails[visitId] || {};
-        const sourceLanguageCode = baseDetail.idioma_detectado || 'N/D';
-        let originalTextToTranslate = '';
-        let displayAreaId = '';
-        let originalButtonId = '';
-        let originalLanguageDisplaySpanId = '';
-        let translateSelectId = '';
-        let editButtonId = ''; // Added to manage edit button state during translation
-
-        // Ensure not in edit mode when translating
-        disableEditMode(); // Ensure display is normal before translating
-
-        if (contentType === 'transcription') {
-            originalTextToTranslate = baseDetail.transcripcion;
-            displayAreaId = 'full-transcription';
-            originalButtonId = 'btn-show-transcription-original';
-            originalLanguageDisplaySpanId = 'transcription-original-language-display';
-            translateSelectId = 'transcription-translate-select';
-        } else if (contentType === 'ai-notes') {
-            originalTextToTranslate = unifiedAiContentMarkdown;
-
-            displayAreaId = 'notes-summary-ai-unified-content';
-            originalButtonId = 'btn-show-ai-notes-original';
-            originalLanguageDisplaySpanId = 'ai-notes-original-language-display';
-            translateSelectId = 'ai-notes-translate-select';
-            editButtonId = 'btn-edit-notes-summary-ia'; // Assign edit button for ai-notes
-        } else {
-            return;
-        }
-
-
-        if (!sourceLanguageCode || sourceLanguageCode === 'N/D' || sourceLanguageCode === 'api') {
-            alert("Could not reliably determine the original language for translation.");
-            return;
-        }
-        if (!originalTextToTranslate || originalTextToTranslate.trim() === '') {
-            alert(`There is no original ${contentType.replace('-', ' ')} to translate.`);
-            return;
-        }
-        if (!targetLanguageCode || targetLanguageCode === "") {
-            alert("Select a language from the menu.");
-            return;
-        }
-
-        const displayArea = document.getElementById(displayAreaId);
-        const originalButton = document.getElementById(originalButtonId);
-        const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
-        const strongElementOriginal = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
-        const strongElementOriginalId = strongElementOriginal ? strongElementOriginal.id : `original-language-text-${contentType}`;
-        const translateSelect = document.getElementById(translateSelectId);
-        const editButton = document.getElementById(editButtonId); // Get edit button
-
-        if (!displayArea || !translateSelect || !originalLanguageDisplaySpan) {
-            console.error("UI elements for translation not found.", {
-                displayArea,
-                translateSelect,
-                originalLanguageDisplaySpan
-            });
-            alert("Internal error: Translation elements not available.");
-            return;
-        }
-
-        const sourceLanguageName = languageNames[sourceLanguageCode] || sourceLanguageCode.toUpperCase();
-        const targetLanguageName = languageNames[targetLanguageCode] || targetLanguageCode.toUpperCase();
-
-        if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #ff7f0e;">(Translating to ${targetLanguageName}...)</span>`;
-        displayArea.innerHTML = '<div class="no-speech">Translating...</div>';
-        if (translateSelect) translateSelect.disabled = true;
-        if (originalButton) originalButton.style.display = 'none';
-        if (editButton) editButton.disabled = true; // Disable edit button during translation
-
-        try {
-            const response = await fetch('/api/traducir_texto', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    texto_original: originalTextToTranslate,
-                    idioma_origen_code: sourceLanguageCode,
-                    idioma_destino_code: targetLanguageCode
-                })
-            });
-            if (!response.ok) {
-                let errorMsg = `Server error ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {}
-                throw new Error(errorMsg);
-            }
-            const data = await response.json();
-
-            if (data && data.texto_traducido) {
-                displayArea.innerHTML = md.render(data.texto_traducido);
-
-                if (originalButton) originalButton.style.display = 'inline-block';
-                if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #10b980;">(Showing translation to ${targetLanguageName})</span>`;
-
-                if (translateSelect) {
-                    translateSelect.disabled = false;
-                    translateSelect.value = "";
-                    Array.from(translateSelect.options).forEach(option => {
-                        option.disabled = (option.value === targetLanguageCode) || (option.value === sourceLanguageCode && sourceLanguageCode !== 'N/D' && sourceLanguageCode !== 'api') || (option.value === "");
-                    });
-                }
-            } else {
-                throw new Error("Invalid API translation response.");
-            }
-        } catch (error) {
-            console.error(`Error in translation (${contentType}):`, error);
-
-            // Reconstruct original content on error based on type
-            if (contentType === 'transcription') {
-                displayArea.innerHTML = formatTranscription(visitDetails[visitId].transcripcion || '');
-            } else if (contentType === 'ai-notes') {
-                displayArea.innerHTML = md.render(unifiedAiContentMarkdown || `<div class="no-speech" style="color:red;">Error translating: ${error.message}.</div>`);
-            }
-
-            if (originalButton) originalButton.style.display = 'none';
-            if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${sourceLanguageName}</strong> <span style="color: #ef4444;">(Translation failed)</span>`;
-            updateTranslationControls(contentType, sourceLanguageCode, true); // Keep controls enabled if original text is there
-        } finally {
-            if (editButton) editButton.disabled = false; // Re-enable edit button after translation attempt
-        }
-    }
-
-    function showOriginalContent(visitId, contentType) {
-        const baseDetail = visitDetails[visitId] || {};
-        const detectedLanguage = baseDetail.idioma_detectado || 'N/D';
-        let originalText = '';
-        let displayAreaId = '';
-        let originalLanguageDisplaySpanId = '';
-        let originalButtonId = '';
-        let editButtonId = ''; // Added to manage edit button state
-
-        // Ensure not in edit mode when displaying original
-        disableEditMode();
-
-        if (contentType === 'transcription') {
-            displayAreaId = 'full-transcription';
-            originalText = baseDetail.transcripcion;
-            if (document.getElementById(displayAreaId)) { // Ensure the element exists
-                document.getElementById(displayAreaId).innerHTML = formatTranscription(originalText) || '<div class="no-speech">No transcription available.</div>';
-            }
-        } else if (contentType === 'ai-notes') {
-            originalText = unifiedAiContentMarkdown; // Use the stored combined markdown
-
-            displayAreaId = 'notes-summary-ai-unified-content';
-            if (document.getElementById(displayAreaId)) { // Ensure the element exists
-                document.getElementById(displayAreaId).innerHTML = md.render(originalText) || '<div class="no-speech">No AI content available.</div>';
-            }
-            editButtonId = 'btn-edit-notes-summary-ia'; // Assign edit button for ai-notes
-        } else {
-            return;
-        }
-
-        if (!originalText && contentType !== 'transcription' && contentType !== 'ai-notes' && document.getElementById(displayAreaId)) {
-            document.getElementById(displayAreaId).innerHTML = `<div class="no-speech">No ${contentType.replace('-', ' ')} available.</div>`;
-        }
-
-        originalLanguageDisplaySpanId = `${contentType}-original-language-display`;
-        originalButtonId = `btn-show-${contentType}-original`;
-
-        const detectedLanguageName = languageNames[detectedLanguage] || detectedLanguage.toUpperCase();
-        const originalLanguageDisplaySpan = document.getElementById(originalLanguageDisplaySpanId);
-        const strongElement = originalLanguageDisplaySpan ? originalLanguageDisplaySpan.querySelector('strong') : null;
-        const strongElementOriginalId = strongElement ? strongElement.id : `original-language-text-${contentType}`;
-
-        if (originalLanguageDisplaySpan) originalLanguageDisplaySpan.innerHTML = `Original Language: <strong id="${strongElementOriginalId}">${detectedLanguageName}</strong>`;
-
-        const originalButton = document.getElementById(originalButtonId);
-        if (originalButton) originalButton.style.display = 'none';
-
-        const editButton = document.getElementById(editButtonId); // Get edit button
-        if (editButton) editButton.disabled = false; // Re-enable edit button
-
-        updateTranslationControls(contentType, detectedLanguage, !!originalText);
-    }
-
-    function updateTranslationControls(contentType, originalDetectedLanguage, hasOriginalText) {
-        const selectId = `${contentType}-translate-select`;
-        const translateSelect = document.getElementById(selectId);
-        const btnShowOriginal = document.getElementById(`btn-show-${contentType}-original`);
-        const btnEdit = document.getElementById(`btn-edit-notes-summary-ia`); // Only for ai-notes
-
-        if (!translateSelect) {
-            console.warn("Select not found:", contentType, selectId);
-            return;
-        }
-
-        const canTranslate = (hasOriginalText && originalDetectedLanguage && originalDetectedLanguage !== 'N/D' && originalDetectedLanguage !== 'api');
-        translateSelect.disabled = !canTranslate;
-        translateSelect.value = "";
-
-        Array.from(translateSelect.options).forEach(option => {
-            if (option.value === "") {
-                option.disabled = false;
-            } else if (!canTranslate || option.value === originalDetectedLanguage) {
-                option.disabled = true;
-            } else {
-                option.disabled = false;
-            }
-        });
-
-        if (btnShowOriginal) {
-            // Only show the 'Original' button if the select is not currently showing original content
-            const currentLanguageDisplay = document.getElementById(`${contentType}-original-language-text`).nextSibling; // Get the span after the strong tag
-            if (currentLanguageDisplay && currentLanguageDisplay.textContent.includes('Showing translation')) {
-                btnShowOriginal.style.display = 'inline-block';
-            } else {
-                btnShowOriginal.style.display = 'none';
-            }
-            btnShowOriginal.onclick = () => showOriginalContent(currentlySelectedVisit, contentType);
-        }
-
-        // Ensure edit button for 'ai-notes' is enabled/disabled correctly
-        if (contentType === 'ai-notes' && btnEdit) {
-            // Enable edit button if there's any AI content (summary or notes)
-            // and it's not currently in editing mode (checked by display styles of textarea)
-            btnEdit.disabled = !hasOriginalText || notesSummaryAiUnifiedTextarea.style.display === 'block';
-            if (notesSummaryAiUnifiedTextarea.style.display === 'block') { // If in edit mode, hide it
-                btnEdit.style.display = 'none';
-            } else { // Otherwise, show it if there's content to edit
-                btnEdit.style.display = hasOriginalText ? 'inline-block' : 'none';
             }
         }
     }
@@ -2418,11 +2045,6 @@
                 } else {
                     logList.innerHTML = '<li><div class="no-speech" style="border:none; padding: 10px 0;">No activity registered.</div></li>';
                 }
-                updateTranslationControls(
-                    'ai-notes',
-                    overviewData.idioma_detectado || baseDetail.idioma_detectado,
-                    !!(originalSummaryAiText || originalNotesAiText)
-                );
                 const overviewSummaryElem = document.getElementById('overview-summary-text');
                 if (overviewSummaryElem && overviewData.resumen_ai) {
                     overviewSummaryElem.textContent = overviewData.resumen_ai;
@@ -2436,7 +2058,7 @@
 
         btn.disabled = !(baseDetail && baseDetail.transcripcion);
         btn.innerHTML = originalButtonText;
-        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = false; // Re-enable edit button
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = !(originalSummaryAiText || originalNotesAiText); // Re-enable edit button
     }
 
 
@@ -2585,14 +2207,6 @@
             }
             const currentVisitDetail = visitDetails[currentlySelectedVisit];
             patientNamePopup.textContent = currentVisitDetail ? currentVisitDetail.paciente_nombre : "N/A";
-
-            const originalVisitLanguage = currentVisitDetail.idioma_detectado || 'N/D';
-            const originalVisitLanguageName = languageNames[originalVisitLanguage] || 'Unknown';
-
-            const originalOption = selectEmailLanguage.querySelector('option[value=""]');
-            if (originalOption) originalOption.textContent = `Original Visit Language (${originalVisitLanguageName})`;
-            selectEmailLanguage.value = "";
-
             sharePopup.classList.add('visible');
             document.getElementById('recipient-email').focus();
         });
@@ -2620,7 +2234,6 @@
         const recipientEmail = document.getElementById('recipient-email').value;
         const optionalSubject = document.getElementById('optional-subject').value;
         const additionalMessage = document.getElementById('additional-message').value;
-        const selectedEmailLanguage = selectEmailLanguage.value;
 
         btnSendEmailPopup.disabled = true;
         btnSendEmailPopup.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
@@ -2631,8 +2244,7 @@
                 visita_id: currentlySelectedVisit,
                 email_destinatario: recipientEmail,
                 asunto: optionalSubject,
-                mensaje_adicional: additionalMessage,
-                idioma_email: selectedEmailLanguage
+                mensaje_adicional: additionalMessage
             };
 
             const response = await fetch('/api/compartir_visita_email', {
@@ -2724,19 +2336,6 @@
         // before any visit is loaded.
         disableEditMode();
 
-
-        ['transcription', 'ai-notes'].forEach(type => {
-            const selectEl = document.getElementById(`${type}-translate-select`);
-            if (selectEl) {
-                selectEl.addEventListener('change', function(event) {
-                    const selectedLanguageCode = event.target.value;
-                    if (selectedLanguageCode && currentlySelectedVisit) {
-                        requestTranslation(currentlySelectedVisit, type, selectedLanguageCode);
-                    }
-                });
-            }
-        });
-
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape" && sharePopup && sharePopup.classList.contains('visible')) {
                 closeSharePopup();
@@ -2754,11 +2353,11 @@
         const recentVisitId = '{{ visita_reciente.id if visita_reciente else 'null' }}';
         if (recentVisitId !== 'null' && visitDetails[recentVisitId]) {
             console.log(`[HISTORY] Recent visit detected: ${recentVisitId}. Loading details automatically.`);
-            viewVisitDetails(recentVisitId); // No .then() here
+            viewVisitDetails(recentVisitId);
         } else if (Object.keys(visitDetails).length > 0) {
             const firstVisitId = Object.keys(visitDetails)[0];
             console.log(`[HISTORY] No specific recent visit, but visits exist. Loading the first one: ${firstVisitId}`);
-            viewVisitDetails(firstVisitId); // No .then() here
+            viewVisitDetails(firstVisitId);
         } else {
             console.log("[HISTORY] No visits to load automatically.");
         }
