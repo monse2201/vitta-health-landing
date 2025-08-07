@@ -446,19 +446,17 @@
         overflow-x: auto; /* To ensure text doesn't overflow */
     }
 
-    /* Ensure textarea takes up full width and appropriate height */
     #notes-summary-ai-unified-textarea {
-        width: 100%; /* Important: Make it take full width of its container */
-        min-height: 250px; /* Match the display div's min-height */
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
-        font-family: 'Inter', sans-serif; /* Use Inter for better editing readability */
-        font-size: 14px; /* Slightly larger font for comfortable editing */
+        width: 100%; 
+        min-height: 250px; 
+        box-sizing: border-box; 
+        font-family: 'Inter', sans-serif; 
+        font-size: 14px; 
         line-height: 1.6;
-        resize: vertical; /* Allow vertical resizing by user */
-        padding: 18px 22px; /* Match display div's padding */
+        resize: vertical; 
+        padding: 18px 22px; 
     }
 
-    /* --- START: Added styles for diet plan table --- */
     #diet-plan-content table {
         width: 100%;
         border-collapse: collapse;
@@ -484,8 +482,6 @@
         margin: 0;
         padding-left: 20px;
     }
-
-    /* --- END: Added styles for diet plan table --- */
 
     #full-transcription {
         min-height: 280px;
@@ -545,12 +541,12 @@
         padding: 15px;
         border-radius: 6px;
         min-height: 80px;
-        overflow-x: auto; /* Ensures scroll if content is too wide */
+        overflow-x: auto; 
     }
 
     .overview-summary-item,
     .overview-activity-item {
-        grid-column: 1 / -1; /* Takes full width at any size */
+        grid-column: 1 / -1; 
     }
 
     @media (min-width: 768px) {
@@ -567,7 +563,7 @@
         margin-top: 10px;
         max-height: 300px;
         overflow-y: auto;
-        padding-right: 10px; /* Space for the scrollbar */
+        padding-right: 10px;
     }
 
     .activity-log-timeline li {
@@ -772,13 +768,13 @@
         padding: 25px 30px;
         border-radius: 10px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        width: 90%; /* Adjustment for mobile */
+        width: 90%;
         max-width: 500px;
         position: relative;
         transform: scale(0.9);
         transition: transform 0.3s ease;
-        max-height: 90vh; /* To prevent popup from being taller than the screen */
-        overflow-y: auto; /* Allows scroll inside the popup */
+        max-height: 90vh; 
+        overflow-y: auto; 
     }
 
     .popup-overlay.visible .popup-content {
@@ -865,7 +861,7 @@
         margin-top: 25px;
         padding-top: 15px;
         border-top: 1px solid #eee;
-        flex-wrap: wrap; /* Ensures buttons wrap */
+        flex-wrap: wrap; 
     }
 
     .feedback-message {
@@ -898,31 +894,28 @@
         display: block;
     }
 
-    /* --- Media Queries for Responsiveness --- */
-
-    /* Tablets and up (768px and more) */
     @media (min-width: 768px) {
         .main-container {
-            flex-direction: row; /* Back to two-column layout on tablets and desktops */
+            flex-direction: row; 
         }
 
         .side-panel {
-            width: 320px; /* Fixed width for the side panel on larger screens */
-            height: 100vh; /* Full height for the side panel */
+            width: 320px; 
+            height: 100vh;
         }
 
         .detail-panel {
-            flex: 1; /* Takes up the remaining space */
-            padding: 25px 30px; /* Original padding for the detail panel */
+            flex: 1; 
+            padding: 25px 30px; 
         }
 
         .filter-controls select {
-            flex-grow: 1; /* Allows them to grow to fill space */
+            flex-grow: 1; 
             min-width: auto;
         }
 
         .ai-notes-actions .btn-action.secondary {
-            margin-left: 10px; /* Add some spacing for the edit button */
+            margin-left: 10px; 
         }
 
         .popup-actions {
@@ -930,65 +923,64 @@
         }
     }
 
-    /* Mobile (up to 767px) */
     @media (max-width: 767px) {
         body {
-            font-size: 13px; /* Slightly smaller font size for mobile */
+            font-size: 13px; 
         }
 
         .main-container {
-            flex-direction: column; /* Stacks panels vertically on mobile */
-            height: auto; /* Allows height to adjust to content */
-            min-height: 100vh; /* Ensures it at least takes up the full viewport height */
+            flex-direction: column; 
+            height: auto; 
+            min-height: 100vh; 
         }
 
         .side-panel {
-            width: 100%; /* Side panel takes full width */
-            height: auto; /* Auto height, not 100vh */
+            width: 100%; 
+            height: auto; 
             border-right: none;
-            border-bottom: 1px solid #e0e0e0; /* Bottom border to separate from detail panel */
+            border-bottom: 1px solid #e0e0e0; 
         }
 
         .detail-panel {
-            width: 100%; /* Detail panel takes full width */
-            padding: 15px 20px; /* Reduces padding on mobile */
-            flex-grow: 1; /* Ensures detail panel takes up remaining space */
+            width: 100%; 
+            padding: 15px 20px;
+            flex-grow: 1; 
         }
 
         .schedule-button {
-            width: calc(100% - 30px); /* Adjusts width for better padding on mobile */
-            margin: 15px; /* Reduces margin */
-            padding: 10px 15px; /* Reduces padding */
-            font-size: 13px; /* Reduces font size */
+            width: calc(100% - 30px); 
+            margin: 15px; 
+            padding: 10px 15px; 
+            font-size: 13px; 
         }
 
         .date-controls,
         .filter-controls {
-            padding: 10px 15px; /* Reduces padding */
-            gap: 8px; /* Reduces space between elements */
+            padding: 10px 15px; 
+            gap: 8px; 
         }
 
         .arrow-btn,
         .date-display {
-            height: 32px; /* Reduces height of date controls */
-            font-size: 13px; /* Reduces font size */
+            height: 32px; 
+            font-size: 13px; 
         }
 
         .search-input {
             width: calc(100% - 30px);
-            margin: 0 15px 15px 15px; /* Reduces margin */
-            padding: 8px 12px; /* Reduces font size */
+            margin: 0 15px 15px 15px; 
+            padding: 8px 12px; 
             height: 34px;
         }
 
         #visitList {
-            padding: 0 10px 0 15px; /* Adjusts side padding */
+            padding: 0 10px 0 15px; 
         }
 
         .visit-card {
-            padding: 12px; /* Reduces card padding */
-            margin-bottom: 10px; /* Reduces bottom margin */
-            gap: 10px; /* Reduces space between avatar and info */
+            padding: 12px; 
+            margin-bottom: 10px; 
+            gap: 10px; 
         }
 
         .visit-card .avatar {
@@ -1018,7 +1010,7 @@
 
         .tabs-container {
             margin-bottom: 20px;
-            padding-bottom: 5px; /* More space for tab scrolling */
+            padding-bottom: 5px; 
         }
 
         .tab {
@@ -1034,7 +1026,7 @@
         .action-buttons {
             margin-bottom: 20px;
             gap: 8px;
-            justify-content: center; /* Centers buttons on small screens */
+            justify-content: center; 
         }
 
         .btn-action {
@@ -1045,8 +1037,8 @@
         .section-header {
             margin-bottom: 15px;
             padding-bottom: 10px;
-            flex-direction: column; /* Stacks title and translation controls */
-            align-items: flex-start; /* Aligns stacked elements to the left */
+            flex-direction: column; 
+            align-items: flex-start; 
             gap: 10px;
         }
 
@@ -1071,15 +1063,14 @@
 
         .transcription-area,
         .ai-notes-section {
-            padding: 15px 18px; /* Reduces padding */
-            font-size: 12px; /* Reduces font size */
+            padding: 15px 18px; 
+            font-size: 12px;
         }
 
         #full-transcription {
             min-height: 200px;
         }
 
-        /* --- START: Added styles for diet plan table (mobile) --- */
         #diet-plan-content table {
             font-size: 12px;
         }
@@ -1089,15 +1080,13 @@
             padding: 8px 10px;
         }
 
-        /* --- END: Added styles for diet plan table (mobile) --- */
-
         .overview-grid {
-            grid-template-columns: 1fr; /* Single column for all grid elements */
-            gap: 15px; /* Reduces space between elements */
+            grid-template-columns: 1fr; 
+            gap: 15px; 
         }
 
         .overview-detail-item {
-            padding: 15px; /* Reduces padding */
+            padding: 15px;
         }
 
         .overview-label {
@@ -1115,12 +1104,12 @@
         }
 
         .activity-log-timeline {
-            max-height: 250px; /* Adjusts max height */
+            max-height: 250px; 
         }
 
         .activity-log-timeline li {
             font-size: 12px;
-            padding: 6px 0 12px 25px; /* Adjusts padding */
+            padding: 6px 0 12px 25px; 
         }
 
         .activity-log-timeline li .activity-icon {
@@ -1138,13 +1127,13 @@
 
         #patient .patient-info-item {
             font-size: 13px;
-            flex-direction: column; /* Stacks label and value */
+            flex-direction: column; 
             margin-bottom: 10px;
         }
 
         #patient .patient-info-label {
-            width: auto; /* Disables fixed width */
-            margin-bottom: 5px; /* Space between label and value */
+            width: auto; 
+            margin-bottom: 5px; 
         }
 
         #patient-history-link {
@@ -1156,7 +1145,7 @@
         }
 
         .popup-content {
-            padding: 20px 25px; /* Reduces popup padding */
+            padding: 20px 25px;
         }
 
         .popup-content h3 {
@@ -1185,12 +1174,12 @@
             margin-top: 25px;
             padding-top: 15px;
             border-top: 1px solid #eee;
-            flex-wrap: wrap; /* Ensures buttons wrap */
+            flex-wrap: wrap; 
         }
 
         .popup-actions .btn-action {
-            width: 100%; /* Popup buttons take full width */
-            justify-content: center; /* Centers button text */
+            width: 100%;
+            justify-content: center; 
         }
     }
 </style>
@@ -1255,10 +1244,7 @@
             <button class="btn-action" id="btn-create-prescription-visit" disabled title="Create prescription for this visit">
                 <i class="fas fa-file-prescription"></i> Prescription
             </button>
-            <button class="btn-action" id="btn-create-referral-visit" disabled title="Create referral for this visit">
-                <i class="fas fa-directions"></i> Referral
-            </button>
-
+            
             {% if action_for_specialty %}
             <button class="btn-action" id="btn-specialty-action"
                 data-route-name="{{ action_for_specialty.route_name }}"
@@ -1322,7 +1308,6 @@
                 <p style="margin:0; font-size: 0.9em;">Patient: <strong id="notes-patient-name">N/A</strong></p>
             </div>
 
-            {# Combined AI content section #}
             <div class="ai-notes-section">
                 <h4><i class="fas fa-robot"></i> AI Content (Notes & Summary)</h4>
                 
@@ -1333,17 +1318,14 @@
                     <button class="btn-action secondary" id="btn-download-ai-notes-pdf" style="display: none;"><i class="fas fa-file-pdf"></i> Notes PDF</button>
                 </div>
 
-                {# This is the wrapper for the display div and the textarea #}
                 <div id="notes-summary-ai-content-wrapper">
                     <div id="notes-summary-ai-unified-content" class="transcription-area" style="min-height: 250px;">
                         <div class="no-speech">AI notes or summary have not been generated yet.</div>
                     </div>
-                    {# The textarea for editing. Hidden by default. #}
-                    {# Applied transcription-area styling directly here for robustness #}
                     <textarea id="notes-summary-ai-unified-textarea" class="transcription-area" style="display:none;"></textarea>
                 </div>
 
-                <div class="edit-actions"> {# This div now only contains Save/Cancel #}
+                <div class="edit-actions">
                     <button class="btn-action" id="btn-save-notes-summary-ia" style="display: none;" title="Save changes to AI Notes & Summary">
                         <i class="fas fa-save"></i> Save
                     </button>
@@ -1409,14 +1391,14 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
 <script>
-    const md = window.markdownit(); // Initialize markdown-it parser
+    const md = window.markdownit();
 
     const visitDetails = {};
 
     let originalSummaryAiText = '';
     let originalNotesAiText = '';
-    let unifiedAiContentMarkdown = ''; // Stores the combined markdown for current display/editing
-    let originalUnifiedAiContentMarkdown = ''; // To store the state before editing for cancel
+    let unifiedAiContentMarkdown = ''; 
+    let originalUnifiedAiContentMarkdown = '';
 
 
     {% for visit in visitas %}
@@ -1427,10 +1409,10 @@
         id: {{ visit.id | default('null') | tojson }},
         idioma_detectado: {{ visit.idioma_detectado | default('null') | tojson }},
         resumen_ai: {{ visit.resumen_ai | default('null') | tojson }},
-        notas_ai: {{ visit.notas_ai | default('null') | tojson }}, // This will be markdown from DB
+        notas_ai: {{ visit.notas_ai | default('null') | tojson }},
         transcripcion: {{ visit.transcripcion | default('null') | tojson }},
         paciente_id: {{ visit.paciente.id|tojson }},
-        ruta_notas_ai_pdf: {{ visit.ruta_notas_ai_pdf | default('null') | tojson }} // Capture PDF path
+        ruta_notas_ai_pdf: {{ visit.ruta_notas_ai_pdf | default('null') | tojson }}
     };
     {% endfor %}
 
@@ -1447,27 +1429,22 @@
     const formDeleteVisit = document.getElementById('form-delete-visit');
     const btnDeleteFullVisit = document.getElementById('btn-delete-visit-complete');
     const btnCreatePrescriptionVisit = document.getElementById('btn-create-prescription-visit');
-    const btnCreateReferralVisit = document.getElementById('btn-create-referral-visit');
     const btnSpecialtyAction = document.getElementById('btn-specialty-action');
     const tabDietPlan = document.getElementById('tab-diet-plan');
     const btnDownloadAiNotesPdf = document.getElementById('btn-download-ai-notes-pdf');
 
-    // References for edit functionality
     const notesSummaryAiUnifiedContentDisplay = document.getElementById('notes-summary-ai-unified-content');
     const notesSummaryAiUnifiedTextarea = document.getElementById('notes-summary-ai-unified-textarea');
     const btnEditNotesSummaryIA = document.getElementById('btn-edit-notes-summary-ia');
     const btnSaveNotesSummaryIA = document.getElementById('btn-save-notes-summary-ia');
     const btnCancelEditNotesSummaryIA = document.getElementById('btn-cancel-edit-notes-summary-ia');
-    // Reference for the combined generate button
     const btnGenerateNotesSummaryIA = document.getElementById('btn-generate-notes-summary-ia');
 
 
     function switchTab(event, tabId) {
-        // Hide all panels and deactivate all tabs first
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
 
-        // Get the clicked tab element or find it by ID if event is null
         let tabToActivate;
         if (event) {
             tabToActivate = event.currentTarget;
@@ -1475,7 +1452,6 @@
             tabToActivate = document.querySelector(`.tab[onclick*="switchTab(event, '${tabId}')"]`);
         }
 
-        // Activate the selected tab and its corresponding panel
         if (tabToActivate) {
             tabToActivate.classList.add('active');
         }
@@ -1493,11 +1469,8 @@
 
         const currentVisitDetail = visitDetails[visitId] || {};
 
-        // Reset edit mode when a new visit is selected
-        // This line is crucial and must be here. It ensures we are not in edit mode when switching visits.
         disableEditMode();
 
-        // Ensure the "Overview" tab is active by default when loading a new visit
         switchTab(null, 'overview');
 
         if (btnShareVisit) btnShareVisit.disabled = !currentlySelectedVisit;
@@ -1512,26 +1485,15 @@
                 btnCreatePrescriptionVisit.onclick = null;
             }
         }
-        if (btnCreateReferralVisit) {
-            btnCreateReferralVisit.disabled = !currentlySelectedVisit;
-            if (currentlySelectedVisit) {
-                btnCreateReferralVisit.onclick = () => {
-                    window.location.href = `/visita/${currentlySelectedVisit}/referencia/nueva`;
-                };
-            } else {
-                btnCreateReferralVisit.onclick = null;
-            }
-        }
-
+        
         if (btnSpecialtyAction) {
             btnSpecialtyAction.disabled = !currentlySelectedVisit || !currentVisitDetail.transcripcion;
             if (currentlySelectedVisit && currentVisitDetail.transcripcion) {
                 const routeNameFromData = btnSpecialtyAction.dataset.routeName;
-                const docType = btnSpecialtyAction.dataset.docType; // Keep docType if needed for other actions
+                const docType = btnSpecialtyAction.dataset.docType;
 
-                if (routeNameFromData) { // Only check routeNameFromData as docType specific generation is moved
+                if (routeNameFromData) {
                     btnSpecialtyAction.onclick = () => {
-                        // This now always points to the new page for creation
                         window.location.href = `/visita/${currentlySelectedVisit}/${routeNameFromData}`;
                     };
                 } else {
@@ -1575,27 +1537,23 @@
             }
         }
 
-        // --- Unified logic for AI Notes and Summary Display ---
         originalSummaryAiText = currentVisitDetail.resumen_ai || '';
         originalNotesAiText = currentVisitDetail.notas_ai || '';
-        updateUnifiedAiContentDisplay(); // Call function to update display
-        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Store for cancel
+        updateUnifiedAiContentDisplay();
+        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown;
 
 
         document.getElementById('notes-patient-name').textContent = currentVisitDetail.paciente_nombre || 'N/A';
         
-        // Enable edit button if there is content
         if(btnEditNotesSummaryIA) {
             btnEditNotesSummaryIA.disabled = !(originalSummaryAiText || originalNotesAiText);
         }
 
-        // New combined button to generate Notes and Summary
         if (btnGenerateNotesSummaryIA) {
             btnGenerateNotesSummaryIA.disabled = !originalTranscriptionText;
             btnGenerateNotesSummaryIA.onclick = () => callGenerateNotesAndSummaryApi(visitId);
         }
 
-        // Set the PDF download button link for notes (summary is usually not PDF'd separately)
         if (btnDownloadAiNotesPdf) {
             if (currentVisitDetail.ruta_notas_ai_pdf) {
                 btnDownloadAiNotesPdf.style.display = 'inline-block';
@@ -1618,7 +1576,7 @@
         document.getElementById('overview-staff-name').textContent = 'Loading...';
         document.getElementById('overview-patient-name').textContent = currentVisitDetail.paciente_nombre || 'Loading...';
         const overviewSummaryTextElem = document.getElementById('overview-summary-text');
-        // Update overview summary from local data first
+
         if (originalSummaryAiText) {
             overviewSummaryTextElem.textContent = originalSummaryAiText;
         } else if (currentVisitDetail.transcripcion) {
@@ -1649,7 +1607,7 @@
                 if (originalSummaryAiText !== summaryForOverview && visitDetails[visitId] && overviewData.resumen_ai) {
                     visitDetails[visitId].resumen_ai = overviewData.resumen_ai;
                     originalSummaryAiText = overviewData.resumen_ai;
-                    updateUnifiedAiContentDisplay(); // Re-render combined content after updating summary
+                    updateUnifiedAiContentDisplay(); 
                 }
             } else if (!currentVisitDetail.transcripcion) {
                 overviewSummaryTextElem.innerHTML = `<div class="no-speech">No summary or transcription.</div>`;
@@ -1657,19 +1615,17 @@
                 overviewSummaryTextElem.textContent = "Transcription available. Summary not generated.";
             }
 
-            // Update Notes AI from Overview
             if (overviewData.notas_ai) {
                 if (originalNotesAiText !== overviewData.notas_ai) {
                     visitDetails[visitId].notas_ai = overviewData.notas_ai;
-                    visitDetails[visitId].ruta_notas_ai_pdf = overviewData.ruta_notas_ai_pdf; // Make sure this is updated
+                    visitDetails[visitId].ruta_notas_ai_pdf = overviewData.ruta_notas_ai_pdf; 
                     originalNotesAiText = overviewData.notas_ai;
-                    updateUnifiedAiContentDisplay(); // Re-render combined content after updating notes
+                    updateUnifiedAiContentDisplay(); 
                 }
             }
 
-            // Update PDF download button based on new path from overview
             if (btnDownloadAiNotesPdf) {
-                if (visitDetails[visitId].ruta_notas_ai_pdf) { // Check the locally updated data
+                if (visitDetails[visitId].ruta_notas_ai_pdf) { 
                     btnDownloadAiNotesPdf.style.display = 'inline-block';
                     btnDownloadAiNotesPdf.onclick = () => window.open(`/visit/${visitId}/notas_ia_pdf`, '_blank');
                 } else {
@@ -1710,30 +1666,24 @@
         }
     }
 
-    // NEW: Function to toggle edit mode for unified AI content
     function enableEditMode() {
         if (!currentlySelectedVisit) {
             alert("Please select a visit to edit.");
             return;
         }
 
-        // Store current state for 'Cancel'
         originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown;
 
-        // Hide the display div and show the textarea
         notesSummaryAiUnifiedContentDisplay.style.display = 'none';
         notesSummaryAiUnifiedTextarea.style.display = 'block';
 
-        // Populate textarea with the `unifiedAiContentMarkdown` (raw markdown with actual newlines)
         notesSummaryAiUnifiedTextarea.value = unifiedAiContentMarkdown;
 
-        // Show/hide buttons
         btnEditNotesSummaryIA.style.display = 'none';
-        btnGenerateNotesSummaryIA.style.display = 'none'; // Hide generate button during edit
+        btnGenerateNotesSummaryIA.style.display = 'none'; 
         btnSaveNotesSummaryIA.style.display = 'inline-block';
         btnCancelEditNotesSummaryIA.style.display = 'inline-block';
 
-        // Disable PDF download button during edit
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
         if (btnDownloadPdf) btnDownloadPdf.style.display = 'none';
 
@@ -1742,21 +1692,15 @@
     }
 
     function disableEditMode() {
-        // Hide the textarea and show the display div
         if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.style.display = 'block';
         if (notesSummaryAiUnifiedTextarea) notesSummaryAiUnifiedTextarea.style.display = 'none';
 
-        // Re-render the content (important for when 'Cancel' is pressed)
         updateUnifiedAiContentDisplay();
 
-        // Show/hide buttons
         const hasContent = !!unifiedAiContentMarkdown;
-        // Show btnEditNotesSummaryIA only if there is content and not in edit mode
         if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.style.display = (hasContent && notesSummaryAiUnifiedTextarea.style.display === 'none') ? 'inline-block' : 'none';
         if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = !hasContent;
 
-
-        // Re-enable generate button only if a visit is selected and has transcription
         const currentDetail = visitDetails[currentlySelectedVisit];
         if (btnGenerateNotesSummaryIA && currentDetail && currentDetail.transcripcion) {
             btnGenerateNotesSummaryIA.style.display = 'inline-block';
@@ -1766,7 +1710,6 @@
         if (btnSaveNotesSummaryIA) btnSaveNotesSummaryIA.style.display = 'none';
         if (btnCancelEditNotesSummaryIA) btnCancelEditNotesSummaryIA.style.display = 'none';
 
-        // Re-show PDF button if path exists
         const btnDownloadPdf = document.getElementById('btn-download-ai-notes-pdf');
         const currentDetailForUpdate = visitDetails[currentlySelectedVisit];
         if (btnDownloadPdf && currentDetailForUpdate && currentDetailForUpdate.ruta_notas_ai_pdf) {
@@ -1781,12 +1724,10 @@
             alert("No visit selected to save.");
             return;
         }
-        const editedContent = notesSummaryAiUnifiedTextarea.value; // Get content from the textarea
+        const editedContent = notesSummaryAiUnifiedTextarea.value; 
 
-        // Update `unifiedAiContentMarkdown` with the edited content immediately
         unifiedAiContentMarkdown = editedContent;
 
-        // Split the content back into summary and notes based on markdown headers.
         let summaryPart = '';
         let notesPart = '';
 
@@ -1821,8 +1762,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     visita_id: currentlySelectedVisit,
-                    resumen_ai_content: summaryPart, // THIS IS NOW PURE MARKDOWN
-                    notas_ai_content: notesPart // THIS IS NOW PURE MARKDOWN
+                    resumen_ai_content: summaryPart, 
+                    notas_ai_content: notesPart 
                 })
             });
 
@@ -1831,18 +1772,16 @@
                 throw new Error(data.error || `Error ${response.status}`);
             }
 
-            // Update local data and re-render display
-            visitDetails[currentlySelectedVisit].resumen_ai = summaryPart; // Save as pure Markdown
-            visitDetails[currentlySelectedVisit].notas_ai = notesPart; // Save as pure Markdown
-            originalSummaryAiText = summaryPart; // Update originals
-            originalNotesAiText = notesPart; // Update originals
-            originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Update original for future cancels
+            visitDetails[currentlySelectedVisit].resumen_ai = summaryPart; 
+            visitDetails[currentlySelectedVisit].notas_ai = notesPart; 
+            originalSummaryAiText = summaryPart;
+            originalNotesAiText = notesPart; 
+            originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; 
 
-            updateUnifiedAiContentDisplay(); // Render `unifiedAiContentMarkdown` for display
-            disableEditMode(); // Exit edit mode
+            updateUnifiedAiContentDisplay(); 
+            disableEditMode(); 
             alert(data.mensaje || "AI content saved successfully.");
 
-            // Optionally update overview summary if needed
             const overviewSummaryElem = document.getElementById('overview-summary-text');
             if (overviewSummaryElem) overviewSummaryElem.textContent = summaryPart;
 
@@ -1857,7 +1796,6 @@
         }
     }
 
-    // Consolidated function to update the unified display
     function updateUnifiedAiContentDisplay() {
         let combinedContentMarkdown = '';
 
@@ -1873,10 +1811,9 @@
             combinedContentMarkdown += '### AI Generated Notes (Error)\n\n' + originalNotesAiText.replace(/\\n/g, '\n') + '\n\n';
         }
 
-        // Store this raw markdown for editing and original content display.
         unifiedAiContentMarkdown = combinedContentMarkdown.trim();
 
-        if (notesSummaryAiUnifiedContentDisplay) { // Ensure the element exists
+        if (notesSummaryAiUnifiedContentDisplay) { 
             if (unifiedAiContentMarkdown === '') {
                 notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">AI notes or summary have not been generated yet.</div>';
             } else {
@@ -1896,7 +1833,7 @@
             line = line.trim();
             if (!line) return;
             const parts = line.match(/^((?:SPEAKER_\d+|SPK_\d+|HABLANTE\s*\d*|UNK|Speaker\s*\d*|Hablante\s*\d*)[^:]*):\s*(.*)$/i);
-            if (parts && parts[1] && parts[2]) { // Ensure both parts exist
+            if (parts && parts[1] && parts[2]) {
                 const speaker = escapeHtml(parts[1].trim());
                 const message = escapeHtml(parts[2].trim());
                 html += `<p><span class="speaker">${speaker}:</span> ${message}</p>`;
@@ -1907,7 +1844,6 @@
         return html || '<div class="no-speech">Unrecognized format or empty transcription.</div>';
     }
 
-    // This function is now the single point for generating both notes and summary
     async function callGenerateNotesAndSummaryApi(visitId) {
         if (!visitId) {
             alert("Invalid visit ID.");
@@ -1927,14 +1863,13 @@
         }
         if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.innerHTML = '<div class="no-speech">Generating AI Notes & Summary...</div>';
         if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
-        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = true; // Disable edit button during generation
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = true;
 
         let summaryGenerated = false;
         let notesGenerated = false;
         let summaryError = null;
         let notesError = null;
 
-        // First, generate summary
         try {
             const responseSummary = await fetch('/api/generar_resumen_ai', {
                 method: 'POST',
@@ -1962,7 +1897,6 @@
             originalSummaryAiText = `[Error generating summary: ${summaryError}]`;
         }
 
-        // Then, generate notes
         try {
             const responseNotes = await fetch('/api/generar_notas_ai', {
                 method: 'POST',
@@ -1981,7 +1915,7 @@
                 visitDetails[visitId].ruta_notas_ai_pdf = dataNotes.ruta_notas_ai_pdf;
                 originalNotesAiText = dataNotes.notas_ai_markdown;
                 notesGenerated = true;
-            } else if (dataNotes.notas_ai) { // Fallback if only markdown is returned
+            } else if (dataNotes.notas_ai) {
                 visitDetails[visitId].notas_ai = dataNotes.notas_ai;
                 originalNotesAiText = dataNotes.notas_ai;
                 notesGenerated = true;
@@ -1995,7 +1929,6 @@
             originalNotesAiText = `[Error generating notes: ${notesError}]`;
         }
 
-        // After both calls, update the display
         let statusMessage = "AI process completed. ";
 
         if (summaryGenerated) {
@@ -2010,11 +1943,10 @@
             statusMessage += `Notes Error: ${notesError}. `;
         }
 
-        updateUnifiedAiContentDisplay(); // Re-render the combined view
-        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; // Update original for future cancels
+        updateUnifiedAiContentDisplay();
+        originalUnifiedAiContentMarkdown = unifiedAiContentMarkdown; 
         alert(statusMessage);
 
-        // Update PDF download button if notes were generated and path exists
         if (btnDownloadAiNotesPdf) {
             if (visitDetails[visitId].ruta_notas_ai_pdf) {
                 btnDownloadAiNotesPdf.style.display = 'inline-block';
@@ -2024,13 +1956,12 @@
             }
         }
 
-        // Refresh activity logs and translation controls via overview API call
         try {
             const overviewResponse = await fetch(`/api/visita_overview/${visitId}`);
             const overviewData = await overviewResponse.json();
             if (overviewResponse.ok) {
                 const logList = document.getElementById('overview-activity-log-list');
-                logList.innerHTML = ''; // Clear previous logs
+                logList.innerHTML = ''; 
                 if (overviewData.activity_logs && overviewData.activity_logs.length > 0) {
                     overviewData.activity_logs.forEach(log => {
                         const li = document.createElement('li');
@@ -2058,11 +1989,9 @@
 
         btn.disabled = !(baseDetail && baseDetail.transcripcion);
         btn.innerHTML = originalButtonText;
-        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = !(originalSummaryAiText || originalNotesAiText); // Re-enable edit button
+        if (btnEditNotesSummaryIA) btnEditNotesSummaryIA.disabled = !(originalSummaryAiText || originalNotesAiText);
     }
 
-
-    // START: Added function to generate diet plan
     async function generateDietPlan(visitId) {
         if (!visitId) {
             alert("Invalid visit ID.");
@@ -2074,10 +2003,9 @@
             return;
         }
 
-        // Use the dynamic specialty button
         const btn = document.getElementById('btn-specialty-action');
-        let originalButtonHTML = ''; // Store HTML to preserve icon
-        if (btn) { // Make sure the button exists
+        let originalButtonHTML = ''; 
+        if (btn) { 
             originalButtonHTML = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Plan...';
@@ -2086,7 +2014,6 @@
         const contentDiv = document.getElementById('diet-plan-content');
         if (contentDiv) contentDiv.innerHTML = '<div class="no-speech">Generating diet plan... Please wait.</div>';
 
-        // Switch to the "Diet Plan" tab
         switchTab(null, 'diet-plan');
 
         try {
@@ -2101,33 +2028,27 @@
             const data = await response.json();
 
             if (!response.ok) {
-                // Try to get error from backend response, otherwise use default
                 throw new Error(data.error || `Server error ${response.status}`);
             }
 
             if (data.plan_alimenticio_html) {
-                // Assuming the backend returns HTML for the diet plan
                 if (contentDiv) contentDiv.innerHTML = data.plan_alimenticio_html;
-                // Store the generated HTML in the local `visitDetails` object
                 visitDetails[visitId].plan_alimenticio_html = data.plan_alimenticio_html;
             } else {
                 throw new Error("The API response did not include the diet plan.");
             }
-            // Log activity (backend should ideally do this, but frontend can be informed)
-            // await fetchActivityLogsAndUpdate(); // Hypothetical function
 
         } catch (error) {
             console.error("Error generating diet plan:", error);
             if (contentDiv) contentDiv.innerHTML = `<div class="no-speech" style="color:red;">Error generating the plan: ${error.message}.<br/>Make sure the API is configured correctly.</div>`;
             alert(`Error generating the diet plan: ${error.message}`);
         } finally {
-            if (btn) { // Make sure the button exists
+            if (btn) { 
                 btn.disabled = !(visitDetail && visitDetail.transcripcion);
-                btn.innerHTML = originalButtonHTML; // Restore original button text/icon
+                btn.innerHTML = originalButtonHTML;
             }
         }
     }
-    // END: Added function to generate diet plan
 
     function changeDate(delta) {
         const dateInput = document.getElementById('date');
@@ -2289,7 +2210,6 @@
         const fullTranscriptionDiv = document.getElementById('full-transcription');
         if (fullTranscriptionDiv) fullTranscriptionDiv.innerHTML = '<div class="no-speech">Select a visit.</div>';
 
-        // Ensure the display div is shown and textarea is hidden initially
         if (notesSummaryAiUnifiedContentDisplay) notesSummaryAiUnifiedContentDisplay.style.display = 'block';
         if (notesSummaryAiUnifiedTextarea) notesSummaryAiUnifiedTextarea.style.display = 'none';
 
@@ -2309,8 +2229,7 @@
 
         if (btnShareVisit) btnShareVisit.disabled = true;
         if (btnCreatePrescriptionVisit) btnCreatePrescriptionVisit.disabled = true;
-        if (btnCreateReferralVisit) btnCreateReferralVisit.disabled = true;
-
+        
         if (document.getElementById('form-delete-visit') && btnDeleteFullVisit) {
             btnDeleteFullVisit.disabled = true;
             document.getElementById('form-delete-visit').action = '#';
@@ -2319,7 +2238,6 @@
         }
         if (btnDownloadAiNotesPdf) btnDownloadAiNotesPdf.style.display = 'none';
 
-        // Attach event listeners for edit buttons
         if (btnEditNotesSummaryIA) {
             btnEditNotesSummaryIA.onclick = enableEditMode;
         }
@@ -2332,8 +2250,7 @@
                 disableEditMode();
             };
         }
-        // Call disableEditMode() here to set the initial state of the buttons
-        // before any visit is loaded.
+
         disableEditMode();
 
         document.addEventListener('keydown', function(event) {

@@ -4594,4 +4594,51 @@ def reset_demo_account():
     Elimina todos los datos generados por el usuario de demostración (demo@vitta.health).
     """
     demo_email = "demo@vitta.health"
-    print(f"--- Iniciando reseteo diario de la cuenta demo: {demo_email} ---")
+    print(f"--- Iniciando reseteo de la cuenta demo: {demo_email} ---")
+
+    # 1. Encontrar el usuario de demostración
+    demo_user = User.query.filter_by(email=demo_email).first()
+
+    if not demo_user:
+        print(f"❌ Error: No se encontró el usuario de demostración con el email '{demo_email}'.")
+        print("Puedes crearlo primero con el comando: flask create-demo-user")
+        return
+
+    print(f"✅ Usuario demo encontrado: {demo_user.nombre} (ID: {demo_user.id})")
+
+    try:
+        # 2. Encontrar todos los pacientes creados por el usuario demo
+        pacientes_a_eliminar = Paciente.query.filter_by(creado_por_id=demo_user.id).all()
+        print(f"🔎 Se encontraron {len(pacientes_a_eliminar)} paciente(s) para eliminar.")
+
+        for paciente in pacientes_a_eliminar:
+            print(f"  - Procesando paciente ID: {paciente.id}, Nombre: {paciente.nombre}")
+            
+            # 3. Eliminar archivos físicos asociados a cada visita del paciente
+            for visita in paciente.visitas:
+                print(f"    - Eliminando archivos de la visita ID: {visita.id}")
+                # Esta función se encarga de eliminar audios, documentos, etc.
+                _eliminar_archivos_asociados_a_visita(visita)
+
+            # 4. Eliminar el paciente de la base de datos
+            # Gracias a la configuración 'cascade="all, delete-orphan"' en el modelo Paciente,
+            # al eliminar un paciente, se eliminarán automáticamente todas sus visitas, recetas,
+            # referencias y planes nutricionales asociados.
+            db.session.delete(paciente)
+            print(f"  - Paciente ID: {paciente.id} y todos sus datos asociados eliminados de la BD.")
+
+        # 5. Eliminar otras entidades directamente relacionadas con el usuario (si las hubiera)
+        # Por ejemplo, si las tareas no se eliminan en cascada con los pacientes
+        tareas_a_eliminar = Tarea.query.filter_by(usuario_id=demo_user.id).delete()
+        if tareas_a_eliminar > 0:
+            print(f"🗑️ Se eliminaron {tareas_a_eliminar} tarea(s) directamente asociadas al usuario demo.")
+
+        # 6. Confirmar los cambios en la base de datos
+        db.session.commit()
+        print("\n✅ Reseteo de la cuenta de demostración completado exitosamente.")
+
+    except Exception as e:
+        # Si algo sale mal, revertir todos los cambios
+        db.session.rollback()
+        print(f"❌ ERROR: Ocurrió un error durante el reseteo. Se revirtieron los cambios.")
+        logging.error(f"Error reseteando la cuenta demo: {e}", exc_info=True)
