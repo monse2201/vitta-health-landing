@@ -2750,22 +2750,29 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
         flash('La visita seleccionada no tiene un paciente asociado.', 'danger')
         return redirect(url_for('historial_visitas'))
 
+    # Se inicializa el diccionario de datos del formulario para que sea persistente en la solicitud GET.
+    # Esto es crucial para que el JavaScript pueda leer las sugerencias.
     form_data_dict = {}
+
     if request.method == 'GET':
+        # Esta es la lógica para precargar el formulario al inicio.
+        # Solo se ejecuta en la primera carga de la página.
         if visita.transcripcion and visita.transcripcion.strip() and client_openai and not visita.transcripcion.startswith("[Error"):
-            datos_ia_plan = generar_contenido_plan_nutricional_con_ia(visita.transcripcion, visita.idioma_detectado)
+            datos_ia_plan = generar_contenido_plan_nutricional_con_ia(visita.transcripcion, visita.idioma_detectado or 'es')
             if datos_ia_plan and not datos_ia_plan.get("error"):
-                # --- CORRECCIÓN APLICADA AQUÍ ---
-                # Pasamos el diccionario de Python directamente, en lugar de un string JSON.
-                # Jinja se encargará de convertirlo a un objeto JavaScript en la plantilla.
+                # Se pasa el diccionario directamente a la plantilla. El JavaScript lo parseará.
                 form_data_dict['suggested_plan_data'] = datos_ia_plan
                 flash("Se ha sugerido un borrador del plan nutricional basado en la transcripción. Por favor, revísalo y ajústalo.", 'info')
             elif datos_ia_plan and datos_ia_plan.get("error"):
                 flash(f"Error al sugerir plan desde IA: {datos_ia_plan.get('error')}", "warning")
+        else:
+             flash("No hay una transcripción válida para generar un plan nutricional automáticamente.", "warning")
+
 
     if request.method == 'POST':
         form_data_dict = request.form.copy()
         contenido_json_final_str = request.form.get('final_json_content_str')
+        # La clave para las notas generales debe ser 'general_notes' para coincidir con el formulario.
         notas_adicionales_form = request.form.get('general_notes', '').strip()
         
         if not contenido_json_final_str:
@@ -2774,7 +2781,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
         
         try:
             parsed_contenido = json.loads(contenido_json_final_str)
-            if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('main_goal') or not parsed_contenido.get('daily_meal_plan'):
+            if not isinstance(parsed_contenido, dict) or not parsed_contenido.get('main_goal'):
                  flash('El JSON del plan nutricional no tiene la estructura requerida.', 'danger')
                  raise json.JSONDecodeError("Estructura JSON inválida", contenido_json_final_str, 0)
 
@@ -2783,6 +2790,7 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
                 paciente_id=visita.paciente_id,
                 medico_id=current_user.id,
                 contenido_json=contenido_json_final_str,
+                # La lógica para 'notas_adicionales' ahora se manejará mejor en el JSON.
                 notas_adicionales=notas_adicionales_form or None,
                 estado="activo"
             )
@@ -2815,7 +2823,11 @@ def nuevo_plan_nutricional_para_visita_page(visita_id):
             logging.error(f"Error al crear Plan Nutricional para visita {visita_id}: {e}", exc_info=True)
             flash(f'Error al crear el Plan Nutricional: {str(e)}', 'danger')
         
-        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)    
+        # En caso de error, se vuelve a la página con los datos del formulario que ya se llenaron.
+        return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
+
+    return render_template('crear_plan_nutricional.html', visita=visita, paciente=visita.paciente, form_data=form_data_dict)
+
 @app.route('/plan_nutricional/<int:plan_id>')
 @login_required
 def ver_plan_nutricional(plan_id):
