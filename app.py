@@ -424,6 +424,8 @@ else:
     logging.info("SocketIO initialized WITHOUT message queue Redis. Async_mode auto-detected.")
 socketio = SocketIO(app, **socketio_kwargs)
 
+with app.app_context():
+    precargar_modelos_traduccion()
 
 # --- Modelos de Base de Datos ---
 class User(db.Model, UserMixin):
@@ -1058,13 +1060,13 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
             logging.info(f"Cargando nuevo pipeline de traducción para {model_name}...")
             
             # --- INICIO DE LA SECCIÓN CORREGIDA ---
-            # Forzamos la CPU para el pipeline de Hugging Face si no necesitamos GPU.
-            # Esto evita que transformers intente instalar o usar torch con CUDA.
-            device_arg = -1 # -1 para forzar el uso de CPU
+            # Forzamos la CPU para el pipeline de Hugging Face.
+            # El parámetro moderno y correcto para esto es "cpu".
+            device_str = "cpu"
             logging.info(f"Forzando uso de CPU para el pipeline de traducción de Hugging Face para {model_name}.")
             # --- FIN DE LA SECCIÓN CORREGIDA ---
 
-            translator = pipeline("translation", model=model_name, tokenizer=model_name, device=device_arg) # type: ignore
+            translator = pipeline("translation", model=model_name, tokenizer=model_name, device=device_str)
             translation_pipelines_cache[pipeline_key] = translator
             logging.info(f"Pipeline para {model_name} cargado y cacheado (device: {device_arg}).")
         
@@ -1112,7 +1114,37 @@ def _traducir_texto_interno(texto_original, idioma_origen_code, idioma_destino_c
         if any(err_key in error_str for err_key in ["can't be instantiated", "does not exist", "is not a valid model identifier", "404", "not found"]):
             return f"[Error: Modelo de traducción HF no encontrado o inválido para '{norm_idioma_origen_code}' a '{norm_idioma_destino_code}']\n{texto_original}"
         return f"[Error durante la traducción con Hugging Face: {str(e)[:100]}...]\n{texto_original}"
-
+def precargar_modelos_traduccion():
+    """
+    Precarga los modelos de traducción más comunes al iniciar la aplicación
+    para evitar demoras en la primera solicitud del usuario.
+    """
+    logging.info("Iniciando precarga de modelos de traducción...")
+    # Pares de idiomas a precargar (hacia y desde el inglés)
+    pares_de_idiomas = [
+        # Español <-> Inglés
+        ('es', 'en'),
+        ('en', 'es'),
+        # Francés <-> Inglés
+        ('fr', 'en'),
+        ('en', 'fr'),
+        # Italiano <-> Inglés
+        ('it', 'en'),
+        ('en', 'it'),
+        # Alemán <-> Inglés
+        ('de', 'en'),
+        ('en', 'de'),
+    ]
+    
+    for origen, destino in pares_de_idiomas:
+        try:
+            # Llama a la función interna con un texto corto para forzar la descarga y carga del modelo
+            logging.info(f"Precargando modelo: {origen} -> {destino}...")
+            _traducir_texto_interno("hola", origen, destino)
+        except Exception as e:
+            logging.error(f"Fallo al precargar el modelo de traducción para {origen}->{destino}: {e}")
+            
+    logging.info("Precarga de modelos de traducción finalizada.")
 
 def extraer_texto_de_pdf(ruta_archivo_local):
     texto = ""
@@ -2070,7 +2102,7 @@ def descargar_pdf_notas_ia(visita_id):
         idioma_generacion=visita.idioma_detectado or 'N/D',
         notas_contenido_html=markdown.markdown(visita.notas_ai),
         current_year=datetime.now().year,
-        logo_clinica_base64=logo_base64,
+        clinic_logo_base64=logo_base64,
         show_clinic_name=medico_for_pdf.show_clinic_name_pdf,
         show_clinic_address=medico_for_pdf.show_clinic_address_pdf,
         show_clinic_phone=medico_for_pdf.show_clinic_phone_pdf,
@@ -2461,7 +2493,7 @@ def configuracion_perfil_profesional():
     return render_template(
         'configuracion_perfil_profesional.html',
         user=current_user,
-        logo_clinica_base64=logo_base64,
+        clinic_logo_base64=logo_base64,
         css_file="css/configuracion_perfil.css"
     )
 
@@ -2611,7 +2643,7 @@ def ver_receta(receta_id):
         medicamentos=medicamentos_lista, 
         css_file="css/ver_documento.css",
         medico=medico_for_pdf,
-        logo_clinica_base64=logo_base64,
+        clinic_logo_base64=logo_base64,
         show_clinic_name=medico_for_pdf.show_clinic_name_pdf,
         show_clinic_address=medico_for_pdf.show_clinic_address_pdf,
         show_clinic_phone=medico_for_pdf.show_clinic_phone_pdf,
@@ -2702,7 +2734,7 @@ def ver_referencia(referencia_id):
         'ver_referencia.html',
         referencia=referencia,
         medico=medico_for_pdf,
-        logo_clinica_base64=logo_base64,
+        clinic_logo_base64=logo_base64,
         css_file="css/ver_documento.css",
         show_clinic_name=medico_for_pdf.show_clinic_name_pdf,
         show_clinic_address=medico_for_pdf.show_clinic_address_pdf,
@@ -2761,7 +2793,7 @@ def configuracion_documentos():
     return render_template(
         'configuracion_documentos.html',
         user=updated_user,
-        logo_clinica_base64=logo_base64 # <-- ESTA LÍNEA ES LA SOLUCIÓN
+        clinic_logo_base64=logo_base64 # <-- ESTA LÍNEA ES LA SOLUCIÓN
     )
 @app.route('/visita/<int:visita_id>/nuevo_plan_nutricional_para_visita_page', methods=['GET', 'POST'])
 @login_required
@@ -2869,7 +2901,7 @@ def ver_plan_nutricional(plan_id):
         plan=plan,
         contenido=contenido_dict,
         medico=medico_for_pdf,
-        logo_clinica_base64=logo_base64,
+        clinic_logo_base64=logo_base64,
         css_file="css/ver_documento.css",
         show_clinic_name=medico_for_pdf.show_clinic_name_pdf,
         show_clinic_address=medico_for_pdf.show_clinic_address_pdf,
@@ -3705,6 +3737,8 @@ def api_traducir_texto():
     if texto_traducido.startswith("[Error"):
         return jsonify({"error": texto_traducido.split('\n')[0], "texto_traducido": texto_original}), 500
     return jsonify({"texto_traducido": texto_traducido, "idioma_original_confirmado": idioma_origen})
+
+
 
 @app.route('/api/visita_overview/<int:visita_id>')
 @login_required

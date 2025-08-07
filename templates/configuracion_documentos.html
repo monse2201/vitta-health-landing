@@ -305,7 +305,7 @@
         // IMPORTANT: The backend must pass these variables with English names.
         const userData = {
             name: {{ (user.name or '') | tojson }},
-            specialty: {{ (user.specialy or '') | tojson }},
+            specialty: {{ (user.specialty or '') | tojson }},
             professional_license: {{ (user.professional_license or '') | tojson }},
             professional_phone: {{ (user.professional_phone or '') | tojson }},
             biography: {{ (user.biography or '') | tojson }},
@@ -320,31 +320,39 @@
             // Clinic Logo
             // Make sure the image src is updated only if there is a logo
             if (checkboxes.show_clinic_logo_pdf.checked && userData.clinic_logo_base64) {
-                previewLogo.src = userData.clinic_logo_base64;
-                previewLogo.style.display = 'block';
-                previewLogoPlaceholder.style.display = 'none';
+                if (previewLogo) {
+                    previewLogo.src = userData.clinic_logo_base64;
+                    previewLogo.style.display = 'block';
+                }
+                if (previewLogoPlaceholder) {
+                    previewLogoPlaceholder.style.display = 'none';
+                }
             } else {
                 // If checkbox is unchecked or there's no logo, hide the image and show the placeholder
-                previewLogo.src = ""; // Clear src to prevent broken image errors
-                previewLogo.style.display = 'none';
-                previewLogoPlaceholder.style.display = 'flex'; 
+                if (previewLogo) {
+                    previewLogo.src = ""; // Clear src to prevent broken image errors
+                    previewLogo.style.display = 'none';
+                }
+                if (previewLogoPlaceholder) {
+                    previewLogoPlaceholder.style.display = 'flex'; 
+                }
             }
 
             // Clinic Information
-            pClinicName.style.display = checkboxes.show_clinic_name_pdf.checked ? 'block' : 'none';
-            previewClinicAddressP.style.display = checkboxes.show_clinic_address_pdf.checked ? 'block' : 'none';
-            previewClinicPhoneP.style.display = checkboxes.show_clinic_phone_pdf.checked ? 'block' : 'none';
-            previewClinicWebsiteP.style.display = checkboxes.show_clinic_website_pdf.checked ? 'block' : 'none';
+            if(pClinicName) pClinicName.style.display = checkboxes.show_clinic_name_pdf.checked ? 'block' : 'none';
+            if(previewClinicAddressP) previewClinicAddressP.style.display = checkboxes.show_clinic_address_pdf.checked ? 'block' : 'none';
+            if(previewClinicPhoneP) previewClinicPhoneP.style.display = checkboxes.show_clinic_phone_pdf.checked ? 'block' : 'none';
+            if(previewClinicWebsiteP) previewClinicWebsiteP.style.display = checkboxes.show_clinic_website_pdf.checked ? 'block' : 'none';
 
             // Doctor Information
-            previewDoctorLicenseP.style.display = checkboxes.show_doctor_license_pdf.checked ? 'block' : 'none';
-            previewDoctorPhoneP.style.display = checkboxes.show_doctor_phone_pdf.checked ? 'block' : 'none';
-            previewDoctorBioP.style.display = checkboxes.show_doctor_bio_pdf.checked ? 'block' : 'none';
+            if(previewDoctorLicenseP) previewDoctorLicenseP.style.display = checkboxes.show_doctor_license_pdf.checked ? 'block' : 'none';
+            if(previewDoctorPhoneP) previewDoctorPhoneP.style.display = checkboxes.show_doctor_phone_pdf.checked ? 'block' : 'none';
+            if(previewDoctorBioP) previewDoctorBioP.style.display = checkboxes.show_doctor_bio_pdf.checked ? 'block' : 'none';
         }
 
         // Event listeners to update the preview when checkboxes change
         for (const key in checkboxes) {
-            if (checkboxes.hasOwnProperty(key)) {
+            if (checkboxes.hasOwnProperty(key) && checkboxes[key]) {
                 checkboxes[key].addEventListener('change', updatePreview);
             }
         }
