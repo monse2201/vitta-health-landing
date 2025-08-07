@@ -4639,5 +4639,21 @@ def reset_password(email, new_password):
 @login_required
 def change_password_route():
     return render_template('change_password.html')
-with app.app_context():
-    precargar_modelos_traduccion()
+def run_model_preloading():
+    """
+    Función que se ejecutará en segundo plano para no bloquear el inicio.
+    """
+    with app.app_context():
+        logging.info("Iniciando la precarga de modelos en un hilo de segundo plano...")
+        try:
+            precargar_modelos_traduccion()
+        except Exception as e:
+            logging.error(f"Error catastrófico durante la precarga de modelos en segundo plano: {e}", exc_info=True)
+
+logging.info("Iniciando el hilo de precarga de modelos...")
+preload_thread = threading.Thread(target=run_model_preloading)
+preload_thread.daemon = True
+preload_thread.start()
+
+if __name__ == '__main__':
+    socketio.run(app, debug=debug_mode)
