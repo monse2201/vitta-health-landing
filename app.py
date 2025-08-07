@@ -1528,43 +1528,31 @@ def generar_contenido_plan_nutricional_con_ia(transcripcion, idioma_detectado='e
     if not client_openai or not transcripcion or not transcripcion.strip():
         logging.warning("Generación de plan nutricional cancelada: Cliente OpenAI no disponible o transcripción vacía.")
         return {"error": "Cliente OpenAI no disponible o transcripción vacía para generar plan."}
-    nombre_idioma_transcripcion = language_codes_to_names.get(idioma_detectado, idioma_detectado)
-    prompt_sistema = (
-        f"Eres un nutricionista experto altamente especializado en crear planes de alimentación personalizados basados en transcripciones de consultas. "
-        f"Analiza la siguiente transcripción de una consulta con un paciente. Tu tarea es extraer información relevante como objetivos del paciente, "
-        f"preferencias alimentarias, aversiones, alergias, condiciones médicas, nivel de actividad física, y cualquier otro dato pertinente. "
-        f"Con base en esto, genera un plan nutricional detallado. "
-        f"El plan debe incluir: "
-        f"1. 'objetivo_principal': El objetivo principal del plan (ej: pérdida de peso, aumento de masa muscular, control de diabetes). "
-        f"2. 'recomendaciones_generales': Lista de consejos generales (ej: beber 2L de agua, evitar ultraprocesados). "
-        f"3. 'plan_diario_tipo': Un ejemplo de un día de comidas, estructurado por tiempo de comida (Desayuno, Media Mañana, Almuerzo, Merienda, Cena). "
-        f"   Cada comida debe tener una lista de 'opciones_alimento', donde cada opción es un string describiendo el alimento y la porción sugerida (ej: '1 taza de avena cocida con 1/2 taza de fresas y 10 almendras', 'Pechuga de pollo a la plancha (150g) con ensalada mixta grande y 1/2 taza de quinoa cocida'). "
-        f"4. 'notas_adicionales_plan': Cualquier nota importante específica para el plan. "
-        f"Devuelve la información estrictamente en formato JSON. El JSON debe ser un objeto con las claves 'objetivo_principal', 'recomendaciones_generales' (array de strings), "
-        f"'plan_diario_tipo' (objeto con claves de tiempo de comida, cada una un array de strings de opciones), y 'notas_adicionales_plan' (string). "
-        f"Si no se especifica algún detalle, usa una cadena vacía '' o un array vacío []. "
-        f"La transcripción está en {nombre_idioma_transcripcion}. La respuesta JSON NO debe incluir ninguna explicación adicional, solo el JSON puro. "
-        f"Ejemplo de formato de salida esperado: "
-        f"{{"
-        f"  \"objetivo_principal\": \"Pérdida de peso gradual (0.5-1kg por semana)\", "
-        f"  \"recomendaciones_generales\": ["
-        f"    \"Beber al menos 2 litros de agua al día.\", "
-        f"    \"Realizar 30 minutos de actividad física moderada 5 veces por semana.\", "
-        f"    \"Evitar bebidas azucaradas y alimentos ultraprocesados.\" "
-        f"  ], "
-        f"  \"plan_diario_tipo\": {{ "
-        f"    \"Desayuno\": [\"Opción 1: Batido de proteína (1 scoop) con espinacas, 1/2 plátano y 1 cda de chía.\", \"Opción 2: 2 huevos revueltos con tomate y cebolla, 1 tortilla de maíz integral.\"], "
-        f"    \"Media Mañana\": [\"1 manzana mediana con 10-12 almendras.\"], "
-        f"    \"Almuerzo\": [\"Opción 1: Salmón al horno (150g) con espárragos y 1/2 taza de camote asado.\", \"Opción 2: Lentejas guisadas (1.5 tazas) con arroz integral (1/2 taza) y ensalada verde.\"], "
-        f"    \"Merienda\": [\"1 yogurt griego natural sin azúcar con un puñado de arándanos.\"], "
-        f"    \"Cena\": [\"Opción 1: Pechuga de pavo a la plancha (120g) con ensalada de hojas verdes, pepino y pimiento.\", \"Opción 2: Sopa de verduras casera con 2 tostadas integrales.\"] "
-        f"  }}, "
-        f"  \"notas_adicionales_plan\": \"Ajustar porciones según hambre y saciedad. Consultar si hay dudas.\" "
-        f"}}"
-        "\nResponde ÚNICAMENTE con el objeto JSON."
-    )
-    prompt_usuario = f"Transcripción de la consulta nutricional:\n---\n{transcripcion}\n---\nGenera el plan nutricional en el formato JSON especificado."
-    logging.info(f"Solicitando generación de plan nutricional de la transcripción (Idioma: {idioma_detectado}). Usando modelo gpt-4o o similar.")
+
+    idioma_target = normalize_language_code(idioma_detectado) or 'es'
+    
+    # ------------------ INICIO DE LA CORRECCIÓN ------------------
+    # Se crea un diccionario de prompts para que sean dinámicos según el idioma.
+    # El prompt ahora le pide a la IA que use claves JSON específicas para cada idioma.
+    prompts = {
+        'es': {
+            'sistema': "Eres un nutricionista experto altamente especializado en crear planes de alimentación personalizados basados en transcripciones de consultas. Analiza la siguiente transcripción de una consulta con un paciente. Tu tarea es extraer información relevante como objetivos del paciente, preferencias alimentarias, aversiones, alergias, condiciones médicas, nivel de actividad física, y cualquier otro dato pertinente. Con base en esto, genera un plan nutricional detallado. El plan debe incluir: 1. 'objetivo_principal': El objetivo principal del plan (ej: pérdida de peso, aumento de masa muscular, control de diabetes). 2. 'recomendaciones_generales': Lista de consejos generales (ej: beber 2L de agua, evitar ultraprocesados). 3. 'plan_diario_tipo': Un ejemplo de un día de comidas, estructurado por tiempo de comida (Desayuno, Media Mañana, Almuerzo, Merienda, Cena, Otros). Cada comida debe tener una lista de opciones. 4. 'notas_adicionales_plan': Cualquier nota importante. 5. 'meal_times': Un objeto con las horas de comida sugeridas. Devuelve la información estrictamente en formato JSON, usando las claves indicadas en español. Responde en español. Si un detalle no está especificado, usa una cadena vacía '' o un array vacío []. La respuesta JSON no debe incluir ninguna explicación adicional, solo el JSON puro.",
+            'usuario': f"Transcripción de la consulta nutricional:\n---\n{transcripcion}\n---\nGenera el plan nutricional en el formato JSON especificado. Responde en español.",
+            'claves': {'main_goal': 'objetivo_principal', 'general_recommendations': 'recomendaciones_generales', 'daily_meal_plan': 'plan_diario_tipo', 'additional_plan_notes': 'notas_adicionales_plan', 'meal_times': 'meal_times'}
+        },
+        'en': {
+            'sistema': "You are an expert nutritionist highly specialized in creating personalized meal plans based on consultation transcripts. Your task is to extract relevant information and generate a detailed nutrition plan. The plan should include: 1. 'main_goal': The main goal of the plan (e.g., weight loss, muscle gain). 2. 'general_recommendations': A list of general tips. 3. 'daily_meal_plan': A daily meal plan structured by mealtime (Breakfast, Mid-Morning Snack, Lunch, Afternoon Snack, Dinner, Others). Each meal should have a list of options. 4. 'additional_plan_notes': Any important notes. 5. 'meal_times': An object with suggested meal times. Return the information strictly in JSON format, using the specified English keys. Respond in English. If a detail is not specified, use an empty string '' or an empty array []. The JSON response must NOT include any additional explanation, just the pure JSON.",
+            'usuario': f"Nutrition consultation transcript:\n---\n{transcripcion}\n---\nGenerate the nutrition plan in the specified JSON format. Respond in English.",
+            'claves': {'main_goal': 'main_goal', 'general_recommendations': 'general_recommendations', 'daily_meal_plan': 'daily_meal_plan', 'additional_plan_notes': 'additional_plan_notes', 'meal_times': 'meal_times'}
+        }
+    }
+    
+    # Selecciona la configuración de prompts y claves según el idioma.
+    prompt_config = prompts.get(idioma_target, prompts['es'])
+    prompt_sistema = prompt_config['sistema']
+    prompt_usuario = prompt_config['usuario']
+    
+    logging.info(f"Solicitando generación de plan nutricional de la transcripción (Idioma: {idioma_target}). Usando modelo gpt-4o o similar.")
     try:
         model_to_use = "gpt-4o"
         datos_extraidos = _llamar_openai_chat(
@@ -1577,15 +1565,46 @@ def generar_contenido_plan_nutricional_con_ia(transcripcion, idioma_detectado='e
         if json_to_parse.endswith("```"): json_to_parse = json_to_parse[:-3]
         json_to_parse = json_to_parse.strip()
         parsed_data = json.loads(json_to_parse)
-        if isinstance(parsed_data, dict) and \
-           all(k in parsed_data for k in ['objetivo_principal', 'recomendaciones_generales', 'plan_diario_tipo', 'notas_adicionales_plan']) and \
-           isinstance(parsed_data['recomendaciones_generales'], list) and \
-           isinstance(parsed_data['plan_diario_tipo'], dict):
-            logging.info(f"Contenido del plan nutricional generado exitosamente.")
+
+        # Se realiza una validación más robusta buscando las claves esperadas para el idioma seleccionado.
+        claves_a_validar = list(prompt_config['claves'].values())
+        es_valido = all(k in parsed_data for k in claves_a_validar)
+        
+        if es_valido:
+            # Si el plan se generó en inglés, remapea las claves a español para mantener un formato consistente.
+            if idioma_target == 'en':
+                remapped_data = {v: parsed_data.get(k) for k, v in prompts['es']['claves'].items()}
+                
+                # También mapea los nombres de las comidas del plan diario.
+                plan_diario_original = remapped_data.get('plan_diario_tipo', {})
+                plan_diario_mapeado = {}
+                mapa_comidas = {
+                    'Breakfast': 'Desayuno', 'Mid-Morning Snack': 'Media Mañana',
+                    'Lunch': 'Almuerzo', 'Afternoon Snack': 'Merienda',
+                    'Dinner': 'Cena', 'Others': 'Otros'
+                }
+                for meal_name_en, items in plan_diario_original.items():
+                    meal_name_es = mapa_comidas.get(meal_name_en, meal_name_en)
+                    plan_diario_mapeado[meal_name_es] = items
+                remapped_data['plan_diario_tipo'] = plan_diario_mapeado
+                
+                # También mapea los nombres de las comidas en el objeto meal_times
+                meal_times_original = remapped_data.get('meal_times', {})
+                meal_times_mapeado = {}
+                for meal_name_en, time_val in meal_times_original.items():
+                    meal_name_es = mapa_comidas.get(meal_name_en, meal_name_en)
+                    meal_times_mapeado[meal_name_es] = time_val
+                remapped_data['meal_times'] = meal_times_mapeado
+                
+                logging.info("Contenido del plan nutricional generado exitosamente en inglés y remapeado a español.")
+                return remapped_data
+            
+            # Si el plan ya está en español, devuélvelo directamente
+            logging.info("Contenido del plan nutricional generado exitosamente en español.")
             return parsed_data
         else:
-            logging.warning(f"Respuesta IA para plan nutricional no tiene la estructura JSON esperada: {json_to_parse}")
-            return {"error": "Estructura JSON inesperada de IA para el plan nutricional."}
+            logging.warning(f"Respuesta IA para plan nutricional no tiene la estructura JSON esperada para el idioma '{idioma_target}': {json_to_parse}")
+            return {"error": f"Estructura JSON inesperada de IA para el plan nutricional en idioma '{idioma_target}'."}
     except json.JSONDecodeError as e_json:
         logging.error(f"Error decodificando JSON de OpenAI para plan nutricional: {e_json}. Respuesta: '{json_to_parse if 'json_to_parse' in locals() else 'N/A'}'")
         return {"error": "IA no devolvió JSON válido para el plan nutricional."}

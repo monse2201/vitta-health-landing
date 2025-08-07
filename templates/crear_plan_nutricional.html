@@ -330,12 +330,12 @@
         </div>
 
         {% set meals_display_info = [
-            { 'id': 'breakfast', 'display_name': 'Breakfast', 'icon': 'fa-mug-saucer', 'ai_name': 'Desayuno', 'default_time_24hr': '07:00' },
-            { 'id': 'midmorning_snack', 'display_name': 'Mid-Morning Snack', 'icon': 'fa-apple-alt', 'ai_name': 'Media Mañana', 'default_time_24hr': '10:00' },
-            { 'id': 'lunch', 'display_name': 'Lunch', 'icon': 'fa-drumstick-bite', 'ai_name': 'Almuerzo', 'default_time_24hr': '12:00' },
-            { 'id': 'afternoon_snack', 'display_name': 'Afternoon Snack', 'icon': 'fa-carrot', 'ai_name': 'Merienda', 'default_time_24hr': '16:00' },
-            { 'id': 'dinner', 'display_name': 'Dinner', 'icon': 'fa-bowl-rice', 'ai_name': 'Cena', 'default_time_24hr': '19:00' },
-            { 'id': 'others', 'display_name': 'Others', 'icon': 'fa-cookie-bite', 'ai_name': 'Otros', 'default_time_24hr': '' }
+            { 'id': 'breakfast', 'display_name': 'Breakfast', 'icon': 'fa-mug-saucer', 'ai_name_es': 'Desayuno', 'ai_name_en': 'Breakfast', 'default_time_24hr': '07:00' },
+            { 'id': 'midmorning_snack', 'display_name': 'Mid-Morning Snack', 'icon': 'fa-apple-alt', 'ai_name_es': 'Media Mañana', 'ai_name_en': 'Mid-Morning Snack', 'default_time_24hr': '10:00' },
+            { 'id': 'lunch', 'display_name': 'Lunch', 'icon': 'fa-drumstick-bite', 'ai_name_es': 'Almuerzo', 'ai_name_en': 'Lunch', 'default_time_24hr': '12:00' },
+            { 'id': 'afternoon_snack', 'display_name': 'Afternoon Snack', 'icon': 'fa-carrot', 'ai_name_es': 'Merienda', 'ai_name_en': 'Afternoon Snack', 'default_time_24hr': '16:00' },
+            { 'id': 'dinner', 'display_name': 'Dinner', 'icon': 'fa-bowl-rice', 'ai_name_es': 'Cena', 'ai_name_en': 'Dinner', 'default_time_24hr': '19:00' },
+            { 'id': 'others', 'display_name': 'Others', 'icon': 'fa-cookie-bite', 'ai_name_es': 'Otros', 'ai_name_en': 'Others', 'default_time_24hr': '' }
         ] %}
 
         {% for meal_info in meals_display_info %}
@@ -363,7 +363,7 @@
                                 {% set display_hour = hour if hour > 0 and hour < 13 else 12 if hour == 0 or hour == 12 else hour - 12 %}
                                 {% set display_time = '%d' % display_hour + ':' + formatted_minute + ' ' + ampm %}
                                 <option value="{{ time_24hr }}"
-                                        {% if form_data and form_data.suggested_plan_data and form_data.suggested_plan_data.meal_times and form_data.suggested_plan_data.meal_times[meal_info.ai_name] == time_24hr %}selected{% elif not form_data or not form_data.suggested_plan_data or not form_data.suggested_plan_data.meal_times or not form_data.suggested_plan_data.meal_times[meal_info.ai_name] and meal_info.default_time_24hr == time_24hr %}selected{% endif %}>
+                                        {% if form_data and form_data.suggested_plan_data and form_data.suggested_plan_data.meal_times and (form_data.suggested_plan_data.meal_times[meal_info.ai_name_es] == time_24hr or form_data.suggested_plan_data.meal_times[meal_info.ai_name_en] == time_24hr) %}selected{% elif not form_data or not form_data.suggested_plan_data or not form_data.suggested_plan_data.meal_times or not (form_data.suggested_plan_data.meal_times[meal_info.ai_name_es] or form_data.suggested_plan_data.meal_times[meal_info.ai_name_en]) and meal_info.default_time_24hr == time_24hr %}selected{% endif %}>
                                     {{ display_time }}
                                 </option>
                             {% endfor %}
@@ -419,20 +419,16 @@
     let recognition;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // CORRECCIÓN: Los nombres de los IDs en el HTML y los nombres de las claves en el JSON del backend NO COINCIDEN.
-        // El backend devuelve 'Desayuno', 'Media Mañana', 'Almuerzo', etc. en español.
-        // El frontend usa 'breakfast', 'midmorning_snack', 'lunch', etc. en inglés.
-        // Se corrige el objeto `mealsInfo` para mapear los IDs del HTML con los nombres del JSON del backend.
+        // CORRECCIÓN: Ahora el mapeo incluye claves para ambos idiomas
         const mealsInfo = [
-            { id: 'breakfast', ai_name: 'Desayuno' },
-            { id: 'midmorning_snack', ai_name: 'Media Mañana' },
-            { id: 'lunch', ai_name: 'Almuerzo' },
-            { id: 'afternoon_snack', ai_name: 'Merienda' },
-            { id: 'dinner', ai_name: 'Cena' },
-            { id: 'others', ai_name: 'Otros' }
+            { id: 'breakfast', ai_name_es: 'Desayuno', ai_name_en: 'Breakfast' },
+            { id: 'midmorning_snack', ai_name_es: 'Media Mañana', ai_name_en: 'Mid-Morning Snack' },
+            { id: 'lunch', ai_name_es: 'Almuerzo', ai_name_en: 'Lunch' },
+            { id: 'afternoon_snack', ai_name_es: 'Merienda', ai_name_en: 'Afternoon Snack' },
+            { id: 'dinner', ai_name_es: 'Cena', ai_name_en: 'Dinner' },
+            { id: 'others', ai_name_es: 'Otros', ai_name_en: 'Others' }
         ];
 
-        // Limpiar los elementos de comida predeterminados en el formulario
         mealsInfo.forEach(meal => {
             const container = document.getElementById(`food-items-${meal.id}`);
             if (container) {
@@ -441,73 +437,72 @@
             }
         });
 
-        // Obtener los datos sugeridos por la IA desde el contexto de Flask
         const suggestedData = {{ form_data.suggested_plan_data | tojson | safe }};
+        
+        // Determinar el idioma del JSON sugerido
+        let jsonLanguage = 'es';
+        if (suggestedData.hasOwnProperty('main_goal') && suggestedData.hasOwnProperty('daily_meal_plan')) {
+            jsonLanguage = 'en';
+        }
 
         if (Object.keys(suggestedData).length > 0 && !suggestedData.error) {
             console.log("Aplicando sugerencias de la IA al formulario...");
-
-            // Rellenar el objetivo principal
-            // CORRECCIÓN: El campo en el JSON es 'objetivo_principal', no 'main_goal'
-            if (suggestedData.objetivo_principal) {
-                document.getElementById('plan_name').value = suggestedData.objetivo_principal;
+            
+            // CORRECCIÓN: Se usa un nombre de campo dinámico en el JSON
+            const mainGoalKey = jsonLanguage === 'es' ? 'objetivo_principal' : 'main_goal';
+            if (suggestedData.hasOwnProperty(mainGoalKey)) {
+                document.getElementById('plan_name').value = suggestedData[mainGoalKey];
             }
-
-            // Rellenar las notas generales y recomendaciones
-            // CORRECCIÓN: El campo en el JSON es 'recomendaciones_generales' y 'notas_adicionales_plan'
+            
+            // CORRECCIÓN: Se usa un nombre de campo dinámico para las recomendaciones y notas
+            const generalRecsKey = jsonLanguage === 'es' ? 'recomendaciones_generales' : 'general_recommendations';
+            const notesKey = jsonLanguage === 'es' ? 'notas_adicionales_plan' : 'additional_plan_notes';
             let notesText = "";
-            if (suggestedData.recomendaciones_generales && Array.isArray(suggestedData.recomendaciones_generales)) {
-                // Se formatean las recomendaciones como una lista con guiones
-                notesText += suggestedData.recomendaciones_generales.map(rec => `- ${rec}`).join("\n");
+            if (suggestedData[generalRecsKey] && Array.isArray(suggestedData[generalRecsKey])) {
+                notesText += suggestedData[generalRecsKey].map(rec => `- ${rec}`).join("\n");
             }
-            if (suggestedData.notas_adicionales_plan) {
-                notesText += (notesText ? "\n\n" : "") + suggestedData.notas_adicionales_plan;
+            if (suggestedData[notesKey]) {
+                notesText += (notesText ? "\n\n" : "") + suggestedData[notesKey];
             }
             document.getElementById('general_notes').value = notesText.trim();
+            
+            // CORRECCIÓN: Se usa el nombre de campo dinámico para el plan diario y los tiempos
+            const mealPlanKey = jsonLanguage === 'es' ? 'plan_diario_tipo' : 'daily_meal_plan';
+            const mealTimesKey = 'meal_times'; // Esta clave es la misma en ambos idiomas
 
-            // Rellenar los horarios de las comidas
-            // CORRECCIÓN: Se usa el mapeo `mealsInfo` para buscar los nombres de la IA
-            if (suggestedData.plan_diario_tipo) {
-                for (const mealAIName in suggestedData.plan_diario_tipo) {
-                    const meal = mealsInfo.find(m => m.ai_name === mealAIName);
-                    if (meal) {
-                        const mealItems = suggestedData.plan_diario_tipo[mealAIName];
-                        if (mealItems && Array.isArray(mealItems)) {
-                            // Limpiar los campos predeterminados antes de añadir los de la IA
-                            const container = document.getElementById(`food-items-${meal.id}`);
-                            if (container) {
-                                container.innerHTML = '';
-                                itemCounters[meal.id] = 0;
-                            }
-                            mealItems.forEach(itemText => {
-                                // Separar descripción y notas si existe un separador ' - '
-                                const parts = itemText.split(' - ');
-                                const description = parts[0] || '';
-                                const notes = parts.slice(1).join(' - ') || '';
-                                addFoodItem(meal.id, 'ai', description.trim(), notes.trim());
-                            });
-                        }
-                    }
-                }
-            }
-
-            // Rellenar los tiempos de comida
-            // CORRECCIÓN: Se usa el mapeo `mealsInfo` para buscar los nombres de la IA
-            if (suggestedData.meal_times) {
+            if (suggestedData.hasOwnProperty(mealPlanKey)) {
                 mealsInfo.forEach(mealHtmlInfo => {
-                    const aiMealName = mealHtmlInfo.ai_name;
-                    if (suggestedData.meal_times.hasOwnProperty(aiMealName)) {
-                        const selectElement = document.getElementById(`suggested_time_${mealHtmlInfo.id}`);
-                        if (selectElement) {
-                            selectElement.value = suggestedData.meal_times[aiMealName];
+                    const aiMealName = jsonLanguage === 'es' ? mealHtmlInfo.ai_name_es : mealHtmlInfo.ai_name_en;
+                    const mealItems = suggestedData[mealPlanKey][aiMealName];
+                    if (mealItems && Array.isArray(mealItems)) {
+                        const container = document.getElementById(`food-items-${mealHtmlInfo.id}`);
+                        if (container) {
+                            container.innerHTML = '';
+                            itemCounters[mealHtmlInfo.id] = 0;
                         }
+                        mealItems.forEach(itemText => {
+                            const parts = itemText.split(' - ');
+                            const description = parts[0] || '';
+                            const notes = parts.slice(1).join(' - ') || '';
+                            addFoodItem(mealHtmlInfo.id, 'ai', description.trim(), notes.trim());
+                        });
                     }
                 });
             }
 
+            if (suggestedData.hasOwnProperty(mealTimesKey)) {
+                mealsInfo.forEach(mealHtmlInfo => {
+                    const aiMealName = jsonLanguage === 'es' ? mealHtmlInfo.ai_name_es : mealHtmlInfo.ai_name_en;
+                    if (suggestedData[mealTimesKey].hasOwnProperty(aiMealName)) {
+                        const selectElement = document.getElementById(`suggested_time_${mealHtmlInfo.id}`);
+                        if (selectElement) {
+                            selectElement.value = suggestedData[mealTimesKey][aiMealName];
+                        }
+                    }
+                });
+            }
         } else {
             console.log("No se encontraron sugerencias de la IA o ocurrió un error. Inicializando con campos vacíos.");
-            // Si no hay sugerencias, agregar un elemento vacío para cada sección de comida
             mealsInfo.forEach(meal => {
                 addFoodItem(meal.id);
             });
@@ -603,7 +598,7 @@
     document.getElementById('createNutritionPlanForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
-        // CORRECCIÓN: El objeto `planData` ahora usa las claves de los campos del formulario
+        // Se mantiene la estructura del `planData` para la lógica interna
         const planData = {
             main_goal: document.getElementById('plan_name').value || "",
             general_recommendations: [],
@@ -612,7 +607,15 @@
             meal_times: {}
         };
         
-        // CORRECCIÓN: Se actualiza `mealsInfo` para que el `ai_name` coincida con las claves del JSON final que espera el backend
+        // Se definen las claves del JSON que el backend espera (español)
+        const finalJsonKeys = {
+            main_goal: 'objetivo_principal',
+            general_recommendations: 'recomendaciones_generales',
+            daily_meal_plan: 'plan_diario_tipo',
+            additional_plan_notes: 'notas_adicionales_plan',
+            meal_times: 'meal_times'
+        };
+
         const mealsInfo = [
             { id: 'breakfast', ai_name: 'Desayuno' },
             { id: 'midmorning_snack', ai_name: 'Media Mañana' },
@@ -622,6 +625,7 @@
             { id: 'others', ai_name: 'Otros' }
         ];
         
+        // Se construye el objeto `planData` a partir del formulario
         mealsInfo.forEach(mealInfo => {
             const selectElement = document.getElementById(`suggested_time_${mealInfo.id}`);
             if (selectElement && selectElement.value) {
@@ -632,7 +636,6 @@
         const generalNotesValue = document.getElementById('general_notes').value;
         const separateNotes = generalNotesValue.split('\n').filter(line => line.trim().length > 0);
         
-        // CORRECCIÓN: La lógica para separar notas generales y adicionales estaba mal. Ahora se corrige.
         const recommendations = separateNotes.filter(line => line.trim().startsWith('-'));
         const additionalNotes = separateNotes.filter(line => !line.trim().startsWith('-'));
 
@@ -660,15 +663,17 @@
             }
         });
         
-        // CORRECCIÓN: El objeto JSON final que se envía al servidor debe tener las claves del backend
+        // CORRECCIÓN: Se crea el JSON final usando las claves esperadas por el backend (en español)
+        // Esto asegura que el backend reciba el formato correcto para guardar
         const finalJsonData = {
-            "objetivo_principal": planData.main_goal,
-            "recomendaciones_generales": planData.general_recommendations,
-            "plan_diario_tipo": planData.daily_meal_plan,
-            "notas_adicionales_plan": planData.additional_plan_notes,
-            "meal_times": planData.meal_times
+            [finalJsonKeys.main_goal]: planData.main_goal,
+            [finalJsonKeys.general_recommendations]: planData.general_recommendations,
+            [finalJsonKeys.daily_meal_plan]: planData.daily_meal_plan,
+            [finalJsonKeys.additional_plan_notes]: planData.additional_plan_notes,
+            [finalJsonKeys.meal_times]: planData.meal_times
         };
-
+        
+        // CORRECCIÓN: El campo oculto ahora se rellena con el JSON final
         document.getElementById('final_json_content_str').value = JSON.stringify(finalJsonData, null, 2);
         this.submit();
     });
